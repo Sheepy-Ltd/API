@@ -1,0 +1,24 @@
+[client]
+token = "MzMyODcyMTI4NDU2Mjk0NDE0.XrIjRw.RHQ7vVe9-x9gxzI3_Ysj_l_ZCmI"
+activity = "Use >help for help!"
+
+#A list of User-ID's representing Administrators
+#             Samuel#0420
+bot_admins = [212530298259374080]
+
+#Bot list API keys
+top_gg_key = "DISCORD_BOT_LIST_KEY"
+bots_for_discord_key = "DISCORD_BOT_LIST_KEY"
+
+[db]
+database = "discord"
+username = "root"
+password = ""
+host = "localhost"
+port = 3306
+poolSize = 5
+
+[nodes]
+node-id = 1
+shards-total = 20
+shards = 10
