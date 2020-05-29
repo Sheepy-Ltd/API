@@ -2,19 +2,16 @@ package com.sheepybot.internal.module;
 
 import com.google.common.collect.Lists;
 import com.sheepybot.Bot;
-import com.sheepybot.api.event.module.ModuleDisabledEvent;
-import com.sheepybot.api.event.module.ModuleEnabledEvent;
-import com.sheepybot.api.event.module.ModuleLoadEvent;
-import org.jetbrains.annotations.NotNull;
-import com.sheepybot.api.entities.command.RootCommandRegistry;
-import com.sheepybot.api.entities.economy.AccountRegistry;
-import com.sheepybot.api.entities.event.RootEventRegistry;
+import com.sheepybot.api.entities.event.module.ModuleDisabledEvent;
+import com.sheepybot.api.entities.event.module.ModuleEnabledEvent;
+import com.sheepybot.api.entities.event.module.ModuleLoadEvent;
 import com.sheepybot.api.entities.module.EventWaiter;
 import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.api.entities.module.ModuleData;
 import com.sheepybot.api.entities.module.loader.ModuleLoader;
 import com.sheepybot.api.entities.utils.Objects;
 import com.sheepybot.api.exception.module.InvalidModuleException;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,16 +30,10 @@ public class ModuleLoaderImpl implements ModuleLoader {
      */
     private static final File MODULES = new File("modules");
 
-    private final List<Module> modules = Lists.newArrayList();
+    private final List<Module> modules;
 
-    private final RootCommandRegistry commandManager;
-    private final RootEventRegistry eventManager;
-    private final AccountRegistry accounts;
-
-    public ModuleLoaderImpl(final Bot bot) {
-        this.accounts = bot.getAccounts();
-        this.commandManager = bot.getCommandRegistry();
-        this.eventManager = bot.getEventRegistry();
+    public ModuleLoaderImpl() {
+        this.modules = Lists.newArrayList();
     }
 
     @Override
@@ -98,17 +89,21 @@ public class ModuleLoaderImpl implements ModuleLoader {
                     if (this.getModuleByName(data.name()) != null) {
                         throw new IllegalStateException("Module '" + data.name() + "' is already loaded");
                     } else {
-                        final File dataFolder = new File(MODULES, data.name());
+                        final File dataFolder = new File(ModuleLoaderImpl.MODULES, data.name());
                         if (!dataFolder.exists()) {
                             //noinspection ResultOfMethodCallIgnored
                             dataFolder.mkdirs();
                         }
 
-                        module.init(this.commandManager, this.eventManager, this.accounts, dataFolder, file);
+                        module.init(Bot.get().getCommandRegistry(),
+                                Bot.get().getEventRegistry(),
+                                dataFolder,
+                                file);
 
                         this.modules.add(module);
 
-                        this.eventManager.callEvent(new ModuleLoadEvent(module));
+                        Bot.get().getEventRegistry().callEvent(new ModuleLoadEvent(module));
+
                         return module;
                     }
                 } catch (final IllegalAccessException | InstantiationException ignored) { //impossible?
@@ -123,7 +118,6 @@ public class ModuleLoaderImpl implements ModuleLoader {
         throw new InvalidModuleException(String.format("File %s does not contain a class that extends Module", file.getName()));
     }
 
-    @SuppressWarnings("ConstantConditions") //intellij is being weird, .listFiles() won't null?
     @Override
     public Collection<Module> loadModules() throws NullPointerException, IllegalArgumentException {
 
@@ -157,7 +151,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
         } catch (final Throwable ex) {
             LOGGER.info("An error occurred whilst enabling " + module.getFullName(), ex);
         }
-        this.eventManager.callEvent(new ModuleEnabledEvent(module));
+        Bot.get().getEventRegistry().callEvent(new ModuleEnabledEvent(module));
     }
 
     @Override
@@ -182,7 +176,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
         module.getEventRegistry().unregisterAll();
         module.getScheduler().cancelAllTasks();
 
-        this.eventManager.callEvent(new ModuleDisabledEvent(module));
+        Bot.get().getEventRegistry().callEvent(new ModuleDisabledEvent(module));
 
         this.modules.remove(module);
     }

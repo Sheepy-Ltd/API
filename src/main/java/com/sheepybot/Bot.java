@@ -2,18 +2,30 @@ package com.sheepybot;
 
 import com.google.gson.JsonParser;
 import com.moandjiezana.toml.Toml;
+import com.sheepybot.api.entities.command.Command;
+import com.sheepybot.api.entities.command.RootCommandRegistry;
 import com.sheepybot.api.entities.database.Database;
 import com.sheepybot.api.entities.database.auth.DatabaseInfo;
+import com.sheepybot.api.entities.event.RootEventRegistry;
+import com.sheepybot.api.entities.language.I18n;
+import com.sheepybot.api.entities.module.Module;
+import com.sheepybot.api.entities.module.loader.ModuleLoader;
+import com.sheepybot.api.entities.scheduler.Scheduler;
+import com.sheepybot.api.entities.utils.Objects;
+import com.sheepybot.internal.command.CommandRegistryImpl;
 import com.sheepybot.internal.command.defaults.admin.BuildInfoCommand;
+import com.sheepybot.internal.command.defaults.admin.EvaluateCommand;
 import com.sheepybot.internal.command.defaults.admin.StopCommand;
-import com.sheepybot.internal.command.defaults.admin.UpdateCommand;
+import com.sheepybot.internal.event.EventRegistryImpl;
+import com.sheepybot.internal.module.ModuleLoaderImpl;
 import com.sheepybot.listeners.*;
+import com.sheepybot.util.BotUtils;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -21,23 +33,6 @@ import okhttp3.Request;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.sheepybot.agent.CarbonitexAgent;
-import com.sheepybot.agent.DiscordBotListAgent;
-import com.sheepybot.api.entities.command.Command;
-import com.sheepybot.api.entities.command.RootCommandRegistry;
-import com.sheepybot.api.entities.economy.AccountRegistry;
-import com.sheepybot.api.entities.event.RootEventRegistry;
-import com.sheepybot.api.entities.language.I18n;
-import com.sheepybot.api.entities.metrics.HeartBeatTask;
-import com.sheepybot.api.entities.metrics.MetricsTask;
-import com.sheepybot.api.entities.module.Module;
-import com.sheepybot.api.entities.module.loader.ModuleLoader;
-import com.sheepybot.api.entities.scheduler.Scheduler;
-import com.sheepybot.api.entities.utils.Objects;
-import com.sheepybot.internal.command.CommandRegistryImpl;
-import com.sheepybot.internal.economy.AccountRegistryImpl;
-import com.sheepybot.internal.event.EventRegistryImpl;
-import com.sheepybot.internal.module.ModuleLoaderImpl;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
@@ -46,7 +41,6 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
 /**
@@ -63,7 +57,7 @@ public class Bot {
      * User-Agent header used for web queries
      */
     @SuppressWarnings("ConstantConditions")
-    //Intellij recognises BotInfo.VERSION_MAJOR to never change so constant conditions suppresses the error
+    //Intellij thinks everything from BotInfo won't change, but it does at compile time thanks to gradle
     public static final String USER_AGENT = BotInfo.BOT_NAME + (BotInfo.VERSION_MAJOR.startsWith("@") ? "" : " v" + BotInfo.VERSION);
 
     /**
@@ -90,7 +84,7 @@ public class Bot {
     }).build();
 
     /**
-     * The thread group used for threads created by {@link #CACHED_EXECUTOR_SERVICE}
+     * The thread group used for threads created by {@link #SCHEDULED_EXECUTOR_SERVICE}
      */
     private static final ThreadGroup THREAD_GROUP = new ThreadGroup("Executor-Thread-Group");
 
@@ -100,19 +94,14 @@ public class Bot {
     private static final BiFunction<String, Runnable, Thread> THREAD_FUNCTION = (threadName, threadExecutor) -> new Thread(THREAD_GROUP, threadExecutor, threadName);
 
     /**
+     * A cached {@link ExecutorService}
+     */
+    public static final ExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newScheduledThreadPool(30, threadExecutor -> THREAD_FUNCTION.apply("Cached Thread Service", threadExecutor));
+
+    /**
      * A single threaded {@link ScheduledExecutorService}.
      */
     public static final ScheduledExecutorService SINGLE_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor(threadExecutor -> THREAD_FUNCTION.apply("Single Thread Service", threadExecutor));
-
-    /**
-     * A cached {@link ExecutorService}
-     */
-    public static final ExecutorService CACHED_EXECUTOR_SERVICE = Executors.newCachedThreadPool(threadExecutor -> THREAD_FUNCTION.apply("Cached Thread Service", threadExecutor));
-
-    /**
-     * The default port netty will use should no netty port be specified in the config file
-     */
-    private static final long DEFAULT_NETTY_PORT = 6016;
 
     private static Bot instance;
 
@@ -123,7 +112,6 @@ public class Bot {
     private long startTime;
     private boolean running;
     private Toml config;
-    private AccountRegistry accounts;
     private RootCommandRegistry commandRegistry;
     private RootEventRegistry eventRegistry;
     private ModuleLoader moduleLoader;
@@ -143,7 +131,14 @@ public class Bot {
         }
     }
 
-    private void start() throws IOException, LoginException, InterruptedException {
+    /**
+     * @return The current instance
+     */
+    public static Bot get() {
+        return Bot.instance;
+    }
+
+    private void start() throws IOException, LoginException {
         Objects.checkArgument(!this.running, "bot is already running");
 
         Bot.instance = this;
@@ -163,7 +158,7 @@ public class Bot {
             this.config = new Toml().read(file);
 
             if (this.config.getString("client.token").isEmpty()) {
-                LOGGER.info("No discord token specified, please configure it in your bot.toml");
+                LOGGER.info("No discord token specified, please configure it in the bot.toml");
                 System.exit(ExitCode.EXIT_CODE_NORMAL);
                 return;
             }
@@ -174,51 +169,49 @@ public class Bot {
 
             LOGGER.info("Loading data managers...");
 
-            //just class initialization
-            this.accounts = new AccountRegistryImpl();
             this.commandRegistry = new CommandRegistryImpl();
             this.eventRegistry = new EventRegistryImpl();
-            this.moduleLoader = new ModuleLoaderImpl(this);
+            this.moduleLoader = new ModuleLoaderImpl();
 
-            LOGGER.info("Connecting to Discord API...");
+            final String token = this.config.getString("client.token");
+
+            int shards = Math.toIntExact(this.config.getLong("client.shards"));
+            int recommendedShards = BotUtils.getRecommendedShards(token);
+            if (shards < recommendedShards) {
+                LOGGER.info("Cannot use less than discords recommended shard count, using recommended shard count from discord instead.");
+                shards = recommendedShards;
+            }
 
             final DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.create(
-                        GatewayIntent.GUILD_MEMBERS,
-                        GatewayIntent.GUILD_BANS,
-                        GatewayIntent.GUILD_VOICE_STATES,
-                        GatewayIntent.GUILD_MESSAGES,
-                        GatewayIntent.GUILD_MESSAGE_REACTIONS,
-                        GatewayIntent.GUILD_EMOJIS
-                    )
-                    .disableCache(CacheFlag.ACTIVITY, CacheFlag.CLIENT_STATUS, CacheFlag.MEMBER_OVERRIDES)
+                    GatewayIntent.GUILD_MEMBERS,
+                    GatewayIntent.GUILD_BANS,
+                    GatewayIntent.GUILD_VOICE_STATES,
+                    GatewayIntent.GUILD_MESSAGES,
+                    GatewayIntent.GUILD_MESSAGE_REACTIONS
+            )
+                    .disableCache(CacheFlag.ACTIVITY, CacheFlag.EMOTE, CacheFlag.CLIENT_STATUS, CacheFlag.MEMBER_OVERRIDES)
                     .setChunkingFilter(ChunkingFilter.NONE)
-                    .setToken(this.config.getString("client.token"))
+                    .setMemberCachePolicy(MemberCachePolicy.NONE)
+                    .setToken(token)
                     .setAutoReconnect(true)
                     .setEnableShutdownHook(false) //we dont use the shutdown hook on JDA as we handle that ourselves
-                    .setActivity(Activity.of(Activity.ActivityType.DEFAULT, this.config.getString("client.activity", "")))
+                    .setActivity(Activity.of(Activity.ActivityType.DEFAULT, this.config.getString("client.activity", "Beep Boop, Boop Beep?")))
                     .setBulkDeleteSplittingEnabled(false)
                     .setHttpClient(HTTP_CLIENT)
-                    .setShardsTotal(-1)
-//                    .setShards(Math.toIntExact(this.config.getLong("docker.shard-from")), Math.toIntExact(this.config.getLong("docker.shard-to")))
+                    .setShardsTotal(shards) //use default shard count
                     .addEventListeners(
-                            new GuildMessageListener(this),
-                            new GuildJoinQuitListener(this),
-                            new GuildMemberListener(this),
-                            new GuildMemberReactionListener(this),
-                            new GuildMemberVoiceListener(this),
-                            new GuildModerationListener(this),
-                            new GuildRoleListener(this),
-                            new GuildUpdateListener(this)
+                            new GuildMessageListener(),
+                            new GuildMemberListener(),
+                            new GuildMemberReactionListener(),
+                            new GuildMemberVoiceListener(),
+                            new GuildModerationListener(),
+                            new GuildRoleListener(),
+                            new GuildUpdateListener()
                     );
 
-            LOGGER.info("Starting shards...");
+            LOGGER.info("Starting shards and attempting to connect to the Discord API...");
 
             this.shardManager = builder.build();
-
-            //Sleep until all shards are connected (shard manager builder doesn't have a buildBlocking method)
-            while (this.shardManager.getShards().stream().anyMatch(shard -> shard.getStatus() != JDA.Status.CONNECTED)) {
-                Thread.sleep(50L);
-            }
 
             LOGGER.info("Registering default commands...");
 
@@ -228,8 +221,8 @@ public class Bot {
                     .build());
 
             this.commandRegistry.registerCommand(Command.builder()
-                    .names("update")
-                    .executor(new UpdateCommand(this))
+                    .names("eval")
+                    .executor(new EvaluateCommand())
                     .build());
 
             this.commandRegistry.registerCommand(Command.builder()
@@ -249,22 +242,6 @@ public class Bot {
 
             LOGGER.info(String.format("Loaded %d modules", this.moduleLoader.getEnabledModules().size()));
 
-            if (Environment.getEnvironment().isRelease()) {
-                LOGGER.info("Loading bot list tasks...");
-
-                LOGGER.info("Starting Carbonitex task...");
-//                Scheduler.getInstance().runTaskRepeating(new CarbonitexAgent(this, this.config.getString("client.agent.carbon.key")), 0L, TimeUnit.MINUTES.toMillis(30));
-
-                LOGGER.info("Starting Discord Bot List task...");
-//                Scheduler.getInstance().runTaskRepeating(new DiscordBotListAgent(this, this.config.getString("client.agent.dbl.key")), 0L, TimeUnit.MINUTES.toMillis(30));
-            }
-
-            LOGGER.info("Starting metrics...");
-//            Scheduler.getInstance().runTaskRepeating(new MetricsTask(this), 0L, TimeUnit.HOURS.toMillis(1));
-
-            LOGGER.info("Starting heart beat...");
-//            Scheduler.getInstance().runTaskRepeating(new HeartBeatTask(this), 0L, TimeUnit.SECONDS.toMillis(15));
-
             LOGGER.info("Registering shutdown hook...");
 
             //register our shutdown hook so if something happens we get properly shutdown
@@ -274,15 +251,6 @@ public class Bot {
         }
     }
 
-    /*
-     * Don't put a System.exit() in here otherwise a deadlock will happen
-     * or an exception...depending if the shutdown method
-     * was called via shutdown hook or manual call
-     *
-     * System.exit() -> fire shutdown hooks inside synchronized method ->
-     * -> shutdown hook calls System.exit() -> re calls that synchronized
-     * method -> waits infinitely as it never loses the synchronized lock
-     */
     private void shutdown() {
         Objects.checkArgument(this.running, "bot not running");
 
@@ -306,17 +274,10 @@ public class Bot {
 
         Scheduler.getInstance().shutdown();
 
-        Bot.CACHED_EXECUTOR_SERVICE.shutdownNow();
+        Bot.SCHEDULED_EXECUTOR_SERVICE.shutdownNow();
         Bot.SINGLE_EXECUTOR_SERVICE.shutdownNow();
 
         Bot.instance = null;
-    }
-
-    /**
-     * @return The current instance
-     */
-    public static Bot getInstance() {
-        return Bot.instance;
     }
 
     /**
@@ -334,10 +295,10 @@ public class Bot {
     }
 
     /**
-     * @return The {@link AccountRegistry} impl
+     * @return The {@link Database} instance
      */
-    public AccountRegistry getAccounts() {
-        return this.accounts;
+    public Database getDatabase() {
+        return this.database;
     }
 
     /**

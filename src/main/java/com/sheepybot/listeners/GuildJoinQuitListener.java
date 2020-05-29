@@ -1,25 +1,17 @@
 package com.sheepybot.listeners;
 
 import com.sheepybot.Bot;
-import com.sheepybot.api.event.server.ServerJoinEvent;
-import com.sheepybot.api.event.server.ServerLeaveEvent;
+import com.sheepybot.api.entities.event.server.GuildLeaveEvent;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
-import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GuildJoinQuitListener extends BotListener {
+public class GuildJoinQuitListener extends ListenerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GuildJoinQuitListener.class);
-
-    public GuildJoinQuitListener(@NotNull(value = "parent cannot be null") final Bot bot) {
-        super(bot);
-    }
 
     @Override
     public void onGuildReady(final GuildReadyEvent event) {
@@ -66,13 +58,13 @@ public class GuildJoinQuitListener extends BotListener {
     }
 
     @Override
-    public void onGuildLeave(final GuildLeaveEvent event) {
+    public void onGuildLeave(final net.dv8tion.jda.api.events.guild.GuildLeaveEvent event) {
 
         final Guild server = event.getGuild();
 
         LOGGER.info(String.format("Left guild %s(%s)", server.getName(), server.getId()));
 
-        this.getEventManager().callEvent(new ServerLeaveEvent(server, event.getJDA()));
+        Bot.get().getEventRegistry().callEvent(new GuildLeaveEvent(server, event.getJDA()));
     }
 
 }

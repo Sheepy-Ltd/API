@@ -1,16 +1,16 @@
 package com.sheepybot.api.entities.command.parsers;
 
 import com.google.common.collect.Lists;
+import com.sheepybot.api.entities.command.CommandContext;
 import com.sheepybot.api.entities.command.argument.Argument;
 import com.sheepybot.api.entities.command.argument.ArgumentParser;
 import com.sheepybot.api.entities.command.argument.RawArguments;
 import com.sheepybot.api.entities.language.I18n;
+import com.sheepybot.api.entities.utils.FinderUtil;
 import com.sheepybot.api.exception.parser.ParserException;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
-import com.sheepybot.api.entities.command.CommandContext;
-import com.sheepybot.api.entities.utils.FinderUtil;
 
 import java.util.*;
 
@@ -302,7 +302,7 @@ public class ArgumentParsers {
 
                 builder.append(args.next()).append(" ");
 
-                final List<Member> members = FinderUtil.findMembers(builder.toString().trim(), context.getServer());
+                final List<Member> members = FinderUtil.findMembers(builder.toString().trim(), context.getGuild());
                 if (members.size() == 0) {
                     args.rollback();
                     break;
@@ -425,7 +425,7 @@ public class ArgumentParsers {
             @Override
             public String getTypeName(final I18n i18n) {
                 final StringBuilder sb = new StringBuilder();
-                for (final ArgumentParser parser : moreParsers) {
+                for (final ArgumentParser<?> parser : moreParsers) {
                     sb.append('|').append(parser.getTypeName(i18n));
                 }
                 return sb.toString().trim();

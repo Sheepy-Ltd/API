@@ -11,7 +11,7 @@ public class CommandContext {
 
     private final TextChannel channel;
     private final Member sender;
-    private final Guild server;
+    private final Guild guild;
     private final GuildSettings settings;
     private final Message message;
     private final String trigger;
@@ -22,7 +22,7 @@ public class CommandContext {
     /**
      * @param channel  The channel this {@link Command} was executed in
      * @param sender   The {@link User} who executed this {@link Command}
-     * @param server   The {@link Guild} this command was executed in
+     * @param guild    The {@link Guild} this command was executed in
      * @param settings THe {@link GuildSettings}
      * @param trigger  The command trigger
      * @param command  The {@link Command} executed
@@ -30,7 +30,7 @@ public class CommandContext {
      */
     public CommandContext(@NotNull(value = "channel cannot be null") final TextChannel channel,
                           @NotNull(value = "sender cannot be null") final Member sender,
-                          @NotNull(value = "server cannot be null") final Guild server,
+                          @NotNull(value = "guild cannot be null") final Guild guild,
                           @NotNull(value = "settings cannot be null") final GuildSettings settings,
                           @NotNull(value = "trigger cannot be null") final String trigger,
                           @NotNull(value = "command cannot be null") final Command command,
@@ -39,7 +39,7 @@ public class CommandContext {
                           @NotNull(value = "jda cannot be null") final JDA jda) {
         this.channel = channel;
         this.sender = sender;
-        this.server = server;
+        this.guild = guild;
         this.settings = settings;
         this.trigger = trigger;
         this.command = command;
@@ -72,8 +72,8 @@ public class CommandContext {
     /**
      * @return The {@link Guild} this command was executed in (can be null)
      */
-    public Guild getServer() {
-        return this.server;
+    public Guild getGuild() {
+        return this.guild;
     }
 
     /**

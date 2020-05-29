@@ -1,23 +1,18 @@
 package com.sheepybot.listeners;
 
-import com.sheepybot.Bot;
+import com.sheepybot.api.entities.messaging.Messaging;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.StatusChangeEvent;
-import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.sheepybot.api.entities.messaging.Messaging;
 
 import java.awt.*;
 
-public class JdaStatusListener extends BotListener {
+public class JdaStatusListener extends ListenerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JdaStatusListener.class);
-
-    public JdaStatusListener(@NotNull(value = "bot cannot be null") final Bot bot) {
-        super(bot);
-    }
 
     @Override
     public void onStatusChange(final StatusChangeEvent event) {

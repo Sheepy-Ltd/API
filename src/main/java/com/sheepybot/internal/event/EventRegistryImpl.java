@@ -3,11 +3,11 @@ package com.sheepybot.internal.event;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sheepybot.Bot;
-import com.sheepybot.api.entities.event.*;
 import com.sheepybot.api.entities.event.EventListener;
-import org.jetbrains.annotations.NotNull;
+import com.sheepybot.api.entities.event.*;
 import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.api.exception.event.EventException;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -25,7 +25,7 @@ public class EventRegistryImpl implements RootEventRegistry {
     @Override
     public void callEvent(@NotNull(value = "event cannot be null") final Event event) {
         if (event.isAsync()) {
-            Bot.CACHED_EXECUTOR_SERVICE.submit(() -> this.fireEvent(event));
+            Bot.SCHEDULED_EXECUTOR_SERVICE.submit(() -> this.fireEvent(event));
         } else {
             this.fireEvent(event);
         }
@@ -45,7 +45,7 @@ public class EventRegistryImpl implements RootEventRegistry {
             final EventHandler handler = method.getAnnotation(EventHandler.class);
 
             final Class<?>[] parameters = method.getParameterTypes();
-            if (parameters.length == 0 || parameters.length > 1 || !Event.class.isAssignableFrom(parameters[0])) {
+            if (parameters.length != 1 || !Event.class.isAssignableFrom(parameters[0])) {
                 continue;
             }
 

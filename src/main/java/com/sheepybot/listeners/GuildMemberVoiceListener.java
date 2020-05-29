@@ -1,55 +1,51 @@
 package com.sheepybot.listeners;
 
 import com.sheepybot.Bot;
-import com.sheepybot.api.event.server.member.voice.*;
-import com.sheepybot.api.event.server.voice.VoiceChannelCreateEvent;
-import com.sheepybot.api.event.server.voice.VoiceChannelDeleteEvent;
+import com.sheepybot.api.entities.event.server.member.voice.*;
+import com.sheepybot.api.entities.event.server.voice.VoiceChannelCreateEvent;
+import com.sheepybot.api.entities.event.server.voice.VoiceChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.voice.*;
-import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GuildMemberVoiceListener extends BotListener {
+public class GuildMemberVoiceListener extends ListenerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GuildMemberVoiceListener.class);
 
-    public GuildMemberVoiceListener(@NotNull(value = "parent cannot be null") final Bot bot) {
-        super(bot);
-    }
-
     @Override
     public void onGuildVoiceJoin(final GuildVoiceJoinEvent event) {
-        this.getEventManager().callEvent(new MemberVoiceJoinEvent(event.getMember(), event.getGuild(), event.getChannelJoined(), event.getJDA()));
+        Bot.get().getEventRegistry().callEvent(new MemberVoiceJoinEvent(event.getGuild(), event.getChannelJoined(), event.getMember(), event.getJDA()));
 
     }
 
     @Override
     public void onGuildVoiceMove(final GuildVoiceMoveEvent event) {
-        this.getEventManager().callEvent(new MemberVoiceMoveEvent(event.getMember(), event.getGuild(), event.getChannelJoined(), event.getChannelLeft(), event.getJDA()));
+        Bot.get().getEventRegistry().callEvent(new MemberVoiceMoveEvent(event.getGuild(), event.getMember(), event.getChannelJoined(), event.getChannelLeft(), event.getJDA()));
     }
 
     @Override
     public void onGuildVoiceLeave(final GuildVoiceLeaveEvent event) {
-        this.getEventManager().callEvent(new MemberVoiceLeaveEvent(event.getMember(), event.getGuild(), event.getChannelLeft(), event.getJDA()));
+        Bot.get().getEventRegistry().callEvent(new MemberVoiceLeaveEvent(event.getGuild(), event.getChannelLeft(), event.getMember(), event.getJDA()));
     }
 
     @Override
     public void onGuildVoiceMute(final GuildVoiceMuteEvent event) {
-        this.getEventManager().callEvent(new MemberVoiceMuteEvent(event.getMember(), event.getGuild(), event.getVoiceState().getChannel(), event.getJDA()));
+        Bot.get().getEventRegistry().callEvent(new MemberVoiceMuteEvent(event.getGuild(), event.getVoiceState().getChannel(), event.getMember(), event.getJDA()));
     }
 
     @Override
     public void onGuildVoiceDeafen(final GuildVoiceDeafenEvent event) {
-        this.getEventManager().callEvent(new MemberVoiceDeafenEvent(event.getMember(), event.getGuild(), event.getVoiceState().getChannel(), event.getJDA()));
+        Bot.get().getEventRegistry().callEvent(new MemberVoiceDeafenEvent(event.getGuild(), event.getVoiceState().getChannel(), event.getMember(), event.getJDA()));
     }
 
     @Override
     public void onVoiceChannelCreate(final net.dv8tion.jda.api.events.channel.voice.VoiceChannelCreateEvent event) {
-        this.getEventManager().callEvent(new VoiceChannelCreateEvent(event.getGuild(), event.getChannel(), event.getJDA()));
+        Bot.get().getEventRegistry().callEvent(new VoiceChannelCreateEvent(event.getGuild(), event.getChannel(), event.getJDA()));
     }
 
     @Override
     public void onVoiceChannelDelete(final net.dv8tion.jda.api.events.channel.voice.VoiceChannelDeleteEvent event) {
-        this.getEventManager().callEvent(new VoiceChannelDeleteEvent(event.getGuild(), event.getChannel(), event.getJDA()));
+        Bot.get().getEventRegistry().callEvent(new VoiceChannelDeleteEvent(event.getGuild(), event.getChannel(), event.getJDA()));
     }
 }

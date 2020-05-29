@@ -5,6 +5,7 @@ import com.google.gson.internal.LazilyParsedNumber;
 import com.sheepybot.api.entities.utils.Objects;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -16,7 +17,7 @@ public class DBObject {
      * Initialize an empty {@link DBObject}
      */
     public DBObject() {
-        this.data = Maps.newHashMap();
+        this.data = new LinkedHashMap<>();
     }
 
     /**
@@ -26,6 +27,10 @@ public class DBObject {
         this.data = data;
     }
 
+    /**
+     * @param key The key to search for
+     * @return {@code true} if the key is present, {@code false} otherwise
+     */
     public boolean has(@NotNull(value = "key cannot be null") final String key) {
         Objects.checkNotBlank(key, "key cannot be empty");
         return this.data.containsKey(key);
@@ -295,6 +300,20 @@ public class DBObject {
         }
 
         return result.toString();
+    }
+
+    /**
+     * @return {@code true} if there is no data, {@code false} otherwise
+     */
+    public boolean isEmpty() {
+        return this.data.isEmpty();
+    }
+
+    /**
+     * @return How many elements there are inside of this {@link DBObject}
+     */
+    public int size() {
+        return this.data.size();
     }
 
     /**

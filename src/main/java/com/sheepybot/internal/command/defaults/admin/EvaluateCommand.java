@@ -2,8 +2,6 @@ package com.sheepybot.internal.command.defaults.admin;
 
 import com.google.common.base.Stopwatch;
 import com.sheepybot.Bot;
-import okhttp3.Request;
-import okhttp3.Response;
 import com.sheepybot.api.entities.command.Arguments;
 import com.sheepybot.api.entities.command.Command;
 import com.sheepybot.api.entities.command.CommandContext;
@@ -12,6 +10,8 @@ import com.sheepybot.api.entities.command.parsers.ArgumentParsers;
 import com.sheepybot.api.entities.messaging.Messaging;
 import com.sheepybot.api.entities.utf8.Emoji;
 import com.sheepybot.api.entities.utils.BotUtils;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -38,7 +38,7 @@ public class EvaluateCommand implements CommandExecutor {
     /**
      * Pastebin pattern so we can use pastebin urls in eval
      */
-    private static final Pattern PASTEBIN_PATTERN = Pattern.compile("https://(?:www)pastebin.com/(?:raw/).+$");
+    private static final Pattern PASTEBIN_PATTERN = Pattern.compile("https://(www.)?pastebin.com/(raw/)?.+");
 
     /**
      * An array of imports that will probably be used when executing eval
@@ -50,8 +50,6 @@ public class EvaluateCommand implements CommandExecutor {
             "java.util",
             "java.util.concurrent",
             "java.time",
-            "Packages.net.dv8tion.jda.api",
-            "Packages.com.sheepybot.api.entities"
     };
 
     private final ScriptEngine scriptEngine;
@@ -78,10 +76,11 @@ public class EvaluateCommand implements CommandExecutor {
             this.scriptEngine.put("channel", context.getChannel());
             this.scriptEngine.put("member", context.getMember());
             this.scriptEngine.put("user", context.getSender());
-            this.scriptEngine.put("server", context.getServer());
+            this.scriptEngine.put("guild", context.getGuild());
             this.scriptEngine.put("message", context.getMessage());
-            this.scriptEngine.put("bot", context.getServer().getSelfMember());
+            this.scriptEngine.put("bot", context.getGuild().getSelfMember());
             this.scriptEngine.put("jda", context.getJDA());
+            this.scriptEngine.put("this", this);
 
             String input = args.next(ArgumentParsers.REMAINING_STRING_NO_QUOTE);
             if (input.startsWith("```") && input.endsWith("```")) {
@@ -93,7 +92,7 @@ public class EvaluateCommand implements CommandExecutor {
             final String finput = input; //I hate lambda sometimes
             final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
-            final Future<?> future = Bot.CACHED_EXECUTOR_SERVICE.submit(() -> {
+            final Future<?> future = Bot.SCHEDULED_EXECUTOR_SERVICE.submit(() -> {
 
                 String output;
                 Color color;
@@ -131,7 +130,7 @@ public class EvaluateCommand implements CommandExecutor {
 
             });
 
-            Bot.CACHED_EXECUTOR_SERVICE.submit(() -> {
+            Bot.SCHEDULED_EXECUTOR_SERVICE.submit(() -> {
 
                 try {
                     future.get(EVAL_TIMEOUT_AFTER, TimeUnit.MILLISECONDS);
@@ -153,25 +152,22 @@ public class EvaluateCommand implements CommandExecutor {
     }
 
     /**
-     * Checks whether the {@code input} matches the {@link  #PASTEBIN_PATTERN}
+     * Checks whether the {@code input} matches the {@link #PASTEBIN_PATTERN}
      *
      * @param input The input to match
      * @return {@code true} if the provided input matches {@link #PASTEBIN_PATTERN}
      */
-    private boolean isPastebinURL(final String input) {
+    public boolean isPastebinURL(final String input) {
         return PASTEBIN_PATTERN.matcher(input).matches();
     }
 
     /**
-     * Add the /raw/ to a pastebin url if it doesn't contain it
+     * Add the /raw/ to a pastebin url
      *
      * @param url The url
      * @return The raw url
      */
-    private String getAsPastebinUrl(final String url) {
-        if (PASTEBIN_PATTERN.matcher(url).matches()) { //assume it's correct
-            return url;
-        }
+    public String getAsPastebinUrl(final String url) {
         return "https://pastebin.com/raw/" + url.substring(url.lastIndexOf("/") + 1);
     }
 
@@ -182,7 +178,7 @@ public class EvaluateCommand implements CommandExecutor {
      * @return The page content as a {@link String}
      */
     @SuppressWarnings("ConstantConditions")
-    private String getPageContent(final String url) {
+    public String getPageContent(final String url) {
 
         final Request request = new Request.Builder()
                 .url(url)

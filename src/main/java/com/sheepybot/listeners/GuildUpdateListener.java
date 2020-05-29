@@ -1,33 +1,26 @@
 package com.sheepybot.listeners;
 
 import com.sheepybot.Bot;
-import com.sheepybot.api.event.server.ServerUpdateIconEvent;
-import com.sheepybot.api.event.server.ServerUpdateNameEvent;
-import com.sheepybot.api.event.server.ServerUpdateOwnerEvent;
-import net.dv8tion.jda.api.events.guild.update.GuildUpdateIconEvent;
-import net.dv8tion.jda.api.events.guild.update.GuildUpdateNameEvent;
-import net.dv8tion.jda.api.events.guild.update.GuildUpdateOwnerEvent;
-import org.jetbrains.annotations.NotNull;
+import com.sheepybot.api.entities.event.server.GuildUpdateIconEvent;
+import com.sheepybot.api.entities.event.server.GuildUpdateNameEvent;
+import com.sheepybot.api.entities.event.server.GuildUpdateOwnerEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
-public class GuildUpdateListener extends BotListener {
+public class GuildUpdateListener extends ListenerAdapter {
 
-    public GuildUpdateListener(@NotNull(value = "bot cannot be null") final Bot bot) {
-        super(bot);
+    @Override
+    public void onGuildUpdateIcon(final net.dv8tion.jda.api.events.guild.update.GuildUpdateIconEvent event) {
+        Bot.get().getEventRegistry().callEvent(new GuildUpdateIconEvent(event.getOldIconUrl(), event.getNewIconUrl(), event.getGuild(), event.getJDA()));
     }
 
     @Override
-    public void onGuildUpdateIcon(final GuildUpdateIconEvent event) {
-        this.getEventManager().callEvent(new ServerUpdateIconEvent(event.getOldIconUrl(), event.getNewIconUrl(), event.getGuild(), event.getJDA()));
+    public void onGuildUpdateName(final net.dv8tion.jda.api.events.guild.update.GuildUpdateNameEvent event) {
+        Bot.get().getEventRegistry().callEvent(new GuildUpdateNameEvent(event.getOldName(), event.getNewName(), event.getGuild(), event.getJDA()));
     }
 
     @Override
-    public void onGuildUpdateName(final GuildUpdateNameEvent event) {
-        this.getEventManager().callEvent(new ServerUpdateNameEvent(event.getOldName(), event.getNewName(), event.getGuild(), event.getJDA()));
-    }
-
-    @Override
-    public void onGuildUpdateOwner(final GuildUpdateOwnerEvent event) {
-        this.getEventManager().callEvent(new ServerUpdateOwnerEvent(event.getOldOwner(), event.getNewOwner(), event.getGuild(), event.getJDA()));
+    public void onGuildUpdateOwner(final net.dv8tion.jda.api.events.guild.update.GuildUpdateOwnerEvent event) {
+        Bot.get().getEventRegistry().callEvent(new GuildUpdateOwnerEvent(event.getOldOwner(), event.getNewOwner(), event.getGuild(), event.getJDA()));
     }
 
 }

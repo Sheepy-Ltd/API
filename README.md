@@ -8,7 +8,7 @@ If you notice any typos or want to make adjustments to this feel free to do so.
 
 **Getting Started**
 
-##Creating Your First Module
+## Creating Your First Module
 
 ### First steps
 
@@ -67,7 +67,7 @@ things you call from the API, these are handled directly and need not have Modul
 Commands, events and scheduled tasks are automatically unregistered/terminated after your Module is disabled so there's no need
 to do any of these yourself.
 
-##The Command System
+## The Command System
 
 ### Writing your first command
 ```java
@@ -94,7 +94,7 @@ public class MyCommand implements CommandExecutor {
 
 **Overview**:
 
-We create our new class called "MyCommand" implementing `CommandExecutor`, this is something that ALL commands MUST extend in order to be registered.
+We create our new class called "MyCommand" implementing `CommandExecutor`, this is something that ALL commands MUST implement in order to be registered.
 
 Implementing the `CommandExecutor#execute` method we get given two parameters
 
@@ -128,9 +128,7 @@ variations in possible responses in your code.
 
 ### Making your command usable
 ```java
-import CommandRegistry;
-import Command;
-  
+
 ...
 
 @Override
@@ -209,9 +207,9 @@ When executing this command it would look something like
 >boops Samuel#0001 -doubleboop 
 ```
 
-##The event system
+## The event system
 
-###Creating your own event
+### Creating your own event
 ```java
 import Event;
 
@@ -305,7 +303,7 @@ go to our event registry and call the `.register(EventListener)` method which ta
 as its argument, there's no need to register the event class (the one that extends `Event`) itself as this is just the class that gets thrown around and the API
 doesn't need to know about it.
 
-###Final note
+### Final note
 This guide will continue to grow and possibly end up being moved into their own sections
 as the API and bot continue to grow themselves and demands change.
 

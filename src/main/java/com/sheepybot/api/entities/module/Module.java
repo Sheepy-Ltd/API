@@ -2,15 +2,14 @@ package com.sheepybot.api.entities.module;
 
 import com.moandjiezana.toml.Toml;
 import com.sheepybot.api.entities.command.RootCommandRegistry;
-import com.sheepybot.api.entities.economy.AccountRegistry;
+import com.sheepybot.api.entities.event.RootEventRegistry;
 import com.sheepybot.api.entities.language.I18n;
 import com.sheepybot.api.entities.scheduler.Scheduler;
+import com.sheepybot.api.entities.utils.Objects;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.sheepybot.api.entities.event.RootEventRegistry;
-import com.sheepybot.api.entities.utils.Objects;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +24,6 @@ public class Module {
     private EventRegistry eventRegistry;
     private SchedulerRegistry schedulerRegistry;
     private Metrics metrics;
-    private AccountRegistry accounts;
     private File dataFolder;
     private File jar;
 
@@ -44,7 +42,6 @@ public class Module {
     //this is called in the module loader, making it final prevents it being overridden
     public final void init(@NotNull(value = "command manager cannot be null") final RootCommandRegistry rootCommandRegistry,
                            @NotNull(value = "event manager cannot be null") final RootEventRegistry rootEventRegistry,
-                           @NotNull(value = "accounts cannot be null") final AccountRegistry accounts,
                            @NotNull(value = "data folder cannot be null") final File dataFolder,
                            @NotNull(value = "jar cannot be null") final File jar) {
         this.logger = LoggerFactory.getLogger(this.data.name());
@@ -52,7 +49,6 @@ public class Module {
         this.eventRegistry = new EventRegistry(rootEventRegistry, this);
         this.schedulerRegistry = new SchedulerRegistry();
         this.metrics = new Metrics(this.getName());
-        this.accounts = accounts;
         this.dataFolder = dataFolder;
         this.jar = jar;
 
@@ -160,13 +156,6 @@ public class Module {
      */
     public Metrics getMetrics() {
         return this.metrics;
-    }
-
-    /**
-     * @return The {@link AccountRegistry}
-     */
-    public AccountRegistry getAccounts() {
-        return this.accounts;
     }
 
     /**

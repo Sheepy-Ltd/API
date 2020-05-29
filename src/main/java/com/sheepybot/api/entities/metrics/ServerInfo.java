@@ -88,7 +88,7 @@ public class ServerInfo {
      * @return The unix-epoch timestamp of the bot startup
      */
     public static long getUptime() {
-        return Bot.getInstance().getStartTime();
+        return Bot.get().getStartTime();
     }
 
 }

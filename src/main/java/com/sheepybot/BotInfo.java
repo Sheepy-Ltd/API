@@ -5,7 +5,7 @@ public class BotInfo {
     /**
      * The name of the Bot
      */
-    public static final String BOT_NAME = "Sparky";
+    public static final String BOT_NAME = "Sheepy";
 
     /**
      * Version Major

@@ -1,13 +1,13 @@
 package com.sheepybot.api.entities.database;
 
+import com.sheepybot.BotInfo;
+import com.sheepybot.api.entities.database.auth.DatabaseInfo;
 import com.sheepybot.api.entities.database.object.DBCursor;
 import com.sheepybot.api.entities.database.object.DBObject;
 import com.zaxxer.hikari.HikariDataSource;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.sheepybot.BotInfo;
-import com.sheepybot.api.entities.database.auth.DatabaseInfo;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,9 +15,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 
-//this will likely end up expanding in the future, but for now its just a simple fetch retrieve
-//for raw sql statements, expect this in the future to give you the option between writing raw sql
-//or just giving a list of things to insert and the class itself handles it
 public class Database {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Database.class);
@@ -31,20 +28,14 @@ public class Database {
      */
     public Database(@NotNull(value = "credentials cannot be null") final DatabaseInfo credentials) {
         this.dataSource = new HikariDataSource();
-        this.dataSource.setJdbcUrl(String.format("jdbc:mysql://%s:%s/%s", credentials.getHost(), credentials.getPort(), credentials.getDatabase()));
+        this.dataSource.setJdbcUrl(String.format("jdbc:postgresql://%s:%s/%s", credentials.getHost(), credentials.getPort(), credentials.getDatabase()));
         this.dataSource.setUsername(credentials.getUsername());
         this.dataSource.setPassword(credentials.getPassword());
         this.dataSource.setMaximumPoolSize(credentials.getPoolSize());
         this.dataSource.setLeakDetectionThreshold(5_000); //5 seconds
         this.dataSource.setConnectionTimeout(30_000); //30 seconds
-        this.dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        this.dataSource.setPoolName(String.format("%s-Node-%d-Connection-Pool", BotInfo.BOT_NAME, 0));
-        this.dataSource.addDataSourceProperty("useUnicode", "true");
-        this.dataSource.addDataSourceProperty("cachePrepStmts", true);
-        this.dataSource.addDataSourceProperty("prepStmtCacheSize", 250);
-        this.dataSource.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
-        this.dataSource.addDataSourceProperty("useServerPrepStmts", true);
-        this.dataSource.setConnectionInitSql("SET NAMES 'utf8mb4'");
+        this.dataSource.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
+        this.dataSource.setPoolName(String.format("%s-Connection-Pool", BotInfo.BOT_NAME));
     }
 
     /**
@@ -86,8 +77,7 @@ public class Database {
      *
      * @param haystack The query to execute
      * @param needles  The values
-     *
-     * @return A {@link com.sheepybot.api.entities.database.object.DBCursor}, or {@code null} if an error occurred.
+     * @return A {@link DBCursor}, or {@code null} if an error occurred.
      */
     public DBCursor find(@NotNull(value = "query cannot be null") final String haystack,
                                                                   final Object... needles) {
