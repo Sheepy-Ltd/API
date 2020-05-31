@@ -2,18 +2,18 @@ package com.sheepybot.api.entities.configuration;
 
 import com.google.common.collect.Maps;
 import com.google.gson.internal.LazilyParsedNumber;
-import com.sheepybot.internal.caching.EntityLoadingCache;
-import com.sheepybot.internal.caching.caches.GuildConfigCache;
-import net.dv8tion.jda.api.entities.Guild;
-import org.jetbrains.annotations.NotNull;
 import com.sheepybot.api.entities.cache.Saveable;
 import com.sheepybot.api.entities.utils.Objects;
+import com.sheepybot.internal.caching.EntityLoadingCache;
+import com.sheepybot.internal.caching.caches.GuildSettingsCache;
+import net.dv8tion.jda.api.entities.Guild;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
 public class GuildSettings implements Saveable {
 
-    private static final EntityLoadingCache<String, GuildSettings> CONFIG_CACHE = new GuildConfigCache();
+    private static final EntityLoadingCache<String, GuildSettings> CONFIG_CACHE = new GuildSettingsCache();
 
     //TODO: Revise this sytem, it's hideous
 

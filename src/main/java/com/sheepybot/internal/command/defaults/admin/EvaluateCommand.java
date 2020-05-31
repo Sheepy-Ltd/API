@@ -3,13 +3,11 @@ package com.sheepybot.internal.command.defaults.admin;
 import com.google.common.base.Stopwatch;
 import com.sheepybot.Bot;
 import com.sheepybot.api.entities.command.Arguments;
-import com.sheepybot.api.entities.command.Command;
 import com.sheepybot.api.entities.command.CommandContext;
 import com.sheepybot.api.entities.command.CommandExecutor;
 import com.sheepybot.api.entities.command.parsers.ArgumentParsers;
 import com.sheepybot.api.entities.messaging.Messaging;
-import com.sheepybot.api.entities.utf8.Emoji;
-import com.sheepybot.api.entities.utils.BotUtils;
+import com.sheepybot.util.BotUtils;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -96,9 +94,6 @@ public class EvaluateCommand implements CommandExecutor {
 
                 String output;
                 Color color;
-
-                boolean success = false;
-
                 try {
                     stopwatch.start();
 
@@ -109,24 +104,17 @@ public class EvaluateCommand implements CommandExecutor {
                     output = result == null ? "null" : result.toString();
                     color = Color.GREEN;
 
-                    success = true;
-
                 } catch (final ScriptException ex) {
                     output = ex.getMessage();
                     color = Color.RED;
                 }
 
-                final Command.Flag flag = args.getFlag("do-output");
-                if (!success || (flag != null && flag.is(true))) {
-                    Messaging.send(context.getChannel(), Messaging.getLocalEmbedBuilder()
-                            .setColor(color)
-                            .setTitle("Evaluate")
-                            .addField("Input", Messaging.getLocalMessageBuilder().appendCodeBlock(finput, "javascript").build().getContentRaw(), false)
-                            .addField("Output", Messaging.getLocalMessageBuilder().appendCodeBlock(output, "javascript").build().getContentRaw(), false)
-                            .setFooter(String.format("Completed in %dms", stopwatch.elapsed(TimeUnit.MILLISECONDS)), null).build());
-                } else {
-                    context.getMessage().addReaction(Emoji.THUMBS_UP).queue();
-                }
+                Messaging.send(context.getChannel(), Messaging.getLocalEmbedBuilder()
+                        .setColor(color)
+                        .setTitle("Evaluate")
+                        .addField("Input", Messaging.getLocalMessageBuilder().appendCodeBlock(finput, "javascript").build().getContentRaw(), false)
+                        .addField("Output", Messaging.getLocalMessageBuilder().appendCodeBlock(output, "javascript").build().getContentRaw(), false)
+                        .setFooter(String.format("Completed in %dms", stopwatch.elapsed(TimeUnit.MILLISECONDS)), null).build());
 
             });
 

@@ -492,11 +492,11 @@ public class ArgumentParsers {
 
                 for (final String option : this.options) {
                     if (option.equalsIgnoreCase(parse)) {
-                        return parser.parse(context, new RawArguments(new String[]{option}));
+                        return parser.parse(context, new RawArguments(Lists.newArrayList(option)));
                     }
                 }
 
-                throw new ParserException(context.i18n("", parse));
+                throw new ParserException(String.format("Invalid choice %s", parse));
             }
 
         };

@@ -59,6 +59,9 @@ public class EventRegistryImpl implements RootEventRegistry {
 
             final EventExecutor executor = (eventListener, event) -> {
                 try {
+                    if (!eventClass.isAssignableFrom(event.getClass())) {
+                        return;
+                    }
                     method.invoke(eventListener, event);
                 } catch (final IllegalAccessException | InvocationTargetException ex) {
                     throw new EventException(ex);

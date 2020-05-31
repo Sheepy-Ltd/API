@@ -1,7 +1,7 @@
 package com.sheepybot.listeners;
 
 import com.sheepybot.Bot;
-import com.sheepybot.api.entities.event.server.GuildLeaveEvent;
+import com.sheepybot.api.entities.event.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;

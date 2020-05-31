@@ -94,7 +94,7 @@ fabric.properties
 hs_err_pid*
 
 # End of https://www.gitignore.io/api/git,java,intellij+all
-target/classes/META-INF/MANIFEST.MF
+target/
 
 .project
 .settings/
@@ -102,4 +102,5 @@ gradle/
 
 build/*
 
+modules/
 bot.toml

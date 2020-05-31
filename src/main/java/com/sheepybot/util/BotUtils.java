@@ -3,6 +3,7 @@ package com.sheepybot.util;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import com.sheepybot.Bot;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.internal.requests.Requester;
@@ -46,6 +47,7 @@ public class BotUtils {
      * Check whether a {@link Member} is a bot admin
      *
      * @param user The {@link User}
+     *
      * @return {@code true} if the provided {@link Member} is an administrator, {@code false} otherwise
      */
     public static boolean isBotAdmin(@NotNull(value = "user cannot be null") final User user) {
@@ -198,7 +200,7 @@ public class BotUtils {
     }
 
     /**
-     * Get recommended shards.
+     * Get the recommended shard count using the Bot token from Discords /gateway/bot endpoint
      *
      * @param token The bot token
      * @return The recommended shard count or -1 if an I/O error occurred
@@ -240,8 +242,28 @@ public class BotUtils {
         return -1;
     }
 
+
     /**
-     * Get a Bot user ID from a token
+     * Retrieve an activity type from the input {@code activityType}, should no
+     * valid {@link Activity.ActivityType} be specified the default return value is
+     * {@link Activity.ActivityType#DEFAULT}
+     *
+     * @param activityType The activity type
+     * @return The {@link Activity.ActivityType}
+     */
+    public static Activity.ActivityType getActivityTypeFromString(final String activityType) {
+        switch (activityType.toLowerCase()) {
+            case "streaming":
+                return Activity.ActivityType.STREAMING;
+            case "listening":
+                return Activity.ActivityType.LISTENING;
+            default:
+                return Activity.ActivityType.DEFAULT;
+        }
+    }
+
+    /**
+     * Get a Bot user ID from a token using Discords /users/@me endpoint
      *
      * @param token The bot token
      * @return The bot user ID

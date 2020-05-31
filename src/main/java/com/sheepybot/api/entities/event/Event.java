@@ -1,6 +1,6 @@
 package com.sheepybot.api.entities.event;
 
-public class Event {
+public abstract class Event {
 
     private final String name;
     private final boolean isAsync;
@@ -45,4 +45,10 @@ public class Event {
     public boolean isCancellable() {
         return (this instanceof Cancellable);
     }
+
+//    /**
+//     * @return The {@link HandlerList} for this {@link Event}
+//     */
+//    public abstract HandlerList getHandlerList();
+
 }

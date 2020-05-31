@@ -1,9 +1,9 @@
 package com.sheepybot.listeners;
 
 import com.sheepybot.Bot;
-import com.sheepybot.api.entities.event.server.member.voice.*;
-import com.sheepybot.api.entities.event.server.voice.VoiceChannelCreateEvent;
-import com.sheepybot.api.entities.event.server.voice.VoiceChannelDeleteEvent;
+import com.sheepybot.api.entities.event.guild.member.voice.*;
+import com.sheepybot.api.entities.event.guild.voice.VoiceChannelCreateEvent;
+import com.sheepybot.api.entities.event.guild.voice.VoiceChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.voice.*;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;

@@ -1,6 +1,5 @@
 package com.sheepybot.api.entities.command;
 
-import com.sheepybot.api.entities.configuration.GuildSettings;
 import com.sheepybot.api.entities.language.I18n;
 import com.sheepybot.api.entities.messaging.Messaging;
 import net.dv8tion.jda.api.JDA;
@@ -12,7 +11,6 @@ public class CommandContext {
     private final TextChannel channel;
     private final Member sender;
     private final Guild guild;
-    private final GuildSettings settings;
     private final Message message;
     private final String trigger;
     private final Command command;
@@ -23,7 +21,6 @@ public class CommandContext {
      * @param channel  The channel this {@link Command} was executed in
      * @param sender   The {@link User} who executed this {@link Command}
      * @param guild    The {@link Guild} this command was executed in
-     * @param settings THe {@link GuildSettings}
      * @param trigger  The command trigger
      * @param command  The {@link Command} executed
      * @param message  The whole message that caused this {@link Command} to trigger
@@ -31,7 +28,6 @@ public class CommandContext {
     public CommandContext(@NotNull(value = "channel cannot be null") final TextChannel channel,
                           @NotNull(value = "sender cannot be null") final Member sender,
                           @NotNull(value = "guild cannot be null") final Guild guild,
-                          @NotNull(value = "settings cannot be null") final GuildSettings settings,
                           @NotNull(value = "trigger cannot be null") final String trigger,
                           @NotNull(value = "command cannot be null") final Command command,
                           @NotNull(value = "message cannot be null") final Message message,
@@ -40,7 +36,6 @@ public class CommandContext {
         this.channel = channel;
         this.sender = sender;
         this.guild = guild;
-        this.settings = settings;
         this.trigger = trigger;
         this.command = command;
         this.message = message;
@@ -74,13 +69,6 @@ public class CommandContext {
      */
     public Guild getGuild() {
         return this.guild;
-    }
-
-    /**
-     * @return The {@link GuildSettings}
-     */
-    public GuildSettings getGuildSettings() {
-        return this.settings;
     }
 
     /**

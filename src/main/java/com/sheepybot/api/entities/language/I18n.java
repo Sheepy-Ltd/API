@@ -1,14 +1,22 @@
 package com.sheepybot.api.entities.language;
 
 import com.google.common.collect.Maps;
+import com.sheepybot.Bot;
+import com.sheepybot.api.entities.utils.Objects;
 import com.sheepybot.internal.caching.EntityLoadingCache;
 import com.sheepybot.internal.caching.caches.LanguageCache;
 import net.dv8tion.jda.api.entities.Guild;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.sheepybot.api.entities.utils.Objects;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.text.MessageFormat;
 import java.util.Enumeration;
 import java.util.Map;
@@ -43,12 +51,55 @@ public class I18n {
     }
 
     /**
+     * Set the default language file to use for messages
+     *
+     * @param file The file name
+     */
+    public static void setDefaultI18n(@NotNull(value = "file cannot be null") String file) {
+
+
+        try {
+
+            final int ext = file.indexOf('.');
+            if (ext != -1) {
+                file = file.substring(0, ext);
+            }
+
+            LOGGER.info(String.format("Attempting to set language as %s...", file));
+
+            Language language = Language.getByCode(file);
+            if (language == null) {
+                LOGGER.info("Detected custom language file, setting language as unknown...");
+                language = Language.UNKNOWN;
+            }
+
+            LOGGER.info("Loading resource bundle...");
+
+            final ResourceBundle bundle = getBundleFromURL(file, new File("/lang/" + file + ".properties").toURI().toURL());
+            if (bundle == null) {
+                LOGGER.info(String.format("Failed to load resource bundle %s", file));
+            } else {
+
+                LOGGER.info("Resource bundle has been loaded, importing language settings...");
+
+                FALLBACK_I18N = new I18n(Language.UNKNOWN);
+                FALLBACK_I18N.load(bundle);
+
+                LOGGER.info(String.format("Language set to %s.", (language == Language.UNKNOWN ? "custom language file" : language.getCode())));
+            }
+
+        } catch (final MalformedURLException ex) {
+            LOGGER.info("An error occurred and the language file could not be set", ex);
+        }
+
+    }
+
+    /**
      * Retrieve an {@link I18n} instance based on the specified {@link Language} of the {@link Guild}
      * <p>
      * <p>Should the {@link Guild} have no configured language, the default returned is the english {@link I18n}</p>
      *
      * @param guild The {@link Guild}
-     *
      * @return The {@link I18n} instance
      */
     public static I18n getI18n(@NotNull(value = "guild cannot be null") final Guild guild) {
@@ -106,17 +157,59 @@ public class I18n {
      */
     public static void loanI18n(@NotNull(value = "clazz cannot be null") final Class clazz) {
 
+        LOGGER.info("Loading additional language files...");
+
         for (final Language language : Language.values()) {
 
-            final I18n i18n = REGISTRY_MAP.computeIfAbsent(language.getCode(), __ -> new I18n(language));
+            if (language.isFake()) continue;
 
-            final ResourceBundle bundle = getBundle(language, clazz);
-            if (bundle == null) {
-                LOGGER.warn(String.format("Missing translation file %s.properties in class %s", language.getCode(), clazz.getSimpleName()));
-            } else {
+            try {
+                LOGGER.info(String.format("Attempting to load language file %s.properties...", language.getCode()));
+
+                final ResourceBundle bundle = getBundleFromURL(language.getCode(), new File("/lang/" + language.getCode() + ".properties").toURI().toURL());
+                if (bundle == null) {
+                    LOGGER.info(String.format("Couldn't load language file %s.properties, this language wont be available for use.", language.getCode()));
+                    continue;
+                }
+
+                final I18n i18n = REGISTRY_MAP.computeIfAbsent(language.getCode(), __ -> new I18n(language));
                 i18n.load(bundle);
+
+            } catch (final MalformedURLException ignored) {
+                LOGGER.info(String.format("Couldn't load external language file %s.properties, skipping it...", language.getCode()));
             }
 
+        }
+
+    }
+
+    /**
+     * Extract internal language files to the running directory
+     */
+    public static void extractLanguageFiles() {
+
+        final File lang = new File("lang/");
+
+        final URL url = Bot.class.getResource("/lang");
+        if (url != null && !lang.exists()) {
+
+            LOGGER.info("Attempting to extract internal language files...");
+
+            lang.mkdirs();
+
+            try {
+                LOGGER.info("Current dir " + url.toURI());
+                for (final File file : new File(url.toURI()).listFiles()) {
+                    LOGGER.info(String.format("Copying internal file %s to %s/%s...", file.getName(), lang.getAbsolutePath(), file.getName()));
+                    try {
+                        FileUtils.copyFile(file, new File(lang, file.getName()));
+                    } catch (final IOException ex) {
+                        LOGGER.info("An error occurred and the file couldn't be extracted", ex);
+                    }
+                }
+            } catch (final URISyntaxException ex) {
+                LOGGER.info("An error occurred during extraction, if this error persists please report it on GitHub.", ex);
+            }
         }
 
     }
@@ -197,10 +290,18 @@ public class I18n {
 
     }
 
-    private static ResourceBundle getBundle(final Language language, final Class clazz) {
+    private static ResourceBundle getBundle(final Language language, final ClassLoader loader) {
         try {
-            return ResourceBundle.getBundle("lang." + language.getCode(), language.getLocale(), clazz.getClassLoader());
-        } catch (final MissingResourceException ignored){
+            return ResourceBundle.getBundle("lang." + language.getCode(), language.getLocale(), loader);
+        } catch (final MissingResourceException ignored) {
+        }
+        return null;
+    }
+
+    private static ResourceBundle getBundleFromURL(final String language, final URL url) {
+        try {
+            return ResourceBundle.getBundle("lang." + language, Language.UNKNOWN.getLocale(), new URLClassLoader(new URL[]{url}));
+        } catch (final MissingResourceException ignored) {
         }
         return null;
     }

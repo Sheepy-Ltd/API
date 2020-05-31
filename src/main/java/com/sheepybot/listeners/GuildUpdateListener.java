@@ -1,9 +1,9 @@
 package com.sheepybot.listeners;
 
 import com.sheepybot.Bot;
-import com.sheepybot.api.entities.event.server.GuildUpdateIconEvent;
-import com.sheepybot.api.entities.event.server.GuildUpdateNameEvent;
-import com.sheepybot.api.entities.event.server.GuildUpdateOwnerEvent;
+import com.sheepybot.api.entities.event.guild.GuildUpdateIconEvent;
+import com.sheepybot.api.entities.event.guild.GuildUpdateNameEvent;
+import com.sheepybot.api.entities.event.guild.GuildUpdateOwnerEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class GuildUpdateListener extends ListenerAdapter {

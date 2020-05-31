@@ -28,7 +28,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
     /**
      * The modules directory
      */
-    private static final File MODULES = new File("modules");
+    public static final File MODULE_DIRECTORY = new File("modules");
 
     private final List<Module> modules;
 
@@ -61,6 +61,8 @@ public class ModuleLoaderImpl implements ModuleLoader {
                 return null;
             }
 
+            LOGGER.info(String.format("Loading module file %s...", file.getName()));
+
             final Enumeration<JarEntry> enumeration = jar.entries();
 
             final URL[] urls = new URL[]{file.toURI().toURL()};
@@ -89,11 +91,18 @@ public class ModuleLoaderImpl implements ModuleLoader {
                     if (this.getModuleByName(data.name()) != null) {
                         throw new IllegalStateException("Module '" + data.name() + "' is already loaded");
                     } else {
-                        final File dataFolder = new File(ModuleLoaderImpl.MODULES, data.name());
+
+                        if (data.name().isEmpty() || data.version().isEmpty()) {
+                            throw new InvalidModuleException("Module must have a name and a version");
+                        }
+
+                        final File dataFolder = new File(ModuleLoaderImpl.MODULE_DIRECTORY, data.name());
                         if (!dataFolder.exists()) {
                             //noinspection ResultOfMethodCallIgnored
                             dataFolder.mkdirs();
                         }
+
+                        LOGGER.info(String.format("Initializing module %s v%s...", data.name(), data.version()));
 
                         module.init(Bot.get().getCommandRegistry(),
                                 Bot.get().getEventRegistry(),
@@ -121,9 +130,9 @@ public class ModuleLoaderImpl implements ModuleLoader {
     @Override
     public Collection<Module> loadModules() throws NullPointerException, IllegalArgumentException {
 
-        if (!ModuleLoaderImpl.MODULES.exists()) ModuleLoaderImpl.MODULES.mkdirs();
+        if (!ModuleLoaderImpl.MODULE_DIRECTORY.exists()) ModuleLoaderImpl.MODULE_DIRECTORY.mkdirs();
 
-        final List<File> files = Arrays.stream(MODULES.listFiles()).filter(file -> file.getName().endsWith(".jar")).collect(Collectors.toList());
+        final List<File> files = Arrays.stream(MODULE_DIRECTORY.listFiles()).filter(file -> file.getName().endsWith(".jar")).collect(Collectors.toList());
         final List<Module> modules = Lists.newArrayListWithCapacity(files.size());
 
         for (final File child : files) {

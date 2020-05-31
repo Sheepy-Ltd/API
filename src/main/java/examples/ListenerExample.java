@@ -2,7 +2,7 @@ package examples;
 
 import com.sheepybot.api.entities.event.EventHandler;
 import com.sheepybot.api.entities.event.EventListener;
-import com.sheepybot.api.entities.event.server.member.MemberChatEvent;
+import com.sheepybot.api.entities.event.guild.member.MemberChatEvent;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;

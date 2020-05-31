@@ -9,6 +9,7 @@ public class RegisteredListener {
     private final EventListener listener;
     private final EventExecutor executor;
     private final EventHandler handler;
+    private final EventHandler.EventPriority priority;
     private final Module module;
 
     /**
@@ -24,6 +25,7 @@ public class RegisteredListener {
         this.listener = listener;
         this.executor = executor;
         this.handler = handler;
+        this.priority = handler.priority();
         this.module = module;
     }
 
@@ -56,14 +58,23 @@ public class RegisteredListener {
     }
 
     /**
+     * @return The event priority
+     */
+    public EventHandler.EventPriority getPriority() {
+        return this.priority;
+    }
+
+    /**
      * @param event The {@link Event} to call
-     *
      * @throws EventException If an error occurred during event execution
      */
     public void callEvent(@NotNull(value = "event cannot be null") final Event event) throws EventException {
-        if (!(event.isCancellable() && ((Cancellable) event).isCancelled() && this.handler.ignoreCancelled())) {
-            this.executor.execute(this.listener, event);
+        if (event instanceof Cancellable) {
+            if (((Cancellable) event).isCancelled() && this.handler.ignoreCancelled()) {
+                return;
+            }
         }
+        this.executor.execute(this.listener, event);
     }
 
 }

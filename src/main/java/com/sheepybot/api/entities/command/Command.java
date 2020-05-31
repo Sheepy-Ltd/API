@@ -1,8 +1,8 @@
 package com.sheepybot.api.entities.command;
 
 import com.google.common.collect.Lists;
-import org.jetbrains.annotations.NotNull;
 import com.sheepybot.api.entities.utils.Objects;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -215,136 +215,6 @@ public final class Command {
             return new Command(this.names, this.examples, this.description, this.usage, this.cooldown, this.executor);
         }
 
-    }
-
-    /**
-     * A class used to represent flags passed with a command
-     */
-    public static final class Flag {
-
-        private final String name;
-        private final String value;
-
-        /**
-         * Create a new {@link Flag}
-         *
-         * @param name  The flag name
-         * @param value The flags value, or {@code null} if there is no value
-         */
-        public Flag(@NotNull(value = "name cannot be null") final String name,
-                    final String value) {
-            this.name = name;
-            this.value = value;
-        }
-
-        /**
-         * @return The name of this {@link Flag}
-         */
-        public String getName() {
-            return this.name;
-        }
-
-        /**
-         * @return This {@link Flag}s value, or {@code null} if there is no value
-         */
-        public String getValue() {
-            return this.value;
-        }
-
-        /**
-         * @return This {@link Flag}s value as an {@link Integer}
-         *
-         * @throws IllegalArgumentException If the {@code value} is {@code null}
-         * @throws NumberFormatException    If the input value is not convertible to an {@link Integer}
-         */
-        public int getAsInt() throws IllegalArgumentException, NumberFormatException {
-            if (this.value == null) {
-                throw new IllegalArgumentException("Cannot convert a null value");
-            }
-            return Integer.parseInt(this.value);
-        }
-
-        /**
-         * Attempts to convert the input flag value into an {@link Integer}
-         * <p>
-         * <p>Should the input value be {@code null}, {@code def} is returned</p>
-         *
-         * @param def The value to return should the input value be {@code null}
-         *
-         * @return The {@link Integer} value, or {@code def} if no value was passed with the flag
-         *
-         * @throws NumberFormatException If the input value is not convertible to a {@link Integer}
-         */
-        public int getAsInt(final int def) throws NumberFormatException {
-            if (this.value == null) {
-                return def;
-            }
-            return Integer.parseInt(this.value);
-        }
-
-        /**
-         * @return This {@link Flag}s value as a {@link Double}
-         *
-         * @throws IllegalArgumentException If the {@code value} is {@code null}
-         * @throws NumberFormatException    If the input value is not convertible to a {@link Double}
-         */
-        public double getAsDouble() throws IllegalArgumentException {
-            if (this.value == null) {
-                throw new IllegalArgumentException("Cannot convert a null value");
-            }
-            return Double.parseDouble(this.value);
-        }
-
-        /**
-         * Attempts to convert the input flag value into a {@link Double}
-         * <p>
-         * <p>Should the input value be {@code null}, {@code def} is returned</p>
-         *
-         * @param def The value to return should the input value be {@code null}
-         *
-         * @return The {@link Double} value, or {@code def} if no value was passed with the flag
-         *
-         * @throws NumberFormatException If the input value is not convertible to a {@link Double}
-         */
-        public double getAsDouble(final int def) throws NumberFormatException {
-            if (this.value == null) {
-                return def;
-            }
-            return Double.parseDouble(this.value);
-        }
-
-        /**
-         * @return This {@link Flag}s value as a {@link Boolean}
-         */
-        public boolean isTrue() throws IllegalArgumentException {
-            if (this.value == null) {
-                return false;
-            }
-            return Boolean.parseBoolean(this.value);
-        }
-
-        /**
-         * Attempts to convert the input flag value into a {@link Double}
-         * <p>
-         * <p>Should the input value be {@code null}, {@code def} is returned</p>
-         *
-         * @param def The value to return should the input value be {@code null}
-         *
-         * @return The {@link Boolean} value, or {@code def} if no value was passed with the flag
-         *
-         * @throws NumberFormatException If the input value is not convertible to a {@link Double}
-         */
-        public boolean is(final boolean def) throws NumberFormatException {
-            if (this.value == null) {
-                return def;
-            }
-            return Boolean.parseBoolean(this.value);
-        }
-
-        @Override
-        public String toString() {
-            return "Flag{name=" + this.name + ", value = " + this.value + "}";
-        }
     }
 
 }

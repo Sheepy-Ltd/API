@@ -2,6 +2,7 @@ package com.sheepybot;
 
 import com.google.gson.JsonParser;
 import com.moandjiezana.toml.Toml;
+import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 import com.sheepybot.api.entities.command.Command;
 import com.sheepybot.api.entities.command.RootCommandRegistry;
 import com.sheepybot.api.entities.database.Database;
@@ -13,13 +14,13 @@ import com.sheepybot.api.entities.module.loader.ModuleLoader;
 import com.sheepybot.api.entities.scheduler.Scheduler;
 import com.sheepybot.api.entities.utils.Objects;
 import com.sheepybot.internal.command.CommandRegistryImpl;
-import com.sheepybot.internal.command.defaults.admin.BuildInfoCommand;
 import com.sheepybot.internal.command.defaults.admin.EvaluateCommand;
-import com.sheepybot.internal.command.defaults.admin.StopCommand;
 import com.sheepybot.internal.event.EventRegistryImpl;
 import com.sheepybot.internal.module.ModuleLoaderImpl;
 import com.sheepybot.listeners.*;
 import com.sheepybot.util.BotUtils;
+import com.sheepybot.util.Options;
+import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
@@ -121,7 +122,7 @@ public class Bot {
     public static void main(final String[] args) {
         Bot bot = null;
         try {
-            (bot = new Bot()).start(); //start in current directory
+            (bot = new Bot()).start(args); //start in current directory
         } catch (final Throwable ex) {
             LOGGER.info("An error occurred during startup and the bot has to shutdown...");
             ex.printStackTrace();
@@ -138,7 +139,7 @@ public class Bot {
         return Bot.instance;
     }
 
-    private void start() throws IOException, LoginException {
+    private void start(final String[] args) throws IOException, LoginException {
         Objects.checkArgument(!this.running, "bot is already running");
 
         Bot.instance = this;
@@ -146,11 +147,39 @@ public class Bot {
         this.running = true;
         this.startTime = System.currentTimeMillis();
 
+        final Options options = Options.parse(args);
+
+        final Options.Option buildInfo = options.getOption("buildinfo");
+        if (buildInfo != null) {
+            LOGGER.info("Detected build info flag, logging build info then exiting...");
+
+            LOGGER.info("--------------- Discord ---------------");
+            LOGGER.info(String.format("Rest API Version: %d", JDAInfo.DISCORD_REST_VERSION));
+            LOGGER.info(String.format("Audio Gateway Version: %d", JDAInfo.AUDIO_GATEWAY_VERSION));
+            LOGGER.info("----------------- JDA -----------------");
+            LOGGER.info(String.format("JDA Version: %s", JDAInfo.VERSION));
+            LOGGER.info("----------------- Bot -----------------");
+            LOGGER.info(String.format("API Version: %s", BotInfo.VERSION));
+            LOGGER.info(String.format("Commit Long: %s", BotInfo.GIT_COMMIT));
+            LOGGER.info(String.format("Branch: %s", BotInfo.GIT_BRANCH));
+            LOGGER.info(String.format("Build Date: %s", BotInfo.BUILD_DATE));
+            LOGGER.info(String.format("Lavaplayer Version: %s", PlayerLibrary.VERSION));
+            LOGGER.info(String.format("JVM Version: %s", System.getProperty("java.version")));
+            LOGGER.info("---------------------------------------");
+
+            return;
+        }
+
         final File file = new File("bot.toml");
         if (!file.exists()) {
+            LOGGER.info("Couldn't find required file bot.toml when starting, creating it...");
+
             FileUtils.copyURLToFile(this.getClass().getResource("/bot.toml"), file); //config wasn't found so copy internal one (resources/bot.toml)
-            LOGGER.info(String.format("bot.toml was created at %s.", file.getCanonicalPath()));
-            System.exit(ExitCode.EXIT_CODE_NORMAL); //need to use System.exit() because if the starter is present it will error on restart
+
+            LOGGER.info(String.format("File bot.toml was created at %s, please configure it then restart the bot.", file.getCanonicalPath()));
+
+            ModuleLoaderImpl.MODULE_DIRECTORY.mkdirs(); //assuming first time start so we're making the modules directory too
+            I18n.extractLanguageFiles(); //also extracting internal language files so people can change how we respond
         } else {
 
             LOGGER.info("Loading configuration...");
@@ -159,13 +188,16 @@ public class Bot {
 
             if (this.config.getString("client.token").isEmpty()) {
                 LOGGER.info("No discord token specified, please configure it in the bot.toml");
-                System.exit(ExitCode.EXIT_CODE_NORMAL);
                 return;
             }
 
-            LOGGER.info("Connecting to database...");
+            I18n.setDefaultI18n(this.config.getString("client.languageFile"));
 
-            this.database = new Database(new DatabaseInfo(this.config.getTable("db")));
+            if (this.config.getBoolean("db.enabled", false)) {
+                LOGGER.info("Connecting to database...");
+
+                this.database = new Database(new DatabaseInfo(this.config.getTable("db")));
+            }
 
             LOGGER.info("Loading data managers...");
 
@@ -175,9 +207,10 @@ public class Bot {
 
             final String token = this.config.getString("client.token");
 
-            int shards = Math.toIntExact(this.config.getLong("client.shards"));
+            int shards = Math.toIntExact(this.config.getLong("shards.shard_total"));
             int recommendedShards = BotUtils.getRecommendedShards(token);
-            if (shards < recommendedShards) {
+
+            if (shards != -1 && shards < recommendedShards) {
                 LOGGER.info("Cannot use less than discords recommended shard count, using recommended shard count from discord instead.");
                 shards = recommendedShards;
             }
@@ -187,15 +220,13 @@ public class Bot {
                     GatewayIntent.GUILD_BANS,
                     GatewayIntent.GUILD_VOICE_STATES,
                     GatewayIntent.GUILD_MESSAGES,
-                    GatewayIntent.GUILD_MESSAGE_REACTIONS
-            )
+                    GatewayIntent.GUILD_MESSAGE_REACTIONS)
                     .disableCache(CacheFlag.ACTIVITY, CacheFlag.EMOTE, CacheFlag.CLIENT_STATUS, CacheFlag.MEMBER_OVERRIDES)
                     .setChunkingFilter(ChunkingFilter.NONE)
                     .setMemberCachePolicy(MemberCachePolicy.NONE)
                     .setToken(token)
                     .setAutoReconnect(true)
                     .setEnableShutdownHook(false) //we dont use the shutdown hook on JDA as we handle that ourselves
-                    .setActivity(Activity.of(Activity.ActivityType.DEFAULT, this.config.getString("client.activity", "Beep Boop, Boop Beep?")))
                     .setBulkDeleteSplittingEnabled(false)
                     .setHttpClient(HTTP_CLIENT)
                     .setShardsTotal(shards) //use default shard count
@@ -209,6 +240,24 @@ public class Bot {
                             new GuildUpdateListener()
                     );
 
+            if (shards != -1) {
+
+                int shardMin = Math.toIntExact(this.config.getLong("sharding.shard_min"));
+                int shardMax = Math.toIntExact(this.config.getLong("sharding.shard_max"));
+
+                if (shardMin < 0) shardMin = 0;
+                if (shardMax < 0 || shardMax > shards) shardMax = (shards - 1);
+
+                builder.setShards(shardMin, shardMax);
+
+            }
+
+            final String activity = this.config.getString("client.activity");
+            if (activity != null && !activity.isEmpty()) {
+                LOGGER.info(activity + " / " + this.config.getString("client.activity_type") + " / " + BotUtils.getActivityTypeFromString(this.config.getString("client.activity_type")));
+                builder.setActivity(Activity.of(BotUtils.getActivityTypeFromString(this.config.getString("client.activity_type")), activity));
+            }
+
             LOGGER.info("Starting shards and attempting to connect to the Discord API...");
 
             this.shardManager = builder.build();
@@ -216,18 +265,8 @@ public class Bot {
             LOGGER.info("Registering default commands...");
 
             this.commandRegistry.registerCommand(Command.builder()
-                    .names("buildinfo")
-                    .executor(new BuildInfoCommand())
-                    .build());
-
-            this.commandRegistry.registerCommand(Command.builder()
                     .names("eval")
                     .executor(new EvaluateCommand())
-                    .build());
-
-            this.commandRegistry.registerCommand(Command.builder()
-                    .names("stop")
-                    .executor(new StopCommand())
                     .build());
 
             LOGGER.info("Loading language files...");
@@ -256,12 +295,12 @@ public class Bot {
 
         this.running = false;
 
-        if (this.shardManager != null) {
-            this.shardManager.shutdown();
-        }
-
         if (this.moduleLoader != null) {
             this.moduleLoader.disableModules();
+        }
+
+        if (this.shardManager != null) {
+            this.shardManager.shutdown();
         }
 
         if (this.eventRegistry != null) {

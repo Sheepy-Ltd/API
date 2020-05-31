@@ -1,11 +1,11 @@
 package com.sheepybot.listeners;
 
 import com.sheepybot.Bot;
-import com.sheepybot.api.entities.event.server.member.MemberLeaveEvent;
-import com.sheepybot.api.entities.event.server.member.message.MemberMessageUpdateEvent;
-import com.sheepybot.api.entities.event.server.member.message.MessageBulkDeleteEvent;
-import com.sheepybot.api.entities.event.server.member.moderation.MemberBanEvent;
-import com.sheepybot.api.entities.event.server.member.moderation.MemberPardonEvent;
+import com.sheepybot.api.entities.event.guild.member.MemberLeaveEvent;
+import com.sheepybot.api.entities.event.guild.member.message.MemberMessageUpdateEvent;
+import com.sheepybot.api.entities.event.guild.member.message.MessageBulkDeleteEvent;
+import com.sheepybot.api.entities.event.guild.member.moderation.MemberBanEvent;
+import com.sheepybot.api.entities.event.guild.member.moderation.MemberPardonEvent;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogEntry;

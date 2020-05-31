@@ -7,16 +7,13 @@ import com.sheepybot.api.entities.command.argument.Parameter;
 import com.sheepybot.api.entities.command.argument.RawArguments;
 import com.sheepybot.api.exception.command.CommandSyntaxException;
 import com.sheepybot.api.exception.parser.ParserException;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class Arguments {
 
     private final RawArguments args;
     private final CommandContext context;
-    private final List<Command.Flag> flags;
     private final List<ArgumentParser<?>> syntax;
 
     private int current;
@@ -24,18 +21,14 @@ public class Arguments {
     /**
      * @param context The {@link CommandContext}
      * @param args    The {@link RawArguments} to parse
-     * @param flags   The flags executed with the {@link Command}
-     *
      * @throws CommandSyntaxException If an error occurred during parsing and no fallback parameter was provided by the
      *                                {@link ArgumentParser}
      * @throws ParserException        If a parser error occurred
      */
     public Arguments(final CommandContext context,
-                     final RawArguments args,
-                     final List<Command.Flag> flags) throws CommandSyntaxException, ParserException {
+                     final RawArguments args) throws CommandSyntaxException, ParserException {
         this.args = args;
         this.context = context;
-        this.flags = flags;
         this.syntax = Lists.newArrayList();
     }
 
@@ -46,26 +39,26 @@ public class Arguments {
         return this.args;
     }
 
-    /**
-     * @return The syntax generated as a result of calls to {@link #nextParameter(ArgumentParser)}
-     */
-    public String getSyntax() {
-
-        final StringBuilder builder = new StringBuilder();
-
-        for (final ArgumentParser<?> parser : this.syntax) {
-
-            builder.append(" ");
-            if (parser.getDefaultParameter().getValue() == null && !parser.getDefaultParameter().isNullable()) {
-                builder.append("<").append(parser.getTypeName(this.context.getI18n())).append(">");
-            } else {
-                builder.append("[").append(parser.getTypeName(this.context.getI18n())).append("]");
-            }
-
-        }
-
-        return builder.toString();
-    }
+//    /**
+//     * @return The syntax generated as a result of calls to {@link #nextParameter(ArgumentParser)}
+//     */
+//    public String getSyntax() {
+//
+//        final StringBuilder builder = new StringBuilder();
+//
+//        for (final ArgumentParser<?> parser : this.syntax) {
+//
+//            builder.append(" ");
+//            if (parser.getDefaultParameter().getValue() == null && !parser.getDefaultParameter().isNullable()) {
+//                builder.append("<").append(parser.getTypeName(this.context.getI18n())).append(">");
+//            } else {
+//                builder.append("[").append(parser.getTypeName(this.context.getI18n())).append("]");
+//            }
+//
+//        }
+//
+//        return builder.toString();
+//    }
 
     /**
      * Retrieve the value of the next {@link Parameter}
@@ -125,33 +118,32 @@ public class Arguments {
         return this.args.length();
     }
 
-    /**
-     * Retrieves a {@link Command.Flag}
-     *
-     * @param flag The flag to get
-     *
-     * @return The flags value if it was present, or {@code null} if no flag by that name was passed.
-     */
-    public Command.Flag getFlag(@NotNull(value = "flag cannot be null") final String flag) {
-        return this.flags.stream().filter(pair -> pair.getName().equalsIgnoreCase(flag)).findFirst().orElse(null);
-    }
-
-    /**
-     * Check for the presence of a flag
-     *
-     * @param flag The flag to check
-     *
-     * @return {@code true} if the {@code flag} was present, {@code false} otherwise
-     */
-    public boolean hasFlag(@NotNull(value = "flag cannot be null") final String flag) {
-        return this.getFlag(flag) != null;
-    }
+//    /**
+//     * Retrieves a {@link Command.Flag}
+//     *
+//     * @param flag The flag to get
+//     *
+//     * @return The flags value if it was present, or {@code null} if no flag by that name was passed.
+//     */
+//    public Command.Flag getFlag(@NotNull(value = "flag cannot be null") final String flag) {
+//        return this.flags.stream().filter(pair -> pair.getName().equalsIgnoreCase(flag)).findFirst().orElse(null);
+//    }
+//
+//    /**
+//     * Check for the presence of a flag
+//     *
+//     * @param flag The flag to check
+//     *
+//     * @return {@code true} if the {@code flag} was present, {@code false} otherwise
+//     */
+//    public boolean hasFlag(@NotNull(value = "flag cannot be null") final String flag) {
+//        return this.getFlag(flag) != null;
+//    }
 
     /**
      * Join all arguments provided when executing the command into one {@link String}
      *
      * @param joiner The {@link CharSequence} of which to join the parameters by
-     *
      * @return The joined {@link String}
      */
     public String join(final CharSequence joiner) {
@@ -174,17 +166,11 @@ public class Arguments {
      */
     public Arguments copy() {
 
-        final Arguments args = new Arguments(this.context, this.args, this.flags);
+        final Arguments args = new Arguments(this.context, this.args);
 
         args.syntax.addAll(this.syntax);
 
         return args;
-    }
-
-    @Override
-    public String toString() {
-        return "Arguments{raw=" + this.getRawArguments().toString() + ", context=" + this.context.toString() +
-                ", flags=" + Arrays.toString(this.flags.toArray()) + "}";
     }
 
 }

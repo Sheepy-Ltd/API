@@ -11,7 +11,7 @@ plugins {
     id 'net.kyori.blossom' version '1.1.0'
 }
 
-//def git = versioning.info
+def git = versioning.info
 def ver = new Version(major: 1, minor: 0, patch: 0, build: '')
 
 def buildAuthor = System.getProperty('user.name')
@@ -32,6 +32,10 @@ tasks.withType(JavaCompile) {
 repositories {
     mavenCentral()
     jcenter()
+    
+    maven {
+        url 'https://jitpack.io'
+    }
 }
 
 dependencies {
@@ -51,9 +55,9 @@ dependencies {
     implementation group: 'io.netty', name: 'netty-all', version: '5.0.0.Alpha2'
     implementation group: 'com.zaxxer', name: 'HikariCP', version: '3.4.2'
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.12'
+    implementation group: 'com.github.FredBoat', name: 'Lavalink-Client', version: '4.0'
 }
 
-archiveName = "Bot.jar"
 mainClassName = "com.sheepybot.Bot"
 
 blossom {

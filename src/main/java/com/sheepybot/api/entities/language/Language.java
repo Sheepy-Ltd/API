@@ -1,6 +1,5 @@
 package com.sheepybot.api.entities.language;
 
-import com.sheepybot.api.entities.language.exception.LanguageNotSupportedException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -19,49 +18,44 @@ public enum Language {
     /**
      * British English
      */
-    ENGLISH("en", "GB", "English", "English"),
+    ENGLISH("en", "GB", "English", "English", false),
 
     /**
-     * Welsh
+     * Used whenever we don't know what language we're dealing with
      */
-//    WELSH("cy", "GB", "Cymraeg", "Welsh"),
-
-    /**
-     * French
-     */
-    FRENCH("fr", "FR", "Français", "French");
+    UNKNOWN("en", "GB", "Unknown", "Unknown", true);
 
     /**
      * Retrieve a lang by its country code
      *
      * @param code The lang code
-     *
      * @return The {@link Language}
-     *
-     * @throws LanguageNotSupportedException If the requested language is not currently supported
      */
-    public static Language getByCode(@NotNull(value = "id cannot be null") final String code) throws LanguageNotSupportedException {
+    public static Language getByCode(@NotNull(value = "id cannot be null") final String code) {
         for (final Language language : Language.values()) {
-            if (language.getCode().equalsIgnoreCase(code)) {
+            if (language.getCode().equalsIgnoreCase(code) && !language.isFake()) {
                 return language;
             }
         }
-        throw new LanguageNotSupportedException(code);
+        return null;
     }
 
     private final String code;
     private final Locale locale;
     private final String nativeName;
     private final String englishName;
+    private final boolean isFake;
 
     Language(final String language,
              final String country,
              final String nativeName,
-             final String englishName) {
+             final String englishName,
+             final boolean isFake) {
         this.code = language.toLowerCase() + "_" + country.toUpperCase();
         this.locale = new Locale(language, country);
         this.nativeName = nativeName;
         this.englishName = englishName;
+        this.isFake = isFake;
     }
 
     /**
@@ -92,4 +86,13 @@ public enum Language {
         return this.englishName;
     }
 
+    /**
+     * Used to tell whether this language isn't what it identified as but is instead a default value
+     * <p>This is primary used for {@link Language#UNKNOWN}</p>
+     *
+     * @return {@code true} if this language is fake, {@code false} otherwise
+     */
+    public boolean isFake() {
+        return this.isFake;
+    }
 }

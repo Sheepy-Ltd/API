@@ -1,8 +1,8 @@
 package com.sheepybot.listeners;
 
 import com.sheepybot.Bot;
-import com.sheepybot.api.entities.event.server.member.message.MemberReactionAddEvent;
-import com.sheepybot.api.entities.event.server.member.message.MemberReactionRemoveEvent;
+import com.sheepybot.api.entities.event.guild.member.message.MemberReactionAddEvent;
+import com.sheepybot.api.entities.event.guild.member.message.MemberReactionRemoveEvent;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;

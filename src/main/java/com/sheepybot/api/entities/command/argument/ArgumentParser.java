@@ -1,10 +1,10 @@
 package com.sheepybot.api.entities.command.argument;
 
 import com.google.common.collect.Lists;
+import com.sheepybot.api.entities.command.CommandContext;
 import com.sheepybot.api.entities.language.I18n;
 import com.sheepybot.api.entities.language.Language;
 import com.sheepybot.api.exception.parser.ParserException;
-import com.sheepybot.api.entities.command.CommandContext;
 
 import java.util.List;
 
@@ -50,7 +50,7 @@ public abstract class ArgumentParser<T> {
      */
     public final T tryParse(final CommandContext context,
                             final RawArguments args) throws Exception {
-        final String[] raw = args.getRaw();
+        final List<String> raw = args.getRaw();
 
         final Exception ex;
         try {
@@ -82,7 +82,7 @@ public abstract class ArgumentParser<T> {
      * @return The parsed result
      */
     public abstract T parse(final CommandContext context,
-            final RawArguments args);
+                            final RawArguments args);
 
     @Override
     public String toString() {

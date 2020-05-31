@@ -1,11 +1,11 @@
 package com.sheepybot.listeners;
 
 import com.sheepybot.Bot;
-import com.sheepybot.api.entities.event.server.member.MemberJoinEvent;
-import com.sheepybot.api.entities.event.server.member.MemberLeaveEvent;
-import com.sheepybot.api.entities.event.server.member.MemberNicknameChangeEvent;
-import com.sheepybot.api.entities.event.server.member.role.MemberRolesAddedEvent;
-import com.sheepybot.api.entities.event.server.member.role.MemberRolesRemovedEvent;
+import com.sheepybot.api.entities.event.guild.member.MemberJoinEvent;
+import com.sheepybot.api.entities.event.guild.member.MemberLeaveEvent;
+import com.sheepybot.api.entities.event.guild.member.MemberNicknameChangeEvent;
+import com.sheepybot.api.entities.event.guild.member.role.MemberRolesAddedEvent;
+import com.sheepybot.api.entities.event.guild.member.role.MemberRolesRemovedEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;

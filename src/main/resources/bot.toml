@@ -1,24 +1,28 @@
 [client]
-token = ""
-activity = "Use >help for help!"
+    token = ""                         #your bots token
+    activity_type = "playing"          #must be one of Default, Streaming or Listening
+    activity = "Beep Boop, Boop Beep?" #your activity as its displayed in the discord client, "Playing Mario Kart"
+    languageFile = "en_GB"             #the file name not including the .properties file type
+    prefix = ">"                       #this is the prefix used for commands, change it as you wish
 
 #A list of User-ID's representing Administrators
-#             Samuel#0420
-bot_admins = [212530298259374080]
+bot_admins = []
 
-#Bot list API keys
-top_gg_key = "DISCORD_BOT_LIST_KEY"
-bots_for_discord_key = "DISCORD_BOT_LIST_KEY"
-
+#Your database credentials, set enabled = false to disable database connections if you don't have one
+#This api currently only supports use of PostgreSQL, you can find out how to set it up here
+#https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04
 [db]
-database = "discord"
-username = "user"
-password = "pass"
-host = "localhost"
-port = 3306
-poolSize = 5
+    enabled = false
+    database = "discord"
+    username = "user"
+    password = "pass"
+    host = "localhost"
+    port = 3306
+    poolSize = 5
 
-[nodes]
-node-id = 1
-shards-total = 20
-shards = 10
+#It's advised that you don't edit this unless you know what you're doing.
+#you should only need to change this if you're splitting your bot across multiple instances
+[shards]
+    shard_total = -1 #set to -1 to use discords recommended shard count instead, this is advised.
+    shard_min = -1   #the minimum shard ID
+    shard_max = -1   #the maximum shard ID
