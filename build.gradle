@@ -72,8 +72,8 @@ blossom {
     replaceToken '@build_author@', buildAuthor, file
     replaceToken '@build_date@', buildDate, file
 
-//    replaceToken '@git_branch@', git.branch, file
-//    replaceToken '@git_commit@', git.commit, file
+    replaceToken '@git_branch@', git.branch, file
+    replaceToken '@git_commit@', git.commit, file
 }
 
 final class Version {
