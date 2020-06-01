@@ -61,8 +61,6 @@ public class ModuleLoaderImpl implements ModuleLoader {
                 return null;
             }
 
-            LOGGER.info(String.format("Loading module file %s...", file.getName()));
-
             final Enumeration<JarEntry> enumeration = jar.entries();
 
             final URL[] urls = new URL[]{file.toURI().toURL()};
@@ -102,7 +100,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
                             dataFolder.mkdirs();
                         }
 
-                        LOGGER.info(String.format("Initializing module %s v%s...", data.name(), data.version()));
+                        LOGGER.info(String.format("Loading module %s v%s...", data.name(), data.version()));
 
                         module.init(Bot.get().getCommandRegistry(),
                                 Bot.get().getEventRegistry(),
