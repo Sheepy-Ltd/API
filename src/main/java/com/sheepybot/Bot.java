@@ -163,6 +163,7 @@ public class Bot {
             LOGGER.info(String.format("Commit Long: %s", BotInfo.GIT_COMMIT));
             LOGGER.info(String.format("Branch: %s", BotInfo.GIT_BRANCH));
             LOGGER.info(String.format("Build Date: %s", BotInfo.BUILD_DATE));
+            LOGGER.info(String.format("Build Author: %s", BotInfo.BUILD_AUTHOR));
             LOGGER.info(String.format("Lavaplayer Version: %s", PlayerLibrary.VERSION));
             LOGGER.info(String.format("JVM Version: %s", System.getProperty("java.version")));
             LOGGER.info("---------------------------------------");
