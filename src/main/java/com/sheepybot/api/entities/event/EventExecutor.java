@@ -1,6 +1,7 @@
 package com.sheepybot.api.entities.event;
 
 import com.sheepybot.api.exception.event.EventException;
+import net.dv8tion.jda.api.events.Event;
 import org.jetbrains.annotations.NotNull;
 
 public interface EventExecutor {

@@ -4,8 +4,7 @@ import com.sheepybot.api.entities.command.Command;
 import com.sheepybot.api.entities.command.RootCommandRegistry;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Locale;
-import java.util.Optional;
+import java.util.List;
 
 public final class CommandRegistry {
 
@@ -19,12 +18,13 @@ public final class CommandRegistry {
     }
 
     /**
-     * @param alias The alias of the {@link Command} to get
+     * Retrieve a command by its name or any aliases it may use
      *
-     * @return An {@link Optional} containing the {@link Command} requested if it was present
+     * @param aliases A name that may be used to execute a {@link Command}
+     * @return The {@link Command} if it exists, {@code null} otherwise
      */
-    public Command getCommandByNameOrAlias(@NotNull(value = "command cannot be null") final String alias) {
-        return this.rootCommandRegistry.getCommandByNameOrAlias(alias.toLowerCase(Locale.ENGLISH));
+    public Command getCommandByNameOrAlias(@NotNull(value = "command cannot be null") final List<String> aliases) {
+        return this.rootCommandRegistry.getCommandByNameOrAlias(aliases);
     }
 
     /**
@@ -33,7 +33,7 @@ public final class CommandRegistry {
      * @throws IllegalArgumentException If the {@link Command} is already registered
      */
     public void register(@NotNull(value = "command cannot be null") final Command command) throws IllegalArgumentException {
-        if (this.rootCommandRegistry.getCommandByNameOrAlias(command.getName()) != null) {
+        if (this.rootCommandRegistry.getCommandByNameOrAlias(command.getNames()) != null) {
             throw new IllegalArgumentException("Command '" + command.getName() + "' already exists");
         }
         this.rootCommandRegistry.registerCommand(command, this.module);
@@ -45,7 +45,7 @@ public final class CommandRegistry {
      * @throws IllegalArgumentException If the {@link Command} is not registered
      */
     public void unregister(@NotNull(value = "command cannot be null") final Command command) throws IllegalArgumentException {
-        if (this.rootCommandRegistry.getCommandByNameOrAlias(command.getName()) != null) {
+        if (this.rootCommandRegistry.getCommandByNameOrAlias(command.getNames()) != null) {
             throw new IllegalArgumentException("Command '" + command.getName() + "' is not registered");
         }
         this.rootCommandRegistry.unregisterCommand(command);

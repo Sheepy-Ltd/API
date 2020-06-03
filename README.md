@@ -1,10 +1,12 @@
 # API
 
-The Module API and base for functions of the Sheepy Discord Bot.
+This is a Bot API made by Samuel#0420, its purpose is to make the bot building process a lot easier
+by giving you the tools you want for building a bot straight out of the box.
 
-https://sheepybot.com
+This is made in spare time and in the hopes people will use it. If you like the project
+and want to contribute please feel free to do so, any support is welcome.  
 
-If you notice any typos or want to make adjustments to this feel free to do so.
+
 
 **Getting Started**
 
@@ -35,15 +37,15 @@ public class HelloWorld extends Module {
 **Overview**
 
 We start off the day by creating main class for our Module, after creating it we annotate it with `ModuleData`,
-this annotation contains all the information needed of a module and is essential part before it can begin to take its first steps into the wild.
+this annotation contains all the information needed of a module and is essential part before it can begin to take it's first steps into the wild.
 
 `@ModuleData#name`
-This is just the name of the Module, a name just serves as an identifier for it so if something goes wrong or it gets upset, we know who it was
-and we can help to get them back on track and working.
+This is just the name of the Module, a name just serves as an identifier for it so if something goes wrong then we know what went wrong
+and can work to get things back on track.
 
 `@ModuleData#version`
-This is the current version of the Module, it's here so we can tell if it needs updating or if everything's running smoothly
-so make sure it's changed every time you update your code as it's essential. We follow Major, Minor, Patch for our version numbers
+This is the current version of the Module. The version is useful for telling us if we've successfully updated or
+if we're running on older code just to make sure everything is running smoothly. 
 
 Major = Major changes to code that will break anything and everything in its path, this will be most likely to need changing when the API itself gets updated, perform thorough testing before considering release to a dev branch
 Minor = Small changes, added features, nothings broken and things stay fresh and new.
@@ -61,32 +63,29 @@ Commands and events can be registered past this method but it isn't advised (mor
 
 `Module#onDisable` 
 
-This method is called before as your Module is being disabled and should be used to close your resources, don't worry about
-things you call from the API, these are handled directly and need not have Module interaction.
+This method is ran before your Modules disabled and should be used to close your resources.
 
-Commands, events and scheduled tasks are automatically unregistered/terminated after your Module is disabled so there's no need
+Commands, events and scheduled tasks are automatically unregistered/terminated after your Modules disabled so there's no need
 to do any of these yourself.
 
 ## The Command System
 
 ### Writing your first command
 ```java
-import CommandExecutor;
-import CommandContext;
-import Arguments;
-import ArgumentParsers;
+import com.sheepybot.api.entities.command.CommandExecutor;
+import com.sheepybot.api.entities.command.CommandContext;
+import com.sheepybot.api.entities.command.Arguments;
+import com.sheepybot.api.entities.command.parsers.ArgumentParsers;
 
 import net.dv8tion.jda.api.entities.Member;
 
 public class MyCommand implements CommandExecutor {
     
     @Override              
-    public boolean execute(final CommandContext context, final Arguments args) {
+    public void execute(final CommandContext context, final Arguments args) {
         final Member member = args.next(ArgumentParsers.MEMBER);
         
         context.reply("Boop! " + member.getAsMention());
-        
-        return true;
     }
     
 }
@@ -156,107 +155,20 @@ doesn't change the way a command will be processed and command aliases must be u
 already used by another command (within the bot not just your Module) will prevent it from being registered.
 
 We also specify the actual executor for our new command so that the API knows what it's calling,
-there are other methods in the builder but these are the only ones we'll talk about now.
-
-You can also get the trigger (in this instance either boop or boops) that caused your command from `CommandContext`
-if you for some reason want to track that information.
-
-### An introduction to flags
-```java
-import CommandExecutor;
-import CommandContext;
-import Arguments;
-import ArgumentParsers;
-
-import net.dv8tion.jda.api.entities.Member;
-
-public class MyCommand implements CommandExecutor {
-    
-    @Override
-    public boolean execute(final CommandContext context, final Arguments args) {
-        
-        final Member member = args.next(ArgumentParsers.MEMBER);
-        
-        context.reply("Boop! " + member.getAsMention());
-
-        if(args.hasFlag("doubleboop")) { //Check the command was executed with one of our registered flags
-            request.reply("Double Boop! " + member.getAsMention());
-        }
-        
-        return true;
-    }
-    
-}
-```
-
-**Overview**:
-
-Going back to our newly created command we can add a new feature.....Flags!
-Flags are a neat way to add different ways for your command to both process information
-and respond to the user that executed it.
-
-In this instance we're simply changing the way we respond to the user, we check that the
-command was given a flag called "doubleboop" and if the user gave it
-then we ping the user twice (development at its finest).
-
-Commands can have as many flags as you want (of course within reason but that's up to you, there is no hard set limit)
-
-When executing this command it would look something like
-
-```text
->boops Samuel#0001 -doubleboop 
-```
+there are other methods in the builder, but these are the only ones we'll talk about now.
 
 ## The event system
 
-### Creating your own event
-```java
-import Event;
-
-public class MyCustomEvent extends Event {
-
-    private final String message;
-
-    public MyCustomEvent(final String message) {
-        this.message = message;
-    }
-
-    public String getMessage() {
-        return this.message;
-    }
-
-}
-```
-
-**Overview**:
-
-I know we're rushing into things a bit, we've barely just gotten into commands and their capabilities but keeping
-the train going we're moving onto events.
-
-Implemented inside the API is its own event system, giving you a different way
-to process information given to you.
-
-We create a new class and in its constructor we take a string called message,
-anywhere inside your module you can send this event to the internal event handler
-which will ping it to everyone that's listening to it by calling
-
-`getEventRegistry().callEvent(new MyCustomEvent("Hello There"))`
-
-`getEventRegistry` is a method that exists in the parent class `Module` which you extend in your main class similar to `getCommandRegistry` and likewise is specific to your module,
-only you can interact with your events and the same goes for other modules, all modules are kept as separate from each other as can be
-and should never be relying on each other for anything whatsoever. 
-
 ### Listening to events
 ```java
-import EventListener;
-import EventHandler;
-import EventListener;
+import com.sheepybot.api.entities.event.EventListener;
+import com.sheepybot.api.entities.event.EventHandler;
 
 public class MyEventListener implements EventListener {
 
     @EventHandler
-    public void onEvent(final MyCustomEvent event) {
-        System.out.println(event.getMessage());
+    public void onEvent(final GuildMessageReceivedEvent event) {
+        System.out.println(String.format("%s sent a message in %s: %s", event.getGuild().getName(), event.getAuthor().getName(), event.getMessage().getDisplayContent()));
     }
     
 }
@@ -264,20 +176,22 @@ public class MyEventListener implements EventListener {
 
 **Overview**:
 
-Just like any other class that will listen to events we must implement the EventListener class,
-this is just to make sure that we're giving the right thing when we register it and there's nothing to
+Just like any other class will listen to events we must implement the EventListener class,
+this is just to make sure we're giving the right thing when we register it and there's nothing to
 inherit from the class itself.
 
 In order to listen to an event we must first annotate a method (in this case we call it onEvent but you can call it whatever you want, the name isn't relevant).
 Once the event is fired it will be thrown around and will eventually land in our laps and we can proceed to deal with the information we were given 
-by said event, in this case it's our event we made earlier and we get given a message which we just print to the console.
+by said event, in this case it's our event we made earlier, and we get given a message which we just print to the console.
 
 There are loads of events within the API all of which giving their own bit of information from users joining the guild
 to people talking in voice channels, any bit of information we get there is likely an event for it.
 
+The event system supports any event in JDA
+
 ### Firing your new custom event
 ```java
-import EventRegistry;
+import com.sheepybot.api.entities.module.EventRegistry;
 
 ...
 

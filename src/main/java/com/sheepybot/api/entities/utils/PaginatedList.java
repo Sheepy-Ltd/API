@@ -1,6 +1,7 @@
 package com.sheepybot.api.entities.utils;
 
 import com.google.common.collect.Iterators;
+import com.sheepybot.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;

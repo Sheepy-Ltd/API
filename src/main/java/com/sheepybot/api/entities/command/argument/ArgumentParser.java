@@ -1,9 +1,6 @@
 package com.sheepybot.api.entities.command.argument;
 
-import com.google.common.collect.Lists;
 import com.sheepybot.api.entities.command.CommandContext;
-import com.sheepybot.api.entities.language.I18n;
-import com.sheepybot.api.entities.language.Language;
 import com.sheepybot.api.exception.parser.ParserException;
 
 import java.util.List;
@@ -18,24 +15,6 @@ public abstract class ArgumentParser<T> {
     public Argument<T> getDefaultParameter() {
         return Argument.empty();
     }
-
-    /**
-     * Get a {@link List} of example command arguments.
-     *
-     * @return A {@link List} of example command arguments.
-     */
-    public List<String> getSuggestions() {
-        return Lists.newArrayList();
-    }
-
-    /**
-     * Return the (member-friendly) identifier for this {@link ArgumentParser}
-     *
-     * @param i18n The {@link I18n} instance for translations
-     *
-     * @return The identifier for this {@link ArgumentParser}
-     */
-    public abstract String getTypeName(final I18n i18n);
 
     /**
      * Attempts to parse the provided {@link RawArguments} instance to the desired type
@@ -84,8 +63,4 @@ public abstract class ArgumentParser<T> {
     public abstract T parse(final CommandContext context,
                             final RawArguments args);
 
-    @Override
-    public String toString() {
-        return "ArgumentParser{name=" + this.getTypeName(I18n.getI18n(Language.ENGLISH)) + ", default=" + this.getDefaultParameter().toString() + "}";
-    }
 }

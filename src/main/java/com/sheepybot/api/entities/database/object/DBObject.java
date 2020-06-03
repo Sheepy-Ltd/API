@@ -2,7 +2,7 @@ package com.sheepybot.api.entities.database.object;
 
 import com.google.common.collect.Maps;
 import com.google.gson.internal.LazilyParsedNumber;
-import com.sheepybot.api.entities.utils.Objects;
+import com.sheepybot.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;

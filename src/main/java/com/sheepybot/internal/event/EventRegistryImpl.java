@@ -1,16 +1,14 @@
 package com.sheepybot.internal.event;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.sheepybot.Bot;
 import com.sheepybot.api.entities.event.EventListener;
 import com.sheepybot.api.entities.event.*;
 import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.api.exception.event.EventException;
+import net.dv8tion.jda.api.events.Event;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,83 +22,64 @@ public class EventRegistryImpl implements RootEventRegistry {
 
     @Override
     public void callEvent(@NotNull(value = "event cannot be null") final Event event) {
-        if (event.isAsync()) {
-            Bot.SCHEDULED_EXECUTOR_SERVICE.submit(() -> this.fireEvent(event));
-        } else {
-            this.fireEvent(event);
-        }
+        this.fireEvent(event);
     }
 
     @Override
     public void registerEvents(@NotNull(value = "listener cannot be null") final EventListener listener,
                                @NotNull(value = "module cannot be null") final Module module) {
 
-        final List<Method> methods = Arrays.stream(listener.getClass().getDeclaredMethods()).filter(method -> method.isAnnotationPresent(EventHandler.class)).collect(Collectors.toList());
-        for (final Method method : methods) {
-
-            if (method.isBridge() || method.isSynthetic()) {
-                continue;
-            }
+        Arrays.stream(listener.getClass().getDeclaredMethods()).filter(method -> method.isAnnotationPresent(EventHandler.class)
+                && !method.isBridge() && !method.isSynthetic()).forEach(method -> {
 
             final EventHandler handler = method.getAnnotation(EventHandler.class);
 
             final Class<?>[] parameters = method.getParameterTypes();
-            if (parameters.length != 1 || !Event.class.isAssignableFrom(parameters[0])) {
-                continue;
-            }
+            if (parameters.length == 1 && !Event.class.isAssignableFrom(parameters[0])) {
 
-            final Class<? extends Event> eventClass = parameters[0].asSubclass(Event.class);
+                final Class<? extends Event> eventClass = parameters[0].asSubclass(Event.class);
 
-            if (!method.isAccessible()) {
-                method.setAccessible(true);
-            }
-
-            final List<RegisteredListener> registrations = this.listeners.computeIfAbsent(eventClass, k -> new ArrayList<>());
-
-            final EventExecutor executor = (eventListener, event) -> {
-                try {
-                    if (!eventClass.isAssignableFrom(event.getClass())) {
-                        return;
-                    }
-                    method.invoke(eventListener, event);
-                } catch (final IllegalAccessException | InvocationTargetException ex) {
-                    throw new EventException(ex);
+                if (!method.isAccessible()) {
+                    method.setAccessible(true);
                 }
-            };
 
-            registrations.add(new RegisteredListener(listener, executor, handler, module));
+                final List<RegisteredListener> registrations = this.listeners.computeIfAbsent(eventClass, k -> new ArrayList<>());
 
-            this.listeners.put(eventClass, registrations);
+                final EventExecutor executor = (eventListener, event) -> {
+                    try {
+                        if (!eventClass.isAssignableFrom(event.getClass())) {
+                            return;
+                        }
+                        method.invoke(eventListener, event);
+                    } catch (final IllegalAccessException | InvocationTargetException ex) {
+                        throw new EventException(ex);
+                    }
+                };
 
-        }
+                registrations.add(new RegisteredListener(listener, executor, handler, module));
+
+                this.listeners.put(eventClass, registrations);
+
+            }
+
+        });
+
     }
 
     @Override
     public Collection<RegisteredListener> getRegisteredListeners(@NotNull(value = "event cannot be null") final Event event) {
-        final List<RegisteredListener> listeners = Lists.newArrayList();
-        for (final Class<? extends Event> clazz : this.listeners.keySet()) {
-            if (clazz.isAssignableFrom(event.getClass())) {
-                listeners.addAll(this.listeners.get(clazz));
-            }
-        }
-        return Collections.unmodifiableCollection(listeners);
+        return this.listeners.keySet().stream().filter(clazz -> clazz.isAssignableFrom(event.getClass()))
+                .flatMap(clazz -> this.listeners.get(clazz).stream()).collect(Collectors.toList());
     }
 
     @Override
-    public Collection<RegisteredListener> getRegisteredListeners(@NotNull(value = "parent module cannot be null") final Module module) {
-        final List<RegisteredListener> listeners = Lists.newArrayList();
-        for (final Class<? extends Event> clazz : this.listeners.keySet()) {
-            for (final RegisteredListener listener : this.listeners.get(clazz)) {
-                if (listener.getModule() == module) {
-                    listeners.add(listener);
-                }
-            }
-        }
-        return Collections.unmodifiableCollection(listeners);
+    public Collection<RegisteredListener> getRegisteredListeners(@NotNull(value = "module cannot be null") final Module module) {
+        return this.listeners.values().stream().flatMap(listeners -> listeners.stream().filter(listener ->
+                listener.getModule() == module)).collect(Collectors.toList());
     }
 
     @Override
-    public void unregisterAll(@NotNull(value = "parent module cannot be null") final Module module) {
+    public void unregisterAll(@NotNull(value = "module cannot be null") final Module module) {
         this.listeners.keySet().forEach(clazz -> this.listeners.get(clazz).removeIf(listener -> listener.getModule() == module));
     }
 
@@ -114,7 +93,7 @@ public class EventRegistryImpl implements RootEventRegistry {
             try {
                 listener.callEvent(event);
             } catch (final Throwable ex) {
-                LOGGER.info("Could not pass event " + event.getEventName() + " to " + listener.getModule().getFullName(), ex);
+                LOGGER.info("Could not pass event " + event.getClass().getName() + " to " + listener.getModule().getFullName(), ex);
             }
         });
     }

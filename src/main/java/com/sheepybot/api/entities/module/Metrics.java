@@ -3,8 +3,8 @@ package com.sheepybot.api.entities.module;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sheepybot.api.entities.scheduler.ScheduledTask;
+import com.sheepybot.util.Objects;
 import org.jetbrains.annotations.NotNull;
-import com.sheepybot.api.entities.utils.Objects;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,14 +19,11 @@ public final class Metrics {
     private final String name;
     private final List<Graph> graphs;
 
-    private final Object lock;
-
     private ScheduledTask task;
 
     Metrics(@NotNull(value = "module cannot be null") final String name) {
         this.name = name;
         this.graphs = Lists.newArrayList();
-        this.lock = new Object();
     }
 
     /**

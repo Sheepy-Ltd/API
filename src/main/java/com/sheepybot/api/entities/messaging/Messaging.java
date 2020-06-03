@@ -1,5 +1,6 @@
 package com.sheepybot.api.entities.messaging;
 
+import com.sheepybot.util.Objects;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -10,7 +11,6 @@ import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.sheepybot.api.entities.utils.Objects;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;

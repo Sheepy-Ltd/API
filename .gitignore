@@ -102,3 +102,4 @@ build/*
 
 modules/
 bot.toml
+/gradle.properties

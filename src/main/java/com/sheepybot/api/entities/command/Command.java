@@ -1,44 +1,33 @@
 package com.sheepybot.api.entities.command;
 
 import com.google.common.collect.Lists;
-import com.sheepybot.api.entities.utils.Objects;
+import com.sheepybot.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.concurrent.TimeUnit;
+import java.util.Collections;
+import java.util.List;
 
 public final class Command {
 
-    private final String[] names;
-    private final Collection<String> examples;
+    private final List<String> names;
     private final String description;
     private final String usage;
-    private final long cooldown;
     private final CommandExecutor executor;
-
-    private Command parent; //used to build up things such as command usage
 
     /**
      * @param names       The names and aliases of this {@link Command}
-     * @param examples    The examples of this {@link Command}
      * @param description The description of this {@link Command}
      * @param usage       The usage of this {@link Command}
-     * @param cooldown    The cooldown of this {@link Command}
      * @param executor    The {@link CommandExecutor} for this {@link Command}
      */
-    private Command(@NotNull(value = "names cannot be null") final String[] names,
-                    @NotNull(value = "examples cannot be null") final Collection<String> examples,
+    private Command(@NotNull(value = "names cannot be null") final List<String> names,
                     final String description,
                     final String usage,
-                    final long cooldown,
                     @NotNull(value = "executor cannot be null") final CommandExecutor executor) {
-        Objects.checkArgument(names.length > 0, "names cannot be empty");
+        Objects.checkArgument(names.size() > 0, "names cannot be empty");
         this.names = names;
-        this.examples = examples;
         this.description = description;
         this.usage = usage;
-        this.cooldown = cooldown;
         this.executor = executor;
     }
 
@@ -46,21 +35,14 @@ public final class Command {
      * @return The names of this {@link Command}
      */
     public final String getName() {
-        return this.names[0];
+        return this.names.get(0);
     }
 
     /**
-     * @return A {@link Collection} containing every alias for this {@link Command}
+     * @return The names of this {@link Command}
      */
-    public Collection<String> getAliases() {
-        return Lists.newArrayList(this.names);
-    }
-
-    /**
-     * @return A {@link Collection} containing every example for this {@link Command}
-     */
-    public Collection<String> getExamples() {
-        return Lists.newArrayList(this.examples);
+    public final List<String> getNames() {
+        return Collections.unmodifiableList(this.names);
     }
 
     /**
@@ -75,13 +57,6 @@ public final class Command {
      */
     public final String getUsage() {
         return this.usage;
-    }
-
-    /**
-     * @return How frequently this {@link Command} may be executed by a member in milliseconds
-     */
-    public long getCooldown() {
-        return this.cooldown;
     }
 
     /**
@@ -105,19 +80,11 @@ public final class Command {
      */
     public static final class Builder {
 
-        private String[] names;
-        private Collection<String> examples;
+        private List<String> names;
         private String description;
         private String usage;
-        private long cooldown;
         private CommandExecutor executor;
 
-        /**
-         * Creates a new {@link Command.Builder}
-         */
-        private Builder() {
-            this.examples = Lists.newArrayList();
-        }
 
         /**
          * Set the unique names of this {@link Command}
@@ -130,24 +97,15 @@ public final class Command {
                              final String... aliases) {
             Objects.checkArgument(name.length() > 0, "command cannot have an effectively null names");
 
-            final String[] names = new String[1 + aliases.length];
-            names[0] = name;
+            this.names = Lists.newArrayList(name.toLowerCase());
 
-            System.arraycopy(aliases, 0, names, 1, aliases.length);
+            final String[] newAliases = new String[names.size()];
+            for (int i = 0; i < aliases.length; i++) { //force lower case
+                newAliases[i] = aliases[i].toLowerCase();
+            }
 
-            this.names = names;
+            Collections.addAll(this.names, newAliases);
 
-            return this;
-        }
-
-        /**
-         * @param examples The examples
-         *
-         * @return This {@link Builder}
-         */
-        public Builder examples(@NotNull(value = "examples cannot be null") final String... examples) {
-            Objects.checkNotNull(examples, "examples cannot be null");
-            this.examples = Arrays.asList(examples);
             return this;
         }
 
@@ -172,28 +130,6 @@ public final class Command {
         }
 
         /**
-         * @param cooldown How frequently this command may be executed by a member in seconds
-         *
-         * @return This {@link Builder}
-         */
-        public Builder cooldown(final long cooldown) {
-            return this.cooldown(cooldown, TimeUnit.SECONDS);
-        }
-
-        /**
-         * @param cooldown How frequently this command may be executed by a member
-         * @param unit     The {@link TimeUnit} to measure the cooldown in
-         *
-         * @return This {@link Builder}
-         */
-        public Builder cooldown(final long cooldown,
-                                final TimeUnit unit) {
-            Objects.checkArgument(cooldown >= 1, "cooldown cannot be less than 1");
-            this.cooldown = unit.toMillis(cooldown);
-            return this;
-        }
-
-        /**
          * @param executor The executor for this {@link Command}
          *
          * @return This {@link Command.Builder}
@@ -210,9 +146,9 @@ public final class Command {
          * @throws NullPointerException     If this {@link Command} has no {@link CommandExecutor}
          */
         public Command build() {
-            Objects.checkArgument(this.names.length > 0, "command must have a names");
+            Objects.checkArgument(this.names.size() > 0, "command must have a names");
             Objects.checkNotNull(this.executor, "command executor cannot be null");
-            return new Command(this.names, this.examples, this.description, this.usage, this.cooldown, this.executor);
+            return new Command(this.names, this.description, this.usage, this.executor);
         }
 
     }

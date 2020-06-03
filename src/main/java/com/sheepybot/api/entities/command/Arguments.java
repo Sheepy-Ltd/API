@@ -39,27 +39,6 @@ public class Arguments {
         return this.args;
     }
 
-//    /**
-//     * @return The syntax generated as a result of calls to {@link #nextParameter(ArgumentParser)}
-//     */
-//    public String getSyntax() {
-//
-//        final StringBuilder builder = new StringBuilder();
-//
-//        for (final ArgumentParser<?> parser : this.syntax) {
-//
-//            builder.append(" ");
-//            if (parser.getDefaultParameter().getValue() == null && !parser.getDefaultParameter().isNullable()) {
-//                builder.append("<").append(parser.getTypeName(this.context.getI18n())).append(">");
-//            } else {
-//                builder.append("[").append(parser.getTypeName(this.context.getI18n())).append("]");
-//            }
-//
-//        }
-//
-//        return builder.toString();
-//    }
-
     /**
      * Retrieve the value of the next {@link Parameter}
      *
@@ -108,7 +87,7 @@ public class Arguments {
      * @return {@code true} if the command was executed as a dry-start, {@code false} otherwise
      */
     public boolean isDry() {
-        return !this.args.hasNext();
+        return this.args.getRaw().isEmpty();
     }
 
     /**

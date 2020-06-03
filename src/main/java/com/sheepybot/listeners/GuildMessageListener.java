@@ -1,18 +1,15 @@
 package com.sheepybot.listeners;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.sheepybot.Bot;
 import com.sheepybot.api.entities.command.Arguments;
 import com.sheepybot.api.entities.command.Command;
 import com.sheepybot.api.entities.command.CommandContext;
 import com.sheepybot.api.entities.command.argument.RawArguments;
-import com.sheepybot.api.entities.event.guild.member.MemberChatEvent;
 import com.sheepybot.api.entities.language.I18n;
 import com.sheepybot.api.entities.messaging.Messaging;
 import com.sheepybot.api.exception.command.CommandSyntaxException;
 import com.sheepybot.api.exception.parser.ParserException;
-import com.sheepybot.util.RateLimiter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -20,39 +17,18 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.internal.utils.PermissionUtil;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class GuildMessageListener extends ListenerAdapter {
 
-
-    /**
-     * The maximum number of commands executable within a given period
-     */
-    private static final int COMMAND_REQUEST_LIMIT = 10;
-
-    /**
-     * How many seconds to wait before a user can execute another {@link #COMMAND_REQUEST_LIMIT} commands
-     */
-    private static final int COMMAND_REQUEST_RATE_LIMIT_REFRESH_AFTER = 15;
-
     /**
      * How long commands may run before it's assumed they ran into an improperly handled error / infinite loop
      */
     private static final long COMMAND_TIMEOUT_AFTER = 5_000L;
-
-
-    /**
-     * A cache of rate limits from a member
-     */
-    private final Map<Long, RateLimiter> rateLimits;
-
-    public GuildMessageListener() {
-        this.rateLimits = Maps.newHashMap();
-    }
 
     @Override
     public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
@@ -70,7 +46,7 @@ public class GuildMessageListener extends ListenerAdapter {
             return;
         }
 
-        final Future<?> future = Bot.SCHEDULED_EXECUTOR_SERVICE.submit(() -> { //this is done async so as we get bigger we don't end up with bigger delays on commands
+        final Future<?> future = Bot.SCHEDULED_EXECUTOR_SERVICE.submit(() -> {
 
             final I18n i18n = I18n.getDefaultI18n();
 
@@ -87,7 +63,7 @@ public class GuildMessageListener extends ListenerAdapter {
                     Messaging.send(channel, i18n.tl("commandPrefixMention", prefix));
                 }
             } else {
-                Bot.get().getEventRegistry().callEvent(new MemberChatEvent(guild, channel, member, message, jda));
+//                Bot.get().getEventRegistry().callEvent(new MemberChatEvent(guild, channel, member, message, jda));
                 return;
             }
 
@@ -97,14 +73,10 @@ public class GuildMessageListener extends ListenerAdapter {
                 final List<String> split = Lists.newArrayList(content.split("\\s+")); //whitespace
 
                 final String trigger = split.get(0).toLowerCase();
-                final Command command = Bot.get().getCommandRegistry().getCommandByNameOrAlias(trigger);
+                final Command command = Bot.get().getCommandRegistry().getCommandByNameOrAlias(Collections.singletonList(trigger));
 
-                //we rate limit commands so that people can't get the bot rate limited HA, well at least we try to anyway
-//                final RateLimiter limiter = this.rateLimits.computeIfAbsent(user.getIdLong(), id -> new RateLimiter(COMMAND_REQUEST_LIMIT,
-//                        COMMAND_REQUEST_RATE_LIMIT_REFRESH_AFTER,
-//                        TimeUnit.SECONDS));
                 if (command == null) {
-                    Bot.get().getEventRegistry().callEvent(new MemberChatEvent(guild, channel, member, message, jda));
+//                    Bot.get().getEventRegistry().callEvent(new MemberChatEvent(guild, channel, member, message, jda));
                 } else {
 
                     final List<String> args = split.stream().skip(1).collect(Collectors.toList());

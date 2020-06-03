@@ -1,6 +1,7 @@
 package com.sheepybot.api.entities.event;
 
 import com.sheepybot.api.entities.module.Module;
+import net.dv8tion.jda.api.events.Event;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -6,6 +6,10 @@ import com.sheepybot.Bot;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.dv8tion.jda.internal.requests.Requester;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -16,8 +20,10 @@ import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,7 +72,7 @@ public class BotUtils {
      * @return A {@link BufferedImage}
      * @throws IOException If an I/O error occurred
      */
-    public static BufferedImage getImageFromURL(final String url) throws IOException {
+    public static BufferedImage getImageFromURL(@NotNull(value = "url cannot be null") final String url) throws IOException {
 
         final Request request = new Request.Builder()
                 .url(url)
@@ -93,7 +99,7 @@ public class BotUtils {
      * @return The time
      * @throws Exception If the input {@code time} isn't parsable
      */
-    public static long getDateFromInputTime(final String time,
+    public static long getDateFromInputTime(@NotNull(value = "time cannot be null;") final String time,
                                             final boolean future) throws Exception {
 
         final Matcher matcher = TIME_PATTERN.matcher(time);
@@ -251,7 +257,7 @@ public class BotUtils {
      * @param activityType The activity type
      * @return The {@link Activity.ActivityType}
      */
-    public static Activity.ActivityType getActivityTypeFromString(final String activityType) {
+    public static Activity.ActivityType getActivityTypeFromString(@NotNull(value = "activity type cannot be null") final String activityType) {
         switch (activityType.toLowerCase()) {
             case "streaming":
                 return Activity.ActivityType.STREAMING;
@@ -260,6 +266,78 @@ public class BotUtils {
             default:
                 return Activity.ActivityType.DEFAULT;
         }
+    }
+
+    public static List<GatewayIntent> getGatewayIntentsFromList(@NotNull(value = "intents cannot be null") final List<String> intents) {
+        final List<GatewayIntent> gatewayIntents = new ArrayList<>();
+
+        for (final String intent : intents) {
+            final GatewayIntent gatewayIntent = BotUtils.getGatewayIntentFromString(intent);
+            if (gatewayIntent == null) {
+                LOGGER.info(String.format("Couldn't retrieve gateway intent %s", intent));
+            } else {
+                gatewayIntents.add(gatewayIntent);
+            }
+        }
+
+        return gatewayIntents;
+    }
+
+    public static GatewayIntent getGatewayIntentFromString(@NotNull(value = "gateway intent cannot be null") final String gatewayIntent) {
+        for (final GatewayIntent intent : GatewayIntent.values()) {
+            if (intent.name().equalsIgnoreCase(gatewayIntent)) {
+                return intent;
+            }
+        }
+        return null;
+    }
+
+    public static List<CacheFlag> getCacheFlagsFromList(@NotNull(value = "cache flags cannot be null") final List<String> cacheFlags) {
+        final List<CacheFlag> flags = new ArrayList<>();
+
+        for (final String flag : cacheFlags) {
+            final CacheFlag cacheFlag = BotUtils.getCacheFlagFromString(flag);
+            if (cacheFlag == null) {
+                LOGGER.info(String.format("Couldn't retrieve cache flag %s", flag));
+            } else {
+                flags.add(cacheFlag);
+            }
+        }
+
+        return flags;
+    }
+
+    public static CacheFlag getCacheFlagFromString(@NotNull(value = "cache flag cannot be null") final String cacheFlag) {
+        for (final CacheFlag flag : CacheFlag.values()) {
+            if (flag.name().equalsIgnoreCase(cacheFlag)) {
+                return flag;
+            }
+        }
+        return null;
+    }
+
+    public static MemberCachePolicy getMemberCachePolicyFromString(@NotNull(value = "cache policy cannot be null") final String cachePolicy) {
+        switch (cachePolicy.toLowerCase()) {
+            case "all":
+                return MemberCachePolicy.ALL;
+            case "owner":
+                return MemberCachePolicy.OWNER;
+            case "online":
+                return MemberCachePolicy.ONLINE;
+            case "voice":
+                return MemberCachePolicy.VOICE;
+            case "none":
+                return MemberCachePolicy.NONE;
+            default:
+                return MemberCachePolicy.DEFAULT;
+        }
+    }
+
+    public static ChunkingFilter getChunkingFilterFromString(@NotNull(value = "chunking filter cannot be null") final String chunkingFilter) {
+        if (chunkingFilter.equalsIgnoreCase("all")) {
+            return ChunkingFilter.ALL;
+        }
+        return ChunkingFilter.NONE;
     }
 
     /**

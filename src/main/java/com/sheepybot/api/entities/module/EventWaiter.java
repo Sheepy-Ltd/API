@@ -1,17 +1,16 @@
 package com.sheepybot.api.entities.module;
 
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.sheepybot.api.entities.event.EventHandler;
+import com.sheepybot.api.entities.event.EventListener;
+import com.sheepybot.util.Objects;
+import net.dv8tion.jda.api.events.Event;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.sheepybot.api.entities.event.Event;
-import com.sheepybot.api.entities.event.EventHandler;
-import com.sheepybot.api.entities.event.EventListener;
-import com.sheepybot.api.entities.utils.Objects;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -30,7 +29,7 @@ public final class EventWaiter implements EventListener {
     private static final ThreadGroup THREAD_GROUP = new ThreadGroup("Event Waiter Thread Group");
 
     private final ScheduledExecutorService service;
-    private final Map<Class<?>, List<Waiter<?>>> waiters;
+    private final Map<Class<?>, Set<WaitingEvent>> waiters;
 
     /**
      * Construct a new {@link EventWaiter} with the default {@link ScheduledExecutorService}
@@ -53,7 +52,11 @@ public final class EventWaiter implements EventListener {
     }
 
     /**
-     * Waits a predetermined amount of time for the {@link Event}
+     * Waits a predetermined amount of time for the {@link Event} that returns true
+     * when tested with the provided {@link Predicate}
+     *
+     * <p>Should the time allotted lapse the event will not be calls and will be purged from
+     * the internal list calling the {@link Runnable} should one be present</p>
      *
      * @param event         The {@link Class} of the {@link Event}
      * @param predicate     The {@link Predicate} to test when a compatible {@link Event} is called
@@ -61,8 +64,8 @@ public final class EventWaiter implements EventListener {
      * @param timeoutAfter  The maximum length of time to wait for, or 0 to wait indefinitely
      * @param unit          The {@link TimeUnit} to measure the {@code timeout} in
      * @param timeoutAction The {@link Runnable} to execute should a compatible {@link Event} not be thrown before
-     *
      * @return The {@link WaitingEvent}
+     * @throws IllegalArgumentException If this {@link EventWaiter} is shutdown or if there is no timeout set
      */
     public <T extends Event> WaitingEvent<T> newWaiter(@NotNull(value = "event cannot be null") final Class<T> event,
                                                     final Predicate<T> predicate,
@@ -74,8 +77,8 @@ public final class EventWaiter implements EventListener {
         Objects.checkArgument(!this.isShutdown(), "Cannot register new WaitingEvent's on a shutdown EventWaiter");
         Objects.checkArgument(timeoutAfter > 0, "Timeout cannot be negative or equal to 0");
 
-        final WaitingEvent<T> waiter = new WaitingEvent<>(predicate, function);
-        final List<Waiter<?>> waiters = this.waiters.computeIfAbsent(event, __ -> Lists.newArrayListWithCapacity(1));
+        final WaitingEvent waiter = new WaitingEvent<>(predicate, function);
+        final Set<WaitingEvent> waiters = this.waiters.computeIfAbsent(event, __ -> new HashSet<>());
 
         waiters.add(waiter);
 
@@ -95,38 +98,10 @@ public final class EventWaiter implements EventListener {
     }
 
     /**
-     * Register a {@link Waiter} with multiple classes
-     *
-     * @param classes The {@link Class}'s to register the waiter to
-     * @param waiter  The {@link Waiter} to register
-     * @param timeout The maximum length of time to wait for
-     * @param unit    The {@link TimeUnit} to measure the {@code timeout} in
-     */
-    private void addWaiter(final Set<Class<?>> classes,
-                                             final Waiter waiter,
-                                             final long timeout,
-                                             final TimeUnit unit,
-                                             final Runnable runnable) {
-
-        for (final Class<?> clazz : classes) {
-            this.waiters.computeIfAbsent(clazz, __ -> Lists.newArrayListWithCapacity(1)).add(waiter);
-        }
-
-        if (timeout > 0 && unit != null) {
-            this.service.schedule(() -> {
-                for (final Class<?> clazz : classes) {
-                    this.waiters.get(clazz).remove(waiter);
-                }
-            }, timeout, unit);
-        }
-    }
-
-    /**
      * Checks whether the internal {@link ExecutorService} is either {@code null}, shutdown or terminated
      *
      * @return {@code true} if the {@link ExecutorService} is shutdown, {@code false otherwise}
      */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isShutdown() {
         return this.service == null || this.service.isShutdown() || this.service.isTerminated();
     }
@@ -152,49 +127,31 @@ public final class EventWaiter implements EventListener {
         return new WaitingEventBuilder<>(this, clazz);
     }
 
-    /**
-     * Creates a new {@link MultiWaitingEventBuilder}
-     *
-     * @return The {@link MultiWaitingEventBuilder}
-     */
-    public MultiWaitingEventBuilder newMultiBuilder() {
-        return new MultiWaitingEventBuilder(this);
-    }
-
     @EventHandler
     public final void onEvent(final Event event) {
         if (this.isShutdown()) return;
 
         Class clazz = event.getClass();
         while (clazz != null) {
-            if (this.waiters.containsKey(clazz)) {
-                final List<Waiter<?>> waiters = this.waiters.get(clazz);
-                final Waiter[] events = waiters.toArray(new Waiter[0]);
 
-                //noinspection unchecked
+            if (this.waiters.containsKey(clazz)) {
+
+                final Set<WaitingEvent> waiters = this.waiters.get(clazz);
+                final WaitingEvent[] events = waiters.toArray(new WaitingEvent[0]);
+
                 waiters.removeAll(Stream.of(events).filter(waiter -> waiter.call(event)).collect(Collectors.toSet()));
+
             }
+
             clazz = clazz.getSuperclass();
         }
-
-    }
-
-    private interface Waiter<T extends Event> {
-
-        /**
-         * @param event The {@link Event} called
-         *
-         * @return {@code true} if the {@code event} was handled successfully and can be
-         * removed from the waiting event queue, {@code false} otherwise.
-         */
-        boolean call(T event);
 
     }
 
     /**
      *
      */
-    public class WaitingEvent<T extends Event> implements Waiter<T>{
+    public class WaitingEvent<T extends Event> {
 
         private final Predicate<T> predicate;
         private final Function<T, Boolean> function;
@@ -206,9 +163,12 @@ public final class EventWaiter implements EventListener {
         }
 
         /**
-         * {@inheritDoc}
+         * Call the handler for this {@link WaitingEvent}
+         *
+         * @param event The event
+         *
+         * @return {@code true} if this event was handled successfully
          */
-        @Override
         public boolean call(final T event) {
             try {
                 return this.predicate == null || this.predicate.test(event) ? this.function.apply(event) : false;
@@ -220,35 +180,8 @@ public final class EventWaiter implements EventListener {
 
     }
 
-    public class MultiWaitingEvent implements Waiter {
-
-        private final Map<Class<?>, List<WaitingEvent<?>>> events;
-
-        MultiWaitingEvent(final Map<Class<?>, List<WaitingEvent<?>>> events) {
-            this.events = events;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean call(final Event event) {
-
-            final List<WaitingEvent<?>> events = this.events.get(event.getClass());
-            for (final WaitingEvent evt : events) {
-                try {
-                    //noinspection unchecked
-                    return evt.call(event);
-                } catch (final Throwable ignored){
-                }
-            }
-
-            return false;
-        }
-    }
-
     /**
-     *
+     * A utility class aimed at creating a more cleanly styled way of building {@link WaitingEvent}s
      */
     public class WaitingEventBuilder<T extends Event> {
 
@@ -280,13 +213,17 @@ public final class EventWaiter implements EventListener {
          *
          * @return This {@link WaitingEventBuilder}
          */
-        public WaitingEventBuilder<T> check(@NotNull(value = "predicate cannot be null") final Predicate<T> predicate) {
+        public WaitingEventBuilder<T> before(@NotNull(value = "predicate cannot be null") final Predicate<T> predicate) {
             this.predicate = predicate;
             return this;
         }
 
         /**
          * Set the executor for the {@link WaitingEvent}
+         *
+         * <p>Using a consumer means there is no way for a {@link WaitingEvent} to know
+         * whether it was successful so instead it is assumed that it is and returns true upon completion
+         * regardless of any exception being thrown</p>
          *
          * @param consumer The {@link Consumer}
          *
@@ -306,6 +243,10 @@ public final class EventWaiter implements EventListener {
         /**
          * Set the executor for the {@link WaitingEvent}
          *
+         * <p>This method gives more power to the {@link WaitingEvent} as it also gives
+         * the opportunity for it to say it wasn't successful meaning that the {@link WaitingEvent}
+         * could still be called again until it either expires or returns {@code true}</p>
+         *
          * @param function The {@link Function}
          *
          * @return This {@link WaitingEventBuilder}
@@ -318,6 +259,10 @@ public final class EventWaiter implements EventListener {
         /**
          * Set the timeout duration
          *
+         * <p>This is how long we want to listen for a given {@link Event}, should this time
+         * elapse then the event will be purged from the listening queue and any {@link Runnable}
+         * specified will be called to say that the allotted time has ran out</p>
+         *
          * @param timeout The timeout (in seconds)
          *
          * @return This {@link WaitingEventBuilder}
@@ -328,6 +273,10 @@ public final class EventWaiter implements EventListener {
 
         /**
          * Set the timeout duration and the unit to measure it in
+         *
+         * <p>This is how long we want to listen for a given {@link Event}, should this time
+         * elapse then the event will be purged from the listening queue and any {@link Runnable}
+         * specified will be called to say that the allotted time has ran out</p>
          *
          * @param timeout The timeout
          * @param unit    The {@link TimeUnit} to measure the {@code timeout} in
@@ -356,98 +305,12 @@ public final class EventWaiter implements EventListener {
         }
 
         /**
-         * of and register the {@link WaitingEvent}
+         * Create and register the {@link WaitingEvent}
          *
          * @return The {@link WaitingEvent}
          */
         public WaitingEvent<T> build() {
             return this.waiter.newWaiter(this.clazz, this.predicate, this.function, this.timeout, this.unit, this.timeoutAction);
-        }
-
-    }
-
-    public class MultiWaitingEventBuilder {
-
-        private final EventWaiter waiter;
-        private final Map<Class<?>, List<WaitingEvent<?>>> events;
-
-        private long timeout;
-        private TimeUnit unit;
-        private Runnable timeoutAction;
-
-        MultiWaitingEventBuilder(final EventWaiter waiter) {
-            this.waiter = waiter;
-            this.events = Maps.newHashMap();
-        }
-
-        /**
-         * Set the timeout duration
-         *
-         * @param timeout The timeout (in seconds)
-         *
-         * @return This {@link MultiWaitingEventBuilder}
-         */
-        public MultiWaitingEventBuilder timeoutAfter(final long timeout) {
-            return this.timeoutAfter(timeout, TimeUnit.SECONDS);
-        }
-
-        /**
-         * Set the timeout duration and the unit to measure it in
-         *
-         * @param timeout The timeout
-         * @param unit    The {@link TimeUnit} to measure the {@code timeout} in
-         *
-         * @return This {@link MultiWaitingEventBuilder}
-         */
-        public MultiWaitingEventBuilder timeoutAfter(final long timeout,
-                                                   @NotNull(value = "unit cannot be null") final TimeUnit unit) {
-            Objects.checkArgument(timeout > 0, "timeout cannot be negative or equal to 0");
-            this.timeout = timeout;
-            this.unit = unit;
-            return this;
-        }
-
-        /**
-         * Set the {@link Runnable} to be executed should a compatible {@link Event} not be called before the time is
-         * up
-         *
-         * @param timeoutAction The {@link Runnable} to execute
-         *
-         * @return This {@link MultiWaitingEventBuilder}
-         */
-        public MultiWaitingEventBuilder timeoutAction(@NotNull(value = "timeoutAction cannot be null") final Runnable timeoutAction) {
-            this.timeoutAction = timeoutAction;
-            return this;
-        }
-
-        /**
-         * Register a {@link WaitingEvent} to be part of this {@link EventWaiter}
-         *
-         * @param clazz    The {@link Class} of the {@link Event}
-         * @param check    The {@link Predicate} to test when a compatible {@link Event} is called
-         * @param function The {@link Function} to perform the action
-         *
-         * @return This {@link MultiWaitingEventBuilder}
-         */
-        public <T extends Event> MultiWaitingEventBuilder addWaiter(final Class<T> clazz,
-                                                                    final Predicate<T> check,
-                                                                    final Function<T, Boolean> function) {
-
-            final WaitingEvent<T> waiter = new WaitingEvent<>(check, function);
-            this.events.computeIfAbsent(clazz, __ -> Lists.newArrayList()).add(waiter);
-
-            return this;
-        }
-
-        /**
-         * of and register the {@link MultiWaitingEvent}
-         *
-         * @return The {@link MultiWaitingEvent}
-         */
-        public MultiWaitingEvent build() {
-            final MultiWaitingEvent waiter = new MultiWaitingEvent(this.events);
-            this.waiter.addWaiter(this.events.keySet(), waiter, this.timeout, this.unit, this.timeoutAction);
-            return waiter;
         }
 
     }

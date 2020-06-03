@@ -1,10 +1,10 @@
 package com.sheepybot.api.entities.module;
 
-import org.jetbrains.annotations.NotNull;
-import com.sheepybot.api.entities.event.Event;
 import com.sheepybot.api.entities.event.EventListener;
 import com.sheepybot.api.entities.event.RegisteredListener;
 import com.sheepybot.api.entities.event.RootEventRegistry;
+import net.dv8tion.jda.api.events.Event;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
@@ -20,8 +20,7 @@ public final class EventRegistry {
     }
 
     /**
-     * @return A {@link Collection} containing every {@link RegisteredListener} associated with the parent {@link
-     * Module}
+     * @return A {@link Collection} containing every {@link RegisteredListener} associated with this {@link Module}
      */
     public Collection<RegisteredListener> getRegisteredListeners() {
         return this.eventManager.getRegisteredListeners(this.module);

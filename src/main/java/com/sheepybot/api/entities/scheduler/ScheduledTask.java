@@ -1,7 +1,7 @@
 package com.sheepybot.api.entities.scheduler;
 
+import com.sheepybot.util.Objects;
 import org.jetbrains.annotations.NotNull;
-import com.sheepybot.api.entities.utils.Objects;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;

@@ -1,9 +1,9 @@
 package com.sheepybot.api.entities.command;
 
+import com.sheepybot.api.entities.module.Module;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.sheepybot.api.entities.module.Module;
 
 import java.util.List;
 import java.util.Map;
@@ -22,13 +22,12 @@ public interface RootCommandRegistry {
     Map<Module, List<Command>> getCommandMap();
 
     /**
-     * Retrieve a {@link Command} by names (or alias)
+     * Retrieve a {@link Command} by its name or any alias it may use to be referenced or executed
      *
-     * @param alias The names (or alias) of the {@link Command}
-     *
+     * @param aliases The names a command may used to be executed
      * @return The {@link Command}, or {@code null} if no command was found
      */
-    Command getCommandByNameOrAlias(@NotNull(value = "alias cannot be null") final String alias);
+    Command getCommandByNameOrAlias(@NotNull(value = "aliases cannot be null") final List<String> aliases);
 
     /**
      * Register a {@link Command} in this command map
@@ -36,7 +35,6 @@ public interface RootCommandRegistry {
      * @param command The {@link Command} to register
      */
     default void registerCommand(@NotNull(value = "command cannot be null") final Command command) {
-        //this is just a convenience method to save having to pull ", null" after every bot command
         this.registerCommand(command, null);
     }
 

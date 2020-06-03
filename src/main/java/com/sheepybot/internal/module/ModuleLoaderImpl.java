@@ -2,15 +2,12 @@ package com.sheepybot.internal.module;
 
 import com.google.common.collect.Lists;
 import com.sheepybot.Bot;
-import com.sheepybot.api.entities.event.module.ModuleDisabledEvent;
-import com.sheepybot.api.entities.event.module.ModuleEnabledEvent;
-import com.sheepybot.api.entities.event.module.ModuleLoadEvent;
 import com.sheepybot.api.entities.module.EventWaiter;
 import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.api.entities.module.ModuleData;
 import com.sheepybot.api.entities.module.loader.ModuleLoader;
-import com.sheepybot.api.entities.utils.Objects;
 import com.sheepybot.api.exception.module.InvalidModuleException;
+import com.sheepybot.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -109,8 +106,6 @@ public class ModuleLoaderImpl implements ModuleLoader {
 
                         this.modules.add(module);
 
-                        Bot.get().getEventRegistry().callEvent(new ModuleLoadEvent(module));
-
                         return module;
                     }
                 } catch (final IllegalAccessException | InstantiationException ignored) { //impossible?
@@ -158,7 +153,6 @@ public class ModuleLoaderImpl implements ModuleLoader {
         } catch (final Throwable ex) {
             LOGGER.info("An error occurred whilst enabling " + module.getFullName(), ex);
         }
-        Bot.get().getEventRegistry().callEvent(new ModuleEnabledEvent(module));
     }
 
     @Override
@@ -182,8 +176,6 @@ public class ModuleLoaderImpl implements ModuleLoader {
         module.getCommandRegistry().unregisterAll();
         module.getEventRegistry().unregisterAll();
         module.getScheduler().cancelAllTasks();
-
-        Bot.get().getEventRegistry().callEvent(new ModuleDisabledEvent(module));
 
         this.modules.remove(module);
     }

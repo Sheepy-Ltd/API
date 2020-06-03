@@ -5,7 +5,7 @@ import com.sheepybot.api.entities.command.RootCommandRegistry;
 import com.sheepybot.api.entities.event.RootEventRegistry;
 import com.sheepybot.api.entities.language.I18n;
 import com.sheepybot.api.entities.scheduler.Scheduler;
-import com.sheepybot.api.entities.utils.Objects;
+import com.sheepybot.util.Objects;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -15,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-public class Module {
+public abstract class Module {
 
     private final ModuleData data;
 
@@ -59,9 +59,7 @@ public class Module {
     /**
      * Called on {@link Module} enable
      */
-    public void onEnable() {
-
-    }
+    public abstract void onEnable();
 
     /**
      * Called on {@link Module} disable

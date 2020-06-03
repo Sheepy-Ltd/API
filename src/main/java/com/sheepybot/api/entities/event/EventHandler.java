@@ -10,11 +10,6 @@ import java.lang.annotation.Target;
 public @interface EventHandler {
 
     /**
-     * @return {@code true} if the {@link Event} is ignoring cancelled, {@code false} otherwise
-     */
-    boolean ignoreCancelled() default false;
-
-    /**
      * @return The {@link EventPriority}
      */
     EventPriority priority() default EventPriority.NORMAL;

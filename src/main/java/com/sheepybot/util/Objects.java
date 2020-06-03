@@ -9,6 +9,7 @@ public class Objects {
      * Checks that the given expression evaluates to {@code true}
      *
      * @param expression The expression to check
+     *
      * @throws IllegalArgumentException If the expression returned {@code false}
      */
     public static void checkArgument(final boolean expression) throws IllegalArgumentException {
@@ -20,6 +21,7 @@ public class Objects {
      *
      * @param expression The expression to check
      * @param message    The exception message to use if the check fails
+     *
      * @throws IllegalArgumentException If the expression returned {@code false}
      */
     public static void checkArgument(final boolean expression,
@@ -31,6 +33,7 @@ public class Objects {
 
     /**
      * @param state The expression to check
+     *
      * @throws IllegalStateException If the expression returned {@code false}
      */
     public static void checkState(final boolean state) throws IllegalStateException {
@@ -53,7 +56,9 @@ public class Objects {
      * Checks that the given reference is not null.
      *
      * @param reference The reference to check
+     *
      * @return The reference if it was not {@code null}
+     *
      * @throws NullPointerException If the reference was {@code null}
      */
     public static <T> T checkNotNull(final T reference) throws NullPointerException {
@@ -65,7 +70,9 @@ public class Objects {
      *
      * @param reference The reference to check
      * @param message   The exception message to use if the check fails
+     *
      * @return The reference if it was not {@code null}
+     *
      * @throws NullPointerException If the reference was {@code null}
      */
     public static <T> T checkNotNull(final T reference,
@@ -80,6 +87,7 @@ public class Objects {
      * Checks that the given {@link String} is not null or effectively null (just whitespace).
      *
      * @param reference The reference to check
+     *
      * @throws NullPointerException If the reference was {@code null}
      */
     public static void checkNotBlank(final String reference) throws NullPointerException {
@@ -91,6 +99,7 @@ public class Objects {
      *
      * @param reference The reference to check
      * @param message   The exception message to use if the check fails
+     *
      * @throws NullPointerException If the reference was {@code null}
      */
     public static void checkNotBlank(final String reference,

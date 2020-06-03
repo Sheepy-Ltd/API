@@ -63,8 +63,8 @@ public class EvaluateCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean execute(final CommandContext context,
-                           final Arguments args) {
+    public void execute(final CommandContext context,
+                        final Arguments args) {
 
         if (!BotUtils.isBotAdmin(context.getMember())) {
             context.reply(context.i18n("notBotAdmin"));
@@ -73,7 +73,7 @@ public class EvaluateCommand implements CommandExecutor {
             this.scriptEngine.put("context", context);
             this.scriptEngine.put("channel", context.getChannel());
             this.scriptEngine.put("member", context.getMember());
-            this.scriptEngine.put("user", context.getSender());
+            this.scriptEngine.put("user", context.getUser());
             this.scriptEngine.put("guild", context.getGuild());
             this.scriptEngine.put("message", context.getMessage());
             this.scriptEngine.put("bot", context.getGuild().getSelfMember());
@@ -136,7 +136,6 @@ public class EvaluateCommand implements CommandExecutor {
 
         }
 
-        return true;
     }
 
     /**

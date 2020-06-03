@@ -1,8 +1,8 @@
 package com.sheepybot.api.entities.database.auth;
 
 import com.moandjiezana.toml.Toml;
+import com.sheepybot.util.Objects;
 import org.jetbrains.annotations.NotNull;
-import com.sheepybot.api.entities.utils.Objects;
 
 public class DatabaseInfo {
 

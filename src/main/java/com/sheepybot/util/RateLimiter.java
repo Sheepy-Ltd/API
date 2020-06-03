@@ -1,7 +1,5 @@
 package com.sheepybot.util;
 
-import com.sheepybot.api.entities.utils.Objects;
-
 import java.util.concurrent.TimeUnit;
 
 public class RateLimiter {

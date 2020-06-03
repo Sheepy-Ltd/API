@@ -53,7 +53,7 @@ public class CommandContext {
     /**
      * @return The {@link User} who executed this command
      */
-    public User getSender() {
+    public User getUser() {
         return this.sender.getUser();
     }
 

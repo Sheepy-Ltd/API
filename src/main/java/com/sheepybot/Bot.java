@@ -12,21 +12,20 @@ import com.sheepybot.api.entities.language.I18n;
 import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.api.entities.module.loader.ModuleLoader;
 import com.sheepybot.api.entities.scheduler.Scheduler;
-import com.sheepybot.api.entities.utils.Objects;
 import com.sheepybot.internal.command.CommandRegistryImpl;
 import com.sheepybot.internal.command.defaults.admin.EvaluateCommand;
 import com.sheepybot.internal.event.EventRegistryImpl;
 import com.sheepybot.internal.module.ModuleLoaderImpl;
-import com.sheepybot.listeners.*;
+import com.sheepybot.listeners.GuildMessageListener;
+import com.sheepybot.listeners.JdaGenericListener;
 import com.sheepybot.util.BotUtils;
+import com.sheepybot.util.Objects;
 import com.sheepybot.util.Options;
 import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
-import net.dv8tion.jda.api.utils.ChunkingFilter;
-import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -39,6 +38,7 @@ import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -85,7 +85,7 @@ public class Bot {
     }).build();
 
     /**
-     * The thread group used for threads created by {@link #SCHEDULED_EXECUTOR_SERVICE}
+     * The thread group used for our {@link ExecutorService}s
      */
     private static final ThreadGroup THREAD_GROUP = new ThreadGroup("Executor-Thread-Group");
 
@@ -95,7 +95,7 @@ public class Bot {
     private static final BiFunction<String, Runnable, Thread> THREAD_FUNCTION = (threadName, threadExecutor) -> new Thread(THREAD_GROUP, threadExecutor, threadName);
 
     /**
-     * A cached {@link ExecutorService}
+     * A scheduled {@link ExecutorService}
      */
     public static final ExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newScheduledThreadPool(30, threadExecutor -> THREAD_FUNCTION.apply("Cached Thread Service", threadExecutor));
 
@@ -186,7 +186,7 @@ public class Bot {
 
             this.config = new Toml().read(file);
 
-            if (this.config.getString("client.token").isEmpty()) {
+            if (this.config.getString("jda.token").isEmpty()) {
                 LOGGER.info("No discord token specified, please configure it in the bot.toml");
                 return;
             }
@@ -205,9 +205,9 @@ public class Bot {
             this.eventRegistry = new EventRegistryImpl();
             this.moduleLoader = new ModuleLoaderImpl();
 
-            final String token = this.config.getString("client.token");
+            final String token = this.config.getString("jda.token");
 
-            int shards = Math.toIntExact(this.config.getLong("shards.shard_total"));
+            int shards = Math.toIntExact(this.config.getLong("jda.shard_total"));
             int recommendedShards = BotUtils.getRecommendedShards(token);
 
             if (shards != -1 && shards < recommendedShards) {
@@ -215,35 +215,33 @@ public class Bot {
                 shards = recommendedShards;
             }
 
-            final DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.create(
-                    GatewayIntent.GUILD_MEMBERS,
-                    GatewayIntent.GUILD_BANS,
-                    GatewayIntent.GUILD_VOICE_STATES,
-                    GatewayIntent.GUILD_MESSAGES,
-                    GatewayIntent.GUILD_MESSAGE_REACTIONS)
-                    .disableCache(CacheFlag.ACTIVITY, CacheFlag.EMOTE, CacheFlag.CLIENT_STATUS, CacheFlag.MEMBER_OVERRIDES)
-                    .setChunkingFilter(ChunkingFilter.NONE)
-                    .setMemberCachePolicy(MemberCachePolicy.NONE)
-                    .setToken(token)
-                    .setAutoReconnect(true)
-                    .setEnableShutdownHook(false) //we dont use the shutdown hook on JDA as we handle that ourselves
-                    .setBulkDeleteSplittingEnabled(false)
+            final List<GatewayIntent> gatewayIntents = BotUtils.getGatewayIntentsFromList(this.config.getList("jda.gateway_intents"));
+            final List<CacheFlag> cacheFlags = BotUtils.getCacheFlagsFromList(this.config.getList("jda.cache_flags"));
+
+            for (final CacheFlag flag : CacheFlag.values()) {
+                if (flag.getRequiredIntent() == null || gatewayIntents.contains(flag.getRequiredIntent())) {
+                    cacheFlags.add(flag);
+                }
+            }
+
+            final DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.create(token, gatewayIntents)
+                    .enableCache(cacheFlags)
+                    .setChunkingFilter(BotUtils.getChunkingFilterFromString(this.config.getString("jda.chunking_filter")))
+                    .setMemberCachePolicy(BotUtils.getMemberCachePolicyFromString(this.config.getString("jda.member_cache_policy")))
+                    .setAutoReconnect(this.config.getBoolean("jda.auto_reconnect"))
+                    .setEnableShutdownHook(false)
+                    .setBulkDeleteSplittingEnabled(this.config.getBoolean("jda.bulk_delete_splitting"))
                     .setHttpClient(HTTP_CLIENT)
-                    .setShardsTotal(shards) //use default shard count
+                    .setShardsTotal(shards)
                     .addEventListeners(
                             new GuildMessageListener(),
-                            new GuildMemberListener(),
-                            new GuildMemberReactionListener(),
-                            new GuildMemberVoiceListener(),
-                            new GuildModerationListener(),
-                            new GuildRoleListener(),
-                            new GuildUpdateListener()
+                            new JdaGenericListener()
                     );
 
             if (shards != -1) {
 
-                int shardMin = Math.toIntExact(this.config.getLong("sharding.shard_min"));
-                int shardMax = Math.toIntExact(this.config.getLong("sharding.shard_max"));
+                int shardMin = Math.toIntExact(this.config.getLong("jda.shard_min", -1L));
+                int shardMax = Math.toIntExact(this.config.getLong("jda.shard_max", -1L));
 
                 if (shardMin < 0) shardMin = 0;
                 if (shardMax < 0 || shardMax > shards) shardMax = (shards - 1);
@@ -252,10 +250,9 @@ public class Bot {
 
             }
 
-            final String activity = this.config.getString("client.activity");
+            final String activity = this.config.getString("jda.activity");
             if (activity != null && !activity.isEmpty()) {
-                LOGGER.info(activity + " / " + this.config.getString("client.activity_type") + " / " + BotUtils.getActivityTypeFromString(this.config.getString("client.activity_type")));
-                builder.setActivity(Activity.of(BotUtils.getActivityTypeFromString(this.config.getString("client.activity_type")), activity));
+                builder.setActivity(Activity.of(Activity.ActivityType.DEFAULT, activity));
             }
 
             LOGGER.info("Starting shards and attempting to connect to the Discord API...");
@@ -281,10 +278,8 @@ public class Bot {
 
             LOGGER.info(String.format("Loaded %d modules", this.moduleLoader.getEnabledModules().size()));
 
-            LOGGER.info("Registering shutdown hook...");
-
             //register our shutdown hook so if something happens we get properly shutdown
-            Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "Auto-Shutdown-Thread"));
+            Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "API-Auto-Shutdown-Thread"));
 
             LOGGER.info(String.format("Startup completed! Took %dms, running api version: %s.", (System.currentTimeMillis() - this.startTime), BotInfo.VERSION));
         }

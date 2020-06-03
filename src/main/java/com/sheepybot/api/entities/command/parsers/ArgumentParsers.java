@@ -5,25 +5,22 @@ import com.sheepybot.api.entities.command.CommandContext;
 import com.sheepybot.api.entities.command.argument.Argument;
 import com.sheepybot.api.entities.command.argument.ArgumentParser;
 import com.sheepybot.api.entities.command.argument.RawArguments;
-import com.sheepybot.api.entities.language.I18n;
 import com.sheepybot.api.entities.utils.FinderUtil;
 import com.sheepybot.api.exception.parser.ParserException;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ArgumentParsers {
 
     /**
-     * Parse text input. This parsers allows strings with white space if it receives unescaped single or double quotes
+     * Parse text input.
      */
     public static final ArgumentParser<String> STRING = new ArgumentParser<String>() {
-        @Override
-        public String getTypeName(final I18n i18n) {
-            return i18n.tl("parserStringTypeName");
-        }
 
         @Override
         public String parse(final CommandContext context,
@@ -66,10 +63,6 @@ public class ArgumentParsers {
      * Parses the remaining text input from passed {@link RawArguments} instance
      */
     public static final ArgumentParser<String> REMAINING_STRING = new ArgumentParser<String>() {
-        @Override
-        public String getTypeName(final I18n i18n) {
-            return i18n.tl("parserStringTypeName");
-        }
 
         @Override
         public String parse(final CommandContext context,
@@ -87,10 +80,6 @@ public class ArgumentParsers {
      * Parses the remaining text input from passed {@link RawArguments} instance
      */
     public static final ArgumentParser<String> REMAINING_STRING_NO_QUOTE = new ArgumentParser<String>() {
-        @Override
-        public String getTypeName(final I18n i18n) {
-            return i18n.tl("parserStringTypeName");
-        }
 
         @Override
         public String parse(final CommandContext context,
@@ -105,13 +94,9 @@ public class ArgumentParsers {
     };
 
     /**
-     * Parse numerical input as an {@link Integer}
+     * Parse string input to an {@link Integer}
      */
     public static final ArgumentParser<Integer> INTEGER = new ArgumentParser<Integer>() {
-        @Override
-        public String getTypeName(final I18n i18n) {
-            return i18n.tl("parserNumberTypeName");
-        }
 
         @Override
         public Integer parse(final CommandContext context,
@@ -127,96 +112,9 @@ public class ArgumentParsers {
     };
 
     /**
-     *
-     */
-    public static final ArgumentParser<Integer[]> INTEGER_RANGE = new ArgumentParser<Integer[]>() {
-
-        @Override
-        public List<String> getSuggestions() {
-            return Lists.newArrayList("1-15", "12-19", "5-8");
-        }
-
-        @Override
-        public String getTypeName(final I18n i18n) {
-            return i18n.tl("parserIntegerRangeTypeName");
-        }
-
-        @Override
-        public Integer[] parse(final CommandContext context,
-                               final RawArguments args) {
-
-            final String peek = args.peek();
-            if (peek.indexOf('-') == -1) {
-                throw new ParserException("No range specified");
-            }
-
-            final String[] range = args.next().split("-");
-            if (range.length != 2) {
-                throw new ParserException("Invalid range length, must be equal to 2 arguments");
-            }
-
-            final int from = Integer.parseInt(range[0]);
-            final int to = Integer.parseInt(range[1]);
-
-            if (from > to) {
-                throw new ParserException("From cannot be greater than to");
-            }
-
-            final List<Integer> integers = Lists.newArrayList();
-
-            for (int i = from; i <= to; i++) {
-                integers.add(i);
-            }
-
-            return integers.toArray(new Integer[integers.size() - 1]);
-        }
-
-    };
-
-    /**
-     *
-     */
-    public static final ArgumentParser<Integer[]> INTEGER_ARRAY = new ArgumentParser<Integer[]>() {
-
-        @Override
-        public List<String> getSuggestions() {
-            return Lists.newArrayList("1;15;12;3", "9;2;11;6;5", "17;13");
-        }
-
-        @Override
-        public String getTypeName(final I18n i18n) {
-            return i18n.tl("parserIntegerArrayTypeName");
-        }
-
-        @Override
-        public Integer[] parse(final CommandContext context,
-                               final RawArguments args) {
-            final String[] split = args.next().split(";");
-
-            final List<Integer> integers = Lists.newArrayList();
-
-            for (final String parse : split) {
-                try {
-                    integers.add(Integer.parseInt(parse));
-                } catch (final NumberFormatException ignored) {
-                    throw new ParserException(context.i18n("parserNumberInvalidNumber"));
-                }
-            }
-
-            Collections.sort(integers);
-
-            return integers.toArray(new Integer[integers.size() - 1]);
-        }
-    };
-
-    /**
-     * Parse numerical input as a {@link Long}
+     * Parse string input to a {@link Long}
      */
     public static final ArgumentParser<Long> LONG = new ArgumentParser<Long>() {
-        @Override
-        public String getTypeName(final I18n i18n) {
-            return i18n.tl("parserNumberTypeName");
-        }
 
         @Override
         public Long parse(final CommandContext context,
@@ -232,13 +130,9 @@ public class ArgumentParsers {
     };
 
     /**
-     * Parse numerical input as a {@link Double}
+     * Parse string input to a {@link Double}
      */
     public static final ArgumentParser<Double> DOUBLE = new ArgumentParser<Double>() {
-        @Override
-        public String getTypeName(final I18n i18n) {
-            return i18n.tl("parserNumberTypeName");
-        }
 
         @Override
         public Double parse(final CommandContext context,
@@ -254,43 +148,15 @@ public class ArgumentParsers {
     };
 
     /**
-     * Parse numerical input as an {@link Long}, throwing a {@link ParserException} should the value parsed be less than 1
-     */
-    public static final ArgumentParser<Long> NON_NEGATIVE_NUMBER = new ArgumentParser<Long>() {
-        @Override
-        public String getTypeName(final I18n i18n) {
-            return i18n.tl("parserNumberTypeName");
-        }
-
-        @Override
-        public Long parse(final CommandContext context,
-                             final RawArguments args) {
-            final String parsed = args.next();
-            try {
-                final long result = Long.parseLong(parsed);
-                if (result < 1) {
-                    throw new ParserException(context.i18n("parserNumberNotNegative"));
-                }
-                return result;
-            } catch (final NumberFormatException ex) {
-                throw new ParserException(context.i18n("parserInvalidNumber"));
-            }
-        }
-    };
-
-    /**
-     * Parse a string into a {@link Member}
+     * Attempts to retrieve a user by an input string from the local {@link net.dv8tion.jda.api.entities.Guild}, this can be any of
+     * <ul>
+     *     <li>Partial name</li>
+     *     <li>Full name</li>
+     *     <li>User ID</li>
+     *     <li>@mention</li>
+     * </ul>
      */
     public static final ArgumentParser<Member> MEMBER = new ArgumentParser<Member>() {
-        @Override
-        public List<String> getSuggestions() {
-            return Lists.newArrayList("212530298259374080", "Samuel", "Samuel#0001", "@Samuel#0001");
-        }
-
-        @Override
-        public String getTypeName(final I18n i18n) {
-            return i18n.tl("parserMemberTypeName");
-        }
 
         @Override
         public Member parse(final CommandContext context,
@@ -322,70 +188,21 @@ public class ArgumentParsers {
     };
 
     /**
-     * Parse a string into a {@link User}
-     */
-    public static final ArgumentParser<User> USER = new ArgumentParser<User>() {
-        @Override
-        public String getTypeName(final I18n i18n) {
-            return i18n.tl("parserMemberTypeName");
-        }
-
-        @Override
-        public User parse(final CommandContext context,
-                          final RawArguments args) {
-            return MEMBER.parse(context, args).getUser(); //search to local guild not global
-        }
-    };
-
-    /**
-     * Return a functionally identical copy of the {@code parser} changing its names
+     * Apply a fallback parameter for a {@link ArgumentParser} in the event of none being specified
      *
-     * @param parser   The {@link ArgumentParser} to rename
-     * @param typename The new type names
-     *
-     * @return A functionally identical {@link ArgumentParser}
-     */
-    public static <T> ArgumentParser<T> rename(final ArgumentParser<T> parser,
-                                               final String typename) {
-        return new ArgumentParser<T>() {
-            @Override
-            public Argument<T> getDefaultParameter() {
-                return parser.getDefaultParameter();
-            }
-
-            @Override
-            public String getTypeName(final I18n i18n) {
-                return i18n.tl(typename);
-            }
-
-            @Override
-            public T parse(final CommandContext context,
-                           final RawArguments args) {
-                return parser.parse(context, args);
-            }
-
-        };
-    }
-
-    /**
-     * Apply a fallback parameter in the event of none being specified
+     * <p>This fallback parameter may be {@code null}</p>
      *
      * @param parser   The parser
      * @param fallback The fallback parameter
-     *
      * @return The {@link ArgumentParser}
      */
     public static <T> ArgumentParser<T> alt(final ArgumentParser<T> parser,
                                             final T fallback) {
         return new ArgumentParser<T>() {
+
             @Override
             public Argument<T> getDefaultParameter() {
                 return Argument.create(fallback);
-            }
-
-            @Override
-            public String getTypeName(final I18n i18n) {
-                return parser.getTypeName(i18n);
             }
 
             @Override
@@ -420,15 +237,6 @@ public class ArgumentParsers {
                 this.parsers[1] = parser2;
 
                 System.arraycopy(moreParsers, 0, this.parsers, 2, moreParsers.length);
-            }
-
-            @Override
-            public String getTypeName(final I18n i18n) {
-                final StringBuilder sb = new StringBuilder();
-                for (final ArgumentParser<?> parser : moreParsers) {
-                    sb.append('|').append(parser.getTypeName(i18n));
-                }
-                return sb.toString().trim();
             }
 
             @Override
@@ -478,11 +286,6 @@ public class ArgumentParsers {
                     }
                     this.typename = builder.toString().trim();
                 }
-            }
-
-            @Override
-            public String getTypeName(final I18n i18n) {
-                return this.typename;
             }
 
             @Override

@@ -2,6 +2,7 @@ package com.sheepybot.api.entities.event;
 
 import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.api.exception.event.EventException;
+import net.dv8tion.jda.api.events.Event;
 import org.jetbrains.annotations.NotNull;
 
 public class RegisteredListener {
@@ -69,11 +70,6 @@ public class RegisteredListener {
      * @throws EventException If an error occurred during event execution
      */
     public void callEvent(@NotNull(value = "event cannot be null") final Event event) throws EventException {
-        if (event instanceof Cancellable) {
-            if (((Cancellable) event).isCancelled() && this.handler.ignoreCancelled()) {
-                return;
-            }
-        }
         this.executor.execute(this.listener, event);
     }
 

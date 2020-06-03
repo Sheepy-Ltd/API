@@ -2,9 +2,9 @@ package com.sheepybot.api.entities.language;
 
 import com.google.common.collect.Maps;
 import com.sheepybot.Bot;
-import com.sheepybot.api.entities.utils.Objects;
 import com.sheepybot.internal.caching.EntityLoadingCache;
 import com.sheepybot.internal.caching.caches.LanguageCache;
+import com.sheepybot.util.Objects;
 import net.dv8tion.jda.api.entities.Guild;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +41,7 @@ public class I18n {
     private static final Pattern DOUBLE_QUOTE = Pattern.compile("''");
 
     private static final Map<String, I18n> REGISTRY_MAP = Maps.newHashMap();
-    private static final EntityLoadingCache<String, I18n> LANGUAGE_CACHE = new LanguageCache();
+    private static final EntityLoadingCache<Long, I18n> LANGUAGE_CACHE = new LanguageCache();
 
     /**
      * @return The default {@link I18n}
@@ -116,22 +116,7 @@ public class I18n {
      * @return The {@link I18n} instance
      */
     public static I18n getI18n(final long id) {
-        return getI18n(Long.toString(id));
-    }
-
-    /**
-     * Retrieve an {@link I18n} instance based on the specified {@link Language} of the {@link Guild}
-     * <p>
-     * <p>Should the {@link Guild} have no configured language, the default returned is the english {@link I18n}</p>
-     *
-     * @param id The guild id as a {@link String}
-     *
-     * @return The {@link I18n} instance
-     *
-     * @throws NumberFormatException If {@code id} is not convertible to a {@link Long}
-     */
-    public static I18n getI18n(@NotNull(value = "id cannot be null") final String id) {
-        return LANGUAGE_CACHE.getEntity(id, getDefaultI18n());
+        return LANGUAGE_CACHE.getEntity(id);
     }
 
     /**
