@@ -6,8 +6,6 @@ by giving you the tools you want for building a bot straight out of the box.
 This is made in spare time and in the hopes people will use it. If you like the project
 and want to contribute please feel free to do so, any support is welcome.  
 
-
-
 **Getting Started**
 
 ## Creating Your First Module
@@ -15,8 +13,8 @@ and want to contribute please feel free to do so, any support is welcome.
 ### First steps
 
 ```java
-import ModuleData;
-import Module;
+import com.sheepybot.api.entities.module.ModuleData;
+import com.sheepybot.api.entities.module.Module;
 
 @ModuleData(name = "HelloWorld", version = "1.0.0")
 public class HelloWorld extends Module {
@@ -110,11 +108,11 @@ This contains the arguments that were executed with this command and other thing
 On command execution we then retrieve some information from the arguments the user passed to us by calling `args.next(ArgumentParser)` and in this case there's only one argument, then we respond with a message giving the user a ping.
 
 You might ask what if the user doesn't mention anyone, you will get a null pointer or something will fail.
-However in this case it's perfectly fine to call args.next(ArgumentParser) without fear of getting exceptions or having null pointers thrown at you (at least for inbuilt parsers, as you move on you can create your own and use them as you would any other),
-should no argument be passed when you're expecting there to be one or they give something entirely unrelated to it the command handler will manage this on its own and give the user a polite nudge saying how they should use the command.
+However, in this case it's perfectly fine to call args.next(ArgumentParser) without fear of getting exceptions or having null pointers thrown at you (at least for inbuilt parsers, as you move on you can create your own and use them as you would any other),
+should there be no argument given when you're expecting there to be one, or they give something entirely unrelated to it the command handler will manage this on its own and give the user a polite nudge saying how they should use the command.
 
-There are parsers that don't mind not getting given a value but they will either have defaults on them or it is not required for the parser to function in how you use it.
-Should the parser not have a default or a default that isn't useful to you, you can also specify your own return value for a parser (be it inbuilt or your own) by just calling
+There are parsers that don't mind not getting given a value, but they will either have defaults on them, or it is not required for the parser to function in how you use it.
+Should the parser not have a default, or a default that isn't useful to you, you can also specify your own return value for a parser (be it in built, or your own) by calling.
 
 ```java
 ArgumentParsers.alt(ArgumentParser<T> parser, T fallback)
@@ -149,7 +147,7 @@ In our onEnable method we retrieve our CommandRegistry instance which is handily
 we can then create a new Command builder by calling `com.sheepybot.command.Command#builder`, this
 is a useful method allowing you to configure your command for how it's to be used.
 
-We specify our commands name (or trigger) this is what users can type to run our command
+We specify our commands name (or trigger) this is what users can type to run our command,
 and we also give an alias to give an alternate way to execute the command. Running the command with an alias
 doesn't change the way a command will be processed and command aliases must be unique, giving your command an alias
 already used by another command (within the bot not just your Module) will prevent it from being registered.
@@ -212,9 +210,9 @@ Now that we've created our event and added something to listen to it we now need
 Every module is given its own `EventRegistry` and similar to commands we can use it to register
 our interest in an event so that when the time comes we're part of the cool kids club that get told about it.
 
-But we can also use it to call events as well (this is not limited to your own events), in this case we 
+We can also use it to call events as well (this is not limited to your own events), in this case we 
 go to our event registry and call the `.register(EventListener)` method which takes our newly created `EventListener`
-as its argument, there's no need to register the event class (the one that extends `Event`) itself as this is just the class that gets thrown around and the API
+as its argument, there's no need to register the event class (the one that extends `Event`) itself as this is just the class that gets thrown around, and the API
 doesn't need to know about it.
 
 ### Final note
@@ -222,4 +220,4 @@ This guide will continue to grow and possibly end up being moved into their own 
 as the API and bot continue to grow themselves and demands change.
 
 There's plenty of things we haven't covered but hopefully this gives some insight into how things
-function and the capability given to modules to become whatever they want to be.
+function, and the capability given to modules to become whatever they want to be.

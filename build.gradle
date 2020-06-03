@@ -64,7 +64,7 @@ dependencies {
 
 publishing {
     publications {
-        API(MavenPublication) {
+        API (MavenPublication) {
             from components.java
             groupId 'com.sheepybot'
             artifactId 'API'
@@ -90,7 +90,7 @@ bintray {
             released = buildDate
             gpg {
                 sign = true
-                passphrase = System.getenv("GPG_PASSPHRASE")
+                passphrase = "$gpgPassphrase"
             }
         }
     }
