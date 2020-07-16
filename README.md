@@ -174,20 +174,20 @@ public class MyEventListener implements EventListener {
 
 **Overview**:
 
-Just like any other class will listen to events we must implement the EventListener class,
+Just like any other class that will listen to events we must implement the EventListener class,
 this is just to make sure we're giving the right thing when we register it and there's nothing to
 inherit from the class itself.
 
-In order to listen to an event we must first annotate a method (in this case we call it onEvent but you can call it whatever you want, the name isn't relevant).
+In order to listen to an event we must first annotate a method with the @EventHandler annotation (the method name itself doesn't matter).
 Once the event is fired it will be thrown around and will eventually land in our laps and we can proceed to deal with the information we were given 
-by said event, in this case it's our event we made earlier, and we get given a message which we just print to the console.
+by said event.
 
 There are loads of events within the API all of which giving their own bit of information from users joining the guild
 to people talking in voice channels, any bit of information we get there is likely an event for it.
 
 The event system supports any event in JDA
 
-### Firing your new custom event
+### Listening to events
 ```java
 import com.sheepybot.api.entities.module.EventRegistry;
 
@@ -200,7 +200,6 @@ public void onEnable() {
 
     eventRegistry.registerEvent(new MyEventListener());
 
-    eventRegistry.callEvent(new MyCustomEvent("Hello Event System."));
 }
 ```
 
@@ -212,8 +211,7 @@ our interest in an event so that when the time comes we're part of the cool kids
 
 We can also use it to call events as well (this is not limited to your own events), in this case we 
 go to our event registry and call the `.register(EventListener)` method which takes our newly created `EventListener`
-as its argument, there's no need to register the event class (the one that extends `Event`) itself as this is just the class that gets thrown around, and the API
-doesn't need to know about it.
+as its argument. After that, any time the event is fired your listener will get called.
 
 ### Final note
 This guide will continue to grow and possibly end up being moved into their own sections
