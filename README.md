@@ -1,4 +1,4 @@
-# API
+# API v1.0.0_a297523264 [Get It On JitPack](https://jitpack.io/#com.sheepybot/API/v1.0.0_a297523264)
 
 This is a Bot API made by Samuel#0420, its purpose is to make the bot building process a lot easier
 by giving you the tools you want for building a bot straight out of the box.
@@ -7,6 +7,20 @@ This is made in spare time and in the hopes people will use it. If you like the 
 and want to contribute please feel free to do so, any support is welcome.  
 
 **Getting Started**
+
+## Adding the dependency
+The API doesn't have its own maven repository, instead chose to host it on JitPack
+
+Adding this to your build.gradle file will enable you to begin the process of using the API
+```groovy
+    repositories {
+        maven { url 'https://jitpack.io' }
+    }
+
+    dependencies {
+        implementation group: 'com.sheepybot', name: 'API', version: '1.0.0_a297523264'
+    }
+```
 
 ## Creating Your First Module
 
