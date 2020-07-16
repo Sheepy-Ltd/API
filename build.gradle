@@ -23,6 +23,9 @@ group = 'com.sheepybot'
 version = ver.toString()
 
 mainClassName = group + '.Bot'
+shadowJar {
+    archiveName = "API.jar"
+}
 description = ''
 
 sourceCompatibility = 1.8

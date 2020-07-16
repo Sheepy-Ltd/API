@@ -1,7 +1,8 @@
-# API v1.0.0_a297523264 [![](https://jitpack.io/v/com.sheepybot/API.svg)](https://jitpack.io/#com.sheepybot/API)
+# API [![](https://jitpack.io/v/com.sheepybot/API.svg)](https://jitpack.io/#com.sheepybot/API)
 
 This is a Bot API made by Samuel#0420, its purpose is to make the bot building process a lot easier
-by giving you the tools you want for building a bot straight out of the box.
+by giving you the tools you want for building a bot straight out of the box like command registering,
+databases and event listening but is also here to try make things much simpler for the end users too.
 
 This is made in spare time and in the hopes people will use it. If you like the project
 and want to contribute please feel free to do so, any support is welcome.  
