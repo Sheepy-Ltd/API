@@ -7,6 +7,8 @@ databases and event listening but is also here to try make things much simpler f
 This is made in spare time and in the hopes people will use it. If you like the project
 and want to contribute please feel free to do so, any support is welcome.  
 
+You can find documentation about the lib this application uses [here](https://github.com/DV8FromTheWorld/JDA)
+
 **Getting Started**
 
 ## Adding the dependency
