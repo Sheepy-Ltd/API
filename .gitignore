@@ -101,6 +101,6 @@ target/
 build/*
 
 modules/
+lang/
 bot.toml
-/gradle.properties
 /gradle.properties

@@ -170,6 +170,7 @@ public class Bot {
             return;
         }
 
+        //noinspection ResultOfMethodCallIgnored
         ModuleLoaderImpl.MODULE_DIRECTORY.mkdirs(); //assuming first time start so we're making the modules directory too
         I18n.extractLanguageFiles(); //also extracting internal language files so people can change how we respond
 
@@ -215,16 +216,20 @@ public class Bot {
             }
 
             final List<GatewayIntent> gatewayIntents = BotUtils.getGatewayIntentsFromList(this.config.getList("jda.gateway_intents"));
-            final List<CacheFlag> cacheFlags = BotUtils.getCacheFlagsFromList(this.config.getList("jda.cache_flags"));
+            final List<CacheFlag> enabledCacheFlags = BotUtils.getCacheFlagsFromList(this.config.getList("jda.enabled_cache_flags"));
+            final List<CacheFlag> disabledCacheFlags = BotUtils.getCacheFlagsFromList(this.config.getList("jda.disabled_cache_flags"));
 
             for (final CacheFlag flag : CacheFlag.values()) {
-                if (flag.getRequiredIntent() == null || gatewayIntents.contains(flag.getRequiredIntent())) {
-                    cacheFlags.add(flag);
+                if (flag.getRequiredIntent() != null && !gatewayIntents.contains(flag.getRequiredIntent()) && enabledCacheFlags.contains(flag)) {
+                    LOGGER.info(String.format("Missing required gateway intent %s for cache flag %s, disabling cache flag...", flag.getRequiredIntent().name(), flag.name()));
+                    enabledCacheFlags.remove(flag);
+                    disabledCacheFlags.add(flag);
                 }
             }
 
             final DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.create(token, gatewayIntents)
-                    .enableCache(cacheFlags)
+                    .enableCache(enabledCacheFlags)
+                    .disableCache(disabledCacheFlags)
                     .setChunkingFilter(BotUtils.getChunkingFilterFromString(this.config.getString("jda.chunking_filter")))
                     .setMemberCachePolicy(BotUtils.getMemberCachePolicyFromString(this.config.getString("jda.member_cache_policy")))
                     .setAutoReconnect(this.config.getBoolean("jda.auto_reconnect"))

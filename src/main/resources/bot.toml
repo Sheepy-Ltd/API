@@ -6,9 +6,17 @@
         "GUILD_EMOJIS",
         "GUILD_VOICE_STATES",
         "GUILD_MESSAGES",
-        "GUILD_MESSAGE_REACTIONS",
+        "GUILD_MESSAGE_REACTIONS"
     ]                                  #the gateway intents to use, you can specify any of the intents listed here https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/requests/GatewayIntent.html
-    cache_flags = []                   #cache flags to use, keeping this empty will make the api automatically figure out what cache flags to use. You can specify any of the cache flags listed here https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/utils/cache/CacheFlag.html
+    enabled_cache_flags = [
+        "VOICE_STATE",
+        "EMOTE",
+        "MEMBER_OVERRIDES"
+    ]                                  #cache flags to use, keeping this empty will make the api automatically figure out what cache flags to use. You can specify any of the cache flags listed here https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/utils/cache/CacheFlag.html
+    disabled_cache_flags = [
+        "ACTIVITY",
+        "CLIENT_STATUS"
+    ]                                  #cache flags to not use, it can be useful to disable certain cache flags to save memory and bandwidth
     chunking_filter = "NONE"           #the chunking filter to use, this should be kept at NONE but you can set it to any of https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/utils/ChunkingFilter.html
     member_cache_policy = "DEFAULT"    #it's recommended to keep this as DEFAULT, but if need be you can set it to any of https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/utils/MemberCachePolicy.html
     auto_reconnect = true              #whether to automatically attempt reconnecting to Discord after an error
