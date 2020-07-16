@@ -15,8 +15,7 @@ Why shouldn't I use MySQL?
 
  - MySQL has no transactional DDL. This means that if you mess up creating a table in the middle of a migration, you cannot rollback easily.
  - MySQL has a lot of security issues. New zero-day vulnerabilities are found very regularly.
- - MySQL is owned by Oracle.
- - MySQL is slow. It beats Postgres etc at some things, but once you move beyond basic queries it begins to slog.
+ - MySQL is slow. It beats Postgresql at some things, but once you move beyond basic queries it begins to slog.
  - MySQL disconnects you randomly. Unless you setup your connection specially, it will break regularly.
  - MySQL allows all kinds of insane data to be inserted. '0000-00-00' is valid in MySQL.
  - MySQL is not ANSI compliant. You have to turn it on; even then it isn't fully compliant.
@@ -24,7 +23,8 @@ Why shouldn't I use MySQL?
 
 There is no reason to use MySQL over PostgreSQL, or even sqlite3. See also:
 
-https://blog.ionelmc.ro/2014/12/28/terrible-choices-mysql/
+https://blog.ionelmc.ro/2014/12/28/terrible-choices-mysql
+
 https://grimoire.ca/mysql/choose-something-else
 
 You can find out how to set that up here: https://www.postgresqltutorial.com/install-postgresql/
