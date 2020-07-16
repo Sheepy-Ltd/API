@@ -14,13 +14,27 @@ The API doesn't have its own maven repository, instead chose to host it on JitPa
 
 Adding this to your build.gradle file will enable you to begin the process of using the API
 ```groovy
-    repositories {
-        maven { url 'https://jitpack.io' }
-    }
+plugins {
+    id 'java'
+    id 'application'
 
-    dependencies {
-        implementation group: 'com.sheepybot', name: 'API', version: '1.0.0_a297523264'
-    }
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
+}
+
+mainClassName = 'my.example.Bot' //replace this with your bots full name (excluding the .java at the end)
+version = '1.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation group: 'com.sheepybot', name: 'API', version: '1.0.0_a297523264'
+}
+
+compileJava.options.encoding = 'UTF-8'
 ```
 
 ## Creating Your First Module
@@ -227,6 +241,24 @@ our interest in an event so that when the time comes we're part of the cool kids
 We can also use it to call events as well (this is not limited to your own events), in this case we 
 go to our event registry and call the `.register(EventListener)` method which takes our newly created `EventListener`
 as its argument. After that, any time the event is fired your listener will get called.
+
+###Adding your module
+
+After compilation of your shadowed jar you have to run the main API.jar (find a compiled version of that jar [here](https://github.com/Sheepy-Ltd/API/releases)),
+after running it you will find a few directories and files that have been created. Namely `modules`, `lang` and `bot.toml`
+
+The `modules` directory is where your modules .jar file will go, the API won't recognise any modules outside of this directory.
+
+The `lang` directory allows you to customise the default responses the bot gives so if you want the bot to speak
+in a different language or just simply want to change what it says then you can do that.
+
+The `bot.toml` file which will be created in the root folder where you ran the main API.jar and will be
+where you place things like your bots token, you can also configure things like what gateway intents to use,
+enabled cache flags, disabled cache flags, chunk filtering, how many shards to use, databases. There's a lot of things to configure
+inside of the file, and I hope I've done a sufficient job in documenting what each option does.
+
+After you've put your compiled jar inside the `modules` directory you can restart the bot with your configured token,
+and your module is up and running ready to be used!
 
 ### Final note
 This guide will continue to grow and possibly end up being moved into their own sections
