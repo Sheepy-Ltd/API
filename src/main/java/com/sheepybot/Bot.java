@@ -153,11 +153,10 @@ public class Bot {
         if (buildInfo != null) {
             LOGGER.info("Detected build info flag, logging build info then exiting...");
 
-            LOGGER.info("--------------- Discord ---------------");
-            LOGGER.info(String.format("Rest API Version: %d", JDAInfo.DISCORD_REST_VERSION));
-            LOGGER.info(String.format("Audio Gateway Version: %d", JDAInfo.AUDIO_GATEWAY_VERSION));
             LOGGER.info("----------------- JDA -----------------");
             LOGGER.info(String.format("JDA Version: %s", JDAInfo.VERSION));
+            LOGGER.info(String.format("Rest API Version: %d", JDAInfo.DISCORD_REST_VERSION));
+            LOGGER.info(String.format("Audio Gateway Version: %d", JDAInfo.AUDIO_GATEWAY_VERSION));
             LOGGER.info("----------------- Bot -----------------");
             LOGGER.info(String.format("API Version: %s", BotInfo.VERSION));
             LOGGER.info(String.format("Commit Long: %s", BotInfo.GIT_COMMIT));
@@ -171,6 +170,9 @@ public class Bot {
             return;
         }
 
+        ModuleLoaderImpl.MODULE_DIRECTORY.mkdirs(); //assuming first time start so we're making the modules directory too
+        I18n.extractLanguageFiles(); //also extracting internal language files so people can change how we respond
+
         final File file = new File("bot.toml");
         if (!file.exists()) {
             LOGGER.info("Couldn't find required file bot.toml when starting, creating it...");
@@ -178,9 +180,6 @@ public class Bot {
             FileUtils.copyURLToFile(this.getClass().getResource("/bot.toml"), file); //config wasn't found so copy internal one (resources/bot.toml)
 
             LOGGER.info(String.format("File bot.toml was created at %s, please configure it then restart the bot.", file.getCanonicalPath()));
-
-            ModuleLoaderImpl.MODULE_DIRECTORY.mkdirs(); //assuming first time start so we're making the modules directory too
-            I18n.extractLanguageFiles(); //also extracting internal language files so people can change how we respond
         } else {
 
             LOGGER.info("Loading configuration...");
@@ -192,11 +191,10 @@ public class Bot {
                 return;
             }
 
-            I18n.setDefaultI18n(this.config.getString("client.languageFile"));
+//            I18n.setDefaultI18n(this.config.getString("client.languageFile"));
 
             if (this.config.getBoolean("db.enabled", false)) {
-                LOGGER.info("Connecting to database...");
-
+                LOGGER.info("Database has been enabled in configuration file, attempting to connect...");
                 this.database = new Database(new DatabaseInfo(this.config.getTable("db")));
             }
 
@@ -269,7 +267,7 @@ public class Bot {
 
             LOGGER.info("Loading language files...");
 
-            I18n.loanI18n(this.getClass());
+            I18n.loadI18n(this.getClass());
 
             LOGGER.info("Loading modules...");
 

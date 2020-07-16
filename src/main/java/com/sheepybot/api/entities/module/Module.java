@@ -2,8 +2,8 @@ package com.sheepybot.api.entities.module;
 
 import com.moandjiezana.toml.Toml;
 import com.sheepybot.api.entities.command.RootCommandRegistry;
+import com.sheepybot.api.entities.database.Database;
 import com.sheepybot.api.entities.event.RootEventRegistry;
-import com.sheepybot.api.entities.language.I18n;
 import com.sheepybot.api.entities.scheduler.Scheduler;
 import com.sheepybot.util.Objects;
 import org.apache.commons.io.FileUtils;
@@ -22,6 +22,7 @@ public abstract class Module {
     private Logger logger;
     private CommandRegistry commandRegistry;
     private EventRegistry eventRegistry;
+    private Database database;
     private SchedulerRegistry schedulerRegistry;
     private Metrics metrics;
     private File dataFolder;
@@ -42,24 +43,25 @@ public abstract class Module {
     //this is called in the module loader, making it final prevents it being overridden
     public final void init(@NotNull(value = "command manager cannot be null") final RootCommandRegistry rootCommandRegistry,
                            @NotNull(value = "event manager cannot be null") final RootEventRegistry rootEventRegistry,
+                           final Database database,
                            @NotNull(value = "data folder cannot be null") final File dataFolder,
                            @NotNull(value = "jar cannot be null") final File jar) {
         this.logger = LoggerFactory.getLogger(this.data.name());
         this.commandRegistry = new CommandRegistry(rootCommandRegistry, this);
         this.eventRegistry = new EventRegistry(rootEventRegistry, this);
+        this.database = database;
         this.schedulerRegistry = new SchedulerRegistry();
         this.metrics = new Metrics(this.getName());
         this.dataFolder = dataFolder;
         this.jar = jar;
-
-        //Register locale sources
-        I18n.loanI18n(this.getClass());
     }
 
     /**
      * Called on {@link Module} enable
      */
-    public abstract void onEnable();
+    public void onEnable() {
+
+    }
 
     /**
      * Called on {@link Module} disable
@@ -108,6 +110,13 @@ public abstract class Module {
      */
     public EventRegistry getEventRegistry() {
         return this.eventRegistry;
+    }
+
+    /**
+     * @return The {@link Database}, this can return {@code null} if the database is not enabled in your bot configuration.
+     */
+    public Database getDatabase() {
+        return this.database;
     }
 
     /**

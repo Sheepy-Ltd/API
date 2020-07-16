@@ -101,6 +101,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
 
                         module.init(Bot.get().getCommandRegistry(),
                                 Bot.get().getEventRegistry(),
+                                Bot.get().getDatabase(),
                                 dataFolder,
                                 file);
 
@@ -117,7 +118,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
         } catch (final IOException | ClassNotFoundException ex) {
             throw new InvalidModuleException("An error occurred whilst attempting to load module", ex);
         }
-        throw new InvalidModuleException(String.format("File %s does not contain a class that extends Module", file.getName()));
+        throw new InvalidModuleException(String.format("File %s does not contain a class that extends Module or is annotated with @ModuleData", file.getName()));
     }
 
     @Override

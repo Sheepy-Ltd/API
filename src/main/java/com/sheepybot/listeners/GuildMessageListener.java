@@ -48,13 +48,11 @@ public class GuildMessageListener extends ListenerAdapter {
 
         final Future<?> future = Bot.SCHEDULED_EXECUTOR_SERVICE.submit(() -> {
 
-            final I18n i18n = I18n.getDefaultI18n();
-
-            final String prefix = Bot.get().getConfig().getString("client.prefix");
-
             String content = raw;
 
-            //check if this is a command, if it isn't then call the chat event
+            final String prefix = Bot.get().getConfig().getString("client.prefix");
+            final I18n i18n = I18n.getDefaultI18n();
+
             if (content.startsWith(prefix)) {
                 content = content.substring(prefix.length());
             } else if (content.startsWith(guild.getSelfMember().getAsMention())) {
@@ -63,7 +61,7 @@ public class GuildMessageListener extends ListenerAdapter {
                     Messaging.send(channel, i18n.tl("commandPrefixMention", prefix));
                 }
             } else {
-//                Bot.get().getEventRegistry().callEvent(new MemberChatEvent(guild, channel, member, message, jda));
+                Bot.get().getEventRegistry().callEvent(event);
                 return;
             }
 
@@ -76,7 +74,7 @@ public class GuildMessageListener extends ListenerAdapter {
                 final Command command = Bot.get().getCommandRegistry().getCommandByNameOrAlias(Collections.singletonList(trigger));
 
                 if (command == null) {
-//                    Bot.get().getEventRegistry().callEvent(new MemberChatEvent(guild, channel, member, message, jda));
+                    Bot.get().getEventRegistry().callEvent(event);
                 } else {
 
                     final List<String> args = split.stream().skip(1).collect(Collectors.toList());

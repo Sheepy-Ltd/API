@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.MessageFormat;
@@ -140,16 +139,16 @@ public class I18n {
      *
      * @param clazz The {@link Class}
      */
-    public static void loanI18n(@NotNull(value = "clazz cannot be null") final Class clazz) {
+    public static void loadI18n(@NotNull(value = "clazz cannot be null") final Class clazz) {
 
-        LOGGER.info("Loading additional language files...");
+        LOGGER.info("Loading language files...");
 
         for (final Language language : Language.values()) {
 
             if (language.isFake()) continue;
 
             try {
-                LOGGER.info(String.format("Attempting to load language file %s.properties...", language.getCode()));
+                LOGGER.info(String.format("Loading language file %s.properties...", language.getCode()));
 
                 final ResourceBundle bundle = getBundleFromURL(language.getCode(), new File("/lang/" + language.getCode() + ".properties").toURI().toURL());
                 if (bundle == null) {
@@ -175,26 +174,29 @@ public class I18n {
 
         final File lang = new File("lang/");
 
-        final URL url = Bot.class.getResource("/lang");
-        if (url != null && !lang.exists()) {
+        if (!lang.exists()) {
 
             LOGGER.info("Attempting to extract internal language files...");
 
             lang.mkdirs();
 
-            try {
-                LOGGER.info("Current dir " + url.toURI());
-                for (final File file : new File(url.toURI()).listFiles()) {
-                    LOGGER.info(String.format("Copying internal file %s to %s/%s...", file.getName(), lang.getAbsolutePath(), file.getName()));
+            for (final Language language : Language.values()) {
+                if (language.isFake()) continue;
+
+                final String languageFileName = String.format("%s.properties", language.getCode());
+                final File file = new File(lang, languageFileName);
+                if (!file.exists()) {
+                    LOGGER.info(String.format("Extracting internal language file %s to %s", languageFileName, file.getAbsolutePath()));
                     try {
-                        FileUtils.copyFile(file, new File(lang, file.getName()));
-                    } catch (final IOException ex) {
-                        LOGGER.info("An error occurred and the file couldn't be extracted", ex);
+                        FileUtils.copyURLToFile(Bot.get().getClass().getResource(String.format("/lang/%s", languageFileName)), file);
+                        LOGGER.info(String.format("File created at: %s", file.getAbsolutePath()));
+                    } catch (IOException e) {
+                        LOGGER.info(String.format("Failed to extract internal language file %s to %s", languageFileName, file.getAbsolutePath()));
                     }
                 }
-            } catch (final URISyntaxException ex) {
-                LOGGER.info("An error occurred during extraction, if this error persists please report it on GitHub.", ex);
+
             }
+
         }
 
     }
