@@ -23,6 +23,7 @@ Why shouldn't I use MySQL?
  - MySQL has no feature advantage over other databases; PostgreSQL has many more useful features (such as RETURNs).
 
 There is no reason to use MySQL over PostgreSQL, or even sqlite3. See also:
+
 https://blog.ionelmc.ro/2014/12/28/terrible-choices-mysql/
 https://grimoire.ca/mysql/choose-something-else
 
