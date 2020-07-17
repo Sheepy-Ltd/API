@@ -28,14 +28,41 @@ public class Database {
      */
     public Database(@NotNull(value = "credentials cannot be null") final DatabaseInfo credentials) {
         this.dataSource = new HikariDataSource();
-        this.dataSource.setJdbcUrl(String.format("jdbc:postgresql://%s:%s/%s", credentials.getHost(), credentials.getPort(), credentials.getDatabase()));
+        this.dataSource.setJdbcUrl(String.format("jdbc:%s://%s:%s/%s", credentials.getDatabaseType(), credentials.getHost(), credentials.getPort(), credentials.getDatabase()));
         this.dataSource.setUsername(credentials.getUsername());
         this.dataSource.setPassword(credentials.getPassword());
         this.dataSource.setMaximumPoolSize(credentials.getPoolSize());
         this.dataSource.setLeakDetectionThreshold(5_000); //5 seconds
         this.dataSource.setConnectionTimeout(30_000); //30 seconds
-        this.dataSource.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
+        this.dataSource.setDataSourceClassName(getDataSourceClassNameFromDatabaseType(credentials.getDatabaseType()));
         this.dataSource.setPoolName(String.format("%s-Connection-Pool", BotInfo.BOT_NAME));
+    }
+
+    /**
+     * Figure out the proper driver class name for Hikari CP to use dependant on the
+     * type of database specified within the bot configuration.
+     *
+     * <p>The currently accepted database types are as follows:</p>
+     * <ul>
+     *     <li>postgresql</li>
+     *     <li>mariadb</li>
+     *     <li>mysql</li>
+     * </ul>
+     *
+     * @param databaseType The database type.
+     * @return The database type
+     * @throws IllegalArgumentException If the input argument is not one of the accepted types.
+     */
+    private String getDataSourceClassNameFromDatabaseType(final String databaseType) {
+        switch (databaseType.toLowerCase()) {
+            case "postgresql":
+                return "org.postgresql.ds.PGSimpleDataSource";
+            case "mariadb":
+                return "org.mariadb.jdbc.Driver";
+            case "mysql":
+                return "com.mysql.jdbc.Driver";
+        }
+        throw new IllegalArgumentException(String.format("Invalid database type %s (must be one of postgresql, mariadb or mysql)", databaseType));
     }
 
     /**
@@ -44,7 +71,6 @@ public class Database {
      *
      * @param haystack The query to execute
      * @param needles  The values
-     *
      * @return A {@link com.sheepybot.api.entities.database.object.DBObject}, or {@code null} if an error occurred.
      */
     public DBObject findOne(final String haystack,
@@ -53,7 +79,7 @@ public class Database {
              final PreparedStatement statement = connection.prepareStatement(haystack)) {
 
             for (int i = 0; i < needles.length; i++) {
-                statement.setObject((i+1), needles[i]);
+                statement.setObject((i + 1), needles[i]);
             }
 
             final DBObject object = new DBObject();
@@ -80,12 +106,12 @@ public class Database {
      * @return A {@link DBCursor}, or {@code null} if an error occurred.
      */
     public DBCursor find(@NotNull(value = "query cannot be null") final String haystack,
-                                                                  final Object... needles) {
+                         final Object... needles) {
         try (final Connection connection = this.getConnection();
              final PreparedStatement statement = connection.prepareStatement(haystack)) {
 
             for (int i = 0; i < needles.length; i++) {
-                statement.setObject((i+1), needles[i]);
+                statement.setObject((i + 1), needles[i]);
             }
 
             final DBCursor cursor = new DBCursor();
@@ -109,16 +135,15 @@ public class Database {
     /**
      * @param haystack The query to execute
      * @param needles  The values
-     *
      * @return {@code true} if this was successful, {@code false} if there were no rows affected or an error occurred
      */
     public boolean execute(@NotNull(value = "haystack cannot be null") final String haystack,
-                                                                       final Object... needles) {
+                           final Object... needles) {
         try (final Connection connection = this.getConnection();
              final PreparedStatement statement = connection.prepareStatement(haystack)) {
 
             for (int i = 0; i < needles.length; i++) {
-                statement.setObject((i+1), needles[i]);
+                statement.setObject((i + 1), needles[i]);
             }
 
             return statement.executeUpdate() > 0;
@@ -131,6 +156,9 @@ public class Database {
     /**
      * Shutdown this {@link Database}, this will close the internal connection pool
      * preventing any more queries from being executed.
+     *
+     * <p>This should only ever be called by the API directly, any calls made by a module may disrupt the process
+     * of other modules.</p>
      */
     public void shutdown() {
         LOGGER.info("Shutting down HikariCP...");
@@ -139,13 +167,12 @@ public class Database {
         }
     }
 
-    private Connection getConnection() {
-        try {
-            return this.dataSource.getConnection();
-        } catch (final SQLException ex) {
-            LOGGER.info("Failed to retrieve a connection", ex);
-        }
-        return null;
+    /**
+     * @return A {@link Connection}
+     * @throws SQLException If we couldn't retrieve a connection from the pool.
+     */
+    private Connection getConnection() throws SQLException {
+        return this.dataSource.getConnection();
     }
 
 }

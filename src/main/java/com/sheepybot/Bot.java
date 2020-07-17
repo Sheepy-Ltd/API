@@ -163,7 +163,7 @@ public class Bot {
             LOGGER.info(String.format("Branch: %s", BotInfo.GIT_BRANCH));
             LOGGER.info(String.format("Build Date: %s", BotInfo.BUILD_DATE));
             LOGGER.info(String.format("Build Author: %s", BotInfo.BUILD_AUTHOR));
-            LOGGER.info(String.format("Lavaplayer Version: %s", PlayerLibrary.VERSION));
+            LOGGER.info(String.format("Lava Player Version: %s", PlayerLibrary.VERSION));
             LOGGER.info(String.format("JVM Version: %s", System.getProperty("java.version")));
             LOGGER.info("---------------------------------------");
 
@@ -171,7 +171,7 @@ public class Bot {
         }
 
         //noinspection ResultOfMethodCallIgnored
-        ModuleLoaderImpl.MODULE_DIRECTORY.mkdirs(); //assuming first time start so we're making the modules directory too
+        ModuleLoaderImpl.MODULE_DIRECTORY.mkdirs();
         I18n.extractLanguageFiles(); //also extracting internal language files so people can change how we respond
 
         final File file = new File("bot.toml");
@@ -192,7 +192,7 @@ public class Bot {
                 return;
             }
 
-//            I18n.setDefaultI18n(this.config.getString("client.languageFile"));
+            I18n.setDefaultI18n(this.config.getString("client.language"));
 
             if (this.config.getBoolean("db.enabled", false)) {
                 LOGGER.info("Database has been enabled in configuration file, attempting to connect...");

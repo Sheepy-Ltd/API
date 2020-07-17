@@ -1,3 +1,5 @@
+version = 1.0
+
 [jda]
     token = ""                         #your bots token
     activity = "Beep Boop, Boop Beep?" #your activity as its displayed in the discord client
@@ -26,17 +28,18 @@
     shard_max = -1                     #the maximum shard ID
 
 [client]
-    languageFile = "en_GB"             #the file name not including the .properties file type
+    language = "en_GB"                 #the file name not including the .properties file type
     prefix = ">"                       #this is the prefix used for commands, change it as you wish
 
-#A list of User-ID's representing Administrators
+#A list of User-ID's representing Administrators, you can retrieve your user ID by enabling
+#developer mode and then right clicking your user and hit "Copy ID"
+#after that then restart the bot and you can use the BotUtils#isBotAdmin method.
 bot_admins = []
 
-#Your database credentials, set enabled = false to disable database connections if you don't have one
-#This api currently only supports use of PostgreSQL, you can find out how to set it up here
-#https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04
+#Your database credentials, set enabled = false to disable database connections if you don't have one.
 [db]
     enabled = false                     #whether to use the database for GuildSettings, if enabled this will automatically create a table of its own
+    database_type = "postgresql"        #choose from mysql, mariadb or postgresql. Default is Postgresql and the reason for this is explained on the repository.
     database = "discord"                #the postgres database to use
     username = "user"                   #the username for authentication
     password = "pass"                   #the password for authentication

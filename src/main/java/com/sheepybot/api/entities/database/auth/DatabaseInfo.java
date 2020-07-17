@@ -12,6 +12,7 @@ public class DatabaseInfo {
     private final String database;
     private final int port;
     private final int poolSize;
+    private final String databaseType;
 
     /**
      * Construct a new {@link DatabaseInfo} instance from a {@link Toml} instance
@@ -19,24 +20,28 @@ public class DatabaseInfo {
      */
     public DatabaseInfo(@NotNull(value = "table cannot be null") final Toml table) {
         this(table.getString("username"), table.getString("password"), table.getString("host"),
-                table.getString("database"), Math.toIntExact(table.getLong("port")), Math.toIntExact(table.getLong("poolSize")));
+                table.getString("database"), Math.toIntExact(table.getLong("port")), Math.toIntExact(table.getLong("poolSize")),
+                table.getString("database_type"));
     }
 
     /**
      * Construct a new {@link DatabaseInfo}
-     * @param username The username of the database server
-     * @param password The password of the database server
-     * @param host The address of the database server
-     * @param database The database to use on the server
-     * @param port The port of the database server
-     * @param poolSize The size of the connection pool
+     *
+     * @param username     The username of the database server
+     * @param password     The password of the database server
+     * @param host         The address of the database server
+     * @param database     The database to use on the server
+     * @param port         The port of the database server
+     * @param poolSize     The size of the connection pool
+     * @param databaseType The size of the connection pool
      */
     public DatabaseInfo(@NotNull(value = "username cannot be null") final String username,
                         @NotNull(value = "password cannot be null") final String password,
                         @NotNull(value = "host cannot be null") final String host,
                         @NotNull(value = "database cannot be null") final String database,
                         final int port,
-                        final int poolSize) {
+                        final int poolSize,
+                        @NotNull(value = "database type cannot be null") final String databaseType) {
         Objects.checkArgument(port > 0, "port must be greater than 0");
         Objects.checkArgument(poolSize > 0, "pool size must be greater than 0");
         this.username = username;
@@ -45,6 +50,7 @@ public class DatabaseInfo {
         this.database = database;
         this.port = port;
         this.poolSize = poolSize;
+        this.databaseType = databaseType;
     }
 
     /**
@@ -88,4 +94,12 @@ public class DatabaseInfo {
     public int getPoolSize() {
         return this.poolSize;
     }
+
+    /**
+     * @return The database type
+     */
+    public String getDatabaseType() {
+        return this.databaseType;
+    }
+
 }
