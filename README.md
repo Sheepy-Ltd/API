@@ -9,7 +9,7 @@ and want to contribute please feel free to do so, any support is welcome.
 
 You can find documentation about the lib this application uses [here](https://github.com/DV8FromTheWorld/JDA)
 
-As a side note for using databases with this, the API uses Postgresql.
+As a side note for using databases with this, the API uses Postgresql by default but does support MySQL and MariaDB.
 
 Why shouldn't I use MySQL?
 

@@ -25,27 +25,19 @@ public interface RootCommandRegistry {
      * Retrieve a {@link Command} by its name or any alias it may use to be referenced or executed
      *
      * @param aliases The names a command may used to be executed
+     *
      * @return The {@link Command}, or {@code null} if no command was found
      */
     Command getCommandByNameOrAlias(@NotNull(value = "aliases cannot be null") final List<String> aliases);
 
     /**
-     * Register a {@link Command} in this command map
-     *
-     * @param command The {@link Command} to register
-     */
-    default void registerCommand(@NotNull(value = "command cannot be null") final Command command) {
-        this.registerCommand(command, null);
-    }
-
-    /**
      * Register a {@link Command} in this {@link RootCommandRegistry}
      *
      * @param command The {@link Command} to register
-     * @param module  The owning {@link Module}, or {@code null} if this is a default command.
+     * @param module  The owning {@link Module}.
      */
     void registerCommand(@NotNull(value = "command cannot be null") final Command command,
-                         final Module module);
+                         @NotNull(value = "module cannot be null") final Module module);
 
     /**
      * Un-register a {@link Command} from this command map

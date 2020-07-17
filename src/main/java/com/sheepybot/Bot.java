@@ -3,7 +3,6 @@ package com.sheepybot;
 import com.google.gson.JsonParser;
 import com.moandjiezana.toml.Toml;
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
-import com.sheepybot.api.entities.command.Command;
 import com.sheepybot.api.entities.command.RootCommandRegistry;
 import com.sheepybot.api.entities.database.Database;
 import com.sheepybot.api.entities.database.auth.DatabaseInfo;
@@ -13,7 +12,6 @@ import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.api.entities.module.loader.ModuleLoader;
 import com.sheepybot.api.entities.scheduler.Scheduler;
 import com.sheepybot.internal.command.CommandRegistryImpl;
-import com.sheepybot.internal.command.defaults.admin.EvaluateCommand;
 import com.sheepybot.internal.event.EventRegistryImpl;
 import com.sheepybot.internal.module.ModuleLoaderImpl;
 import com.sheepybot.listeners.GuildMessageListener;
@@ -124,8 +122,7 @@ public class Bot {
         try {
             (bot = new Bot()).start(args); //start in current directory
         } catch (final Throwable ex) {
-            LOGGER.info("An error occurred during startup and the bot has to shutdown...");
-            ex.printStackTrace();
+            LOGGER.info("An error occurred during startup and the API has to shutdown...", ex);
             if (bot != null) {
                 bot.shutdown();
             }
@@ -195,7 +192,7 @@ public class Bot {
             I18n.setDefaultI18n(this.config.getString("client.language"));
 
             if (this.config.getBoolean("db.enabled", false)) {
-                LOGGER.info("Database has been enabled in configuration file, attempting to connect...");
+                LOGGER.info("Database has been enabled in configuration file, loading up connection pool...");
                 this.database = new Database(new DatabaseInfo(this.config.getTable("db")));
             }
 
@@ -262,13 +259,6 @@ public class Bot {
             LOGGER.info("Starting shards and attempting to connect to the Discord API...");
 
             this.shardManager = builder.build();
-
-            LOGGER.info("Registering default commands...");
-
-            this.commandRegistry.registerCommand(Command.builder()
-                    .names("eval")
-                    .executor(new EvaluateCommand())
-                    .build());
 
             LOGGER.info("Loading language files...");
 

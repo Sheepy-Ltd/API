@@ -21,7 +21,7 @@ public class DatabaseInfo {
     public DatabaseInfo(@NotNull(value = "table cannot be null") final Toml table) {
         this(table.getString("username"), table.getString("password"), table.getString("host"),
                 table.getString("database"), Math.toIntExact(table.getLong("port")), Math.toIntExact(table.getLong("poolSize")),
-                table.getString("database_type"));
+                table.getString("database_type", "postgresql"));
     }
 
     /**

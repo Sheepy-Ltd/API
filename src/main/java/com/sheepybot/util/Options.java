@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class Options implements Iterator<Options.Option> {
 
     /**
-     * The {@link Pattern} used to match a given string as a flag
+     * The {@link Pattern} used to match a given string as a startup option.
      */
     private static final Pattern FLAG_PATTERN = Pattern.compile("--([\\w-]+)(?:\\s+(\\w+))?");
 
@@ -50,6 +50,7 @@ public class Options implements Iterator<Options.Option> {
      * Parse options from an array and return them as a {@link List}
      *
      * @param options The options to parse
+     *
      * @return An {@link Options} instance
      */
     public static Options parse(final String[] options) {

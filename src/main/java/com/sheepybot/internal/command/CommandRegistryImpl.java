@@ -30,7 +30,7 @@ public class CommandRegistryImpl implements RootCommandRegistry {
 
     @Override
     public void registerCommand(@NotNull(value = "command cannot be null") final Command command,
-                                final @NotNull(value = "module cannot be null") Module module) {
+                                @NotNull(value = "module cannot be null") final Module module) {
         if (this.getCommandByNameOrAlias(command.getNames()) != null) {
             throw new IllegalArgumentException("Command '" + command.getName() + "' is already registered");
         }
