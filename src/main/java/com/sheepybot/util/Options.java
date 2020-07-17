@@ -26,6 +26,7 @@ public class Options implements Iterator<Options.Option> {
      * Retrieve an option by its name
      *
      * @param option The option
+     *
      * @return The {@link Option} or {@code null} if no option was present
      */
     public Option getOption(@NotNull(value = "option cannot be null") final String option) {
@@ -73,7 +74,7 @@ public class Options implements Iterator<Options.Option> {
     }
 
     /**
-     * A class used to represent flags passed with a command
+     * Parses options passed to the API at startup.
      */
     public static final class Option {
 
@@ -178,7 +179,7 @@ public class Options implements Iterator<Options.Option> {
 
         @Override
         public String toString() {
-            return "Flag{name=" + this.name + ", value=" + this.value + "}";
+            return "Option{name=" + this.name + ", value=" + this.value + "}";
         }
     }
 
