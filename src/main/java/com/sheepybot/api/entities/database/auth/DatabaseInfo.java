@@ -33,7 +33,12 @@ public class DatabaseInfo {
      * @param database     The database to use on the server
      * @param port         The port of the database server
      * @param poolSize     The size of the connection pool
-     * @param databaseType The size of the connection pool
+     * @param databaseType The database type to use, must be one of
+     *                     <ul>
+     *                         <li>mysql</li>
+     *                         <li>mariadb</li>
+     *                         <li>postgresql</li>
+     *                     </ul>
      */
     public DatabaseInfo(@NotNull(value = "username cannot be null") final String username,
                         @NotNull(value = "password cannot be null") final String password,

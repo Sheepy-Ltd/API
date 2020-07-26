@@ -93,7 +93,7 @@ public class Database {
 
             return object;
         } catch (final SQLException ex) {
-            LOGGER.error(String.format("An SQLException was thrown whilst attempting to execute query '%s' with %s", haystack, (needles.length == 0 ? "no values" : Arrays.toString(needles))), ex);
+            LOGGER.error(String.format("An SQLException was thrown whilst attempting to execute query '%s' with values %s", haystack, (needles.length == 0 ? "no values" : Arrays.toString(needles))), ex);
         }
         return null;
     }
@@ -127,7 +127,7 @@ public class Database {
 
             return cursor;
         } catch (final SQLException ex) {
-            LOGGER.error(String.format("An SQLException was thrown whilst attempting to execute query '%s' with %s", haystack, (needles.length == 0 ? "no values" : Arrays.toString(needles))), ex);
+            LOGGER.error(String.format("An SQLException was thrown whilst attempting to execute query '%s' with values %s", haystack, (needles.length == 0 ? "no values" : Arrays.toString(needles))), ex);
         }
         return null;
     }
@@ -148,7 +148,7 @@ public class Database {
 
             return statement.executeUpdate() > 0;
         } catch (final SQLException ex) {
-            LOGGER.error(String.format("An SQLException was thrown whilst attempting to execute query '%s' with %s", haystack, (needles.length == 0 ? "no values" : Arrays.toString(needles))), ex);
+            LOGGER.error(String.format("An SQLException was thrown whilst attempting to execute query '%s' with values %s", haystack, (needles.length == 0 ? "no values" : Arrays.toString(needles))), ex);
         }
         return false;
     }
