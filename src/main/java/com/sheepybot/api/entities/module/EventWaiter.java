@@ -6,6 +6,7 @@ import com.sheepybot.api.entities.event.EventHandler;
 import com.sheepybot.api.entities.event.EventListener;
 import com.sheepybot.util.Objects;
 import net.dv8tion.jda.api.events.Event;
+import net.dv8tion.jda.api.events.GenericEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,12 +68,12 @@ public final class EventWaiter implements EventListener {
      * @return The {@link WaitingEvent}
      * @throws IllegalArgumentException If this {@link EventWaiter} is shutdown or if there is no timeout set
      */
-    public <T extends Event> WaitingEvent<T> newWaiter(@NotNull(value = "event cannot be null") final Class<T> event,
-                                                    final Predicate<T> predicate,
-                                                    @NotNull(value = "function cannot be null") final Function<T, Boolean> function,
-                                                    final long timeoutAfter,
-                                                    @NotNull(value = "unit cannot be null") final TimeUnit unit,
-                                                    final Runnable timeoutAction) {
+    public <T extends GenericEvent> WaitingEvent<T> newWaiter(@NotNull(value = "event cannot be null") final Class<T> event,
+                                                              final Predicate<T> predicate,
+                                                              @NotNull(value = "function cannot be null") final Function<T, Boolean> function,
+                                                              final long timeoutAfter,
+                                                              @NotNull(value = "unit cannot be null") final TimeUnit unit,
+                                                              final Runnable timeoutAction) {
 
         Objects.checkArgument(!this.isShutdown(), "Cannot register new WaitingEvent's on a shutdown EventWaiter");
         Objects.checkArgument(timeoutAfter > 0, "Timeout cannot be negative or equal to 0");
@@ -128,13 +129,15 @@ public final class EventWaiter implements EventListener {
     }
 
     @EventHandler
-    public final void onEvent(final Event event) {
+    public final void onEvent(final GenericEvent event) {
         if (this.isShutdown()) return;
 
         Class clazz = event.getClass();
         while (clazz != null) {
 
             if (this.waiters.containsKey(clazz)) {
+
+                LOGGER.info("Found valid event waiter, processing event...");
 
                 final Set<WaitingEvent> waiters = this.waiters.get(clazz);
                 final WaitingEvent[] events = waiters.toArray(new WaitingEvent[0]);
@@ -151,7 +154,7 @@ public final class EventWaiter implements EventListener {
     /**
      *
      */
-    public class WaitingEvent<T extends Event> {
+    public class WaitingEvent<T extends GenericEvent> {
 
         private final Predicate<T> predicate;
         private final Function<T, Boolean> function;
@@ -183,7 +186,7 @@ public final class EventWaiter implements EventListener {
     /**
      * A utility class aimed at creating a more cleanly styled way of building {@link WaitingEvent}s
      */
-    public class WaitingEventBuilder<T extends Event> {
+    public class WaitingEventBuilder<T extends GenericEvent> {
 
         protected final EventWaiter waiter;
         protected final Class<T> clazz;

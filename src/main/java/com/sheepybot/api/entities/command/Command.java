@@ -100,8 +100,12 @@ public final class Command {
             this.names = Lists.newArrayList(name.toLowerCase());
 
             final String[] newAliases = new String[names.size()];
-            for (int i = 0; i < aliases.length; i++) { //force lower case
-                newAliases[i] = aliases[i].toLowerCase();
+            newAliases[0] = name.toLowerCase();
+
+            if (aliases != null) {
+                for (int i = 0; i < aliases.length; i++) { //force lower case
+                    newAliases[i] = aliases[i].toLowerCase();
+                }
             }
 
             Collections.addAll(this.names, newAliases);

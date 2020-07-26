@@ -6,6 +6,7 @@ import com.sheepybot.api.entities.event.*;
 import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.api.exception.event.EventException;
 import net.dv8tion.jda.api.events.Event;
+import net.dv8tion.jda.api.events.GenericEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class EventRegistryImpl implements RootEventRegistry {
 
-    private final Map<Class<? extends Event>, List<RegisteredListener>> listeners;
+    private final Map<Class<? extends GenericEvent>, List<RegisteredListener>> listeners;
 
     public EventRegistryImpl() {
         this.listeners = Maps.newConcurrentMap();
@@ -37,7 +38,7 @@ public class EventRegistryImpl implements RootEventRegistry {
             final Class<?>[] parameters = method.getParameterTypes();
             if (parameters.length == 1 && !Event.class.isAssignableFrom(parameters[0])) {
 
-                final Class<? extends Event> eventClass = parameters[0].asSubclass(Event.class);
+                final Class<? extends GenericEvent> eventClass = parameters[0].asSubclass(GenericEvent.class);
 
                 if (!method.isAccessible()) {
                     method.setAccessible(true);

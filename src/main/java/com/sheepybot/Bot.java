@@ -256,10 +256,6 @@ public class Bot {
                 builder.setActivity(Activity.of(Activity.ActivityType.DEFAULT, activity));
             }
 
-            LOGGER.info("Starting shards and attempting to connect to the Discord API...");
-
-            this.shardManager = builder.build();
-
             LOGGER.info("Loading language files...");
 
             I18n.loadI18n(this.getClass());
@@ -268,7 +264,11 @@ public class Bot {
 
             //If there were no modules to load it just returns an empty list, so no harm done
             final Collection<Module> modules = this.moduleLoader.loadModules();
-            modules.forEach(this.moduleLoader::enableModule);
+            modules.forEach(module -> module.onEnable(shardManager));
+
+            LOGGER.info("Starting shards and attempting to connect to the Discord API...");
+
+            this.shardManager = builder.build();
 
             LOGGER.info(String.format("Loaded %d modules", this.moduleLoader.getEnabledModules().size()));
 

@@ -1,10 +1,11 @@
 package com.sheepybot.api.entities.module.loader;
 
+import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.api.exception.module.InvalidModuleException;
+import net.dv8tion.jda.api.sharding.ShardManager;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.sheepybot.api.entities.module.Module;
 
 import java.io.File;
 import java.util.Collection;
@@ -23,7 +24,7 @@ public interface ModuleLoader {
     Module getModuleByName(@NotNull(value = "module names cannot be null") final String name);
 
     /**
-     * Get every loaded {@link Module}. Even if an error occurred during {@link Module#onEnable()} it will still appear
+     * Get every loaded {@link Module}. Even if an error occurred during {@link Module#onEnable(ShardManager)} it will still appear
      * in this list
      *
      * @return A {@link Collection} of loaded {@link Module}'s
@@ -62,10 +63,8 @@ public interface ModuleLoader {
      */
     void disableModules();
 
-    /**
-     * @param module The {@link Module} to enable
-     */
-    void enableModule(@NotNull(value = "module cannot be null") final Module module);
+    void enableModule(@NotNull(value = "module cannot be null") Module module,
+                      @NotNull(value = "shard manager cannot be null") ShardManager shardManager);
 
     /**
      * @param module The {@link Module} to disable
@@ -76,7 +75,7 @@ public interface ModuleLoader {
      * Reload all {@link Module}s
      *
      * @see ModuleLoader#disableModule(Module)
-     * @see ModuleLoader#enableModule(Module)
+     * @see ModuleLoader#enableModule(Module, ShardManager)
      */
     void reloadModules();
 
