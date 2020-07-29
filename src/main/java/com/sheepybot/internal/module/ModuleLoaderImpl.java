@@ -8,7 +8,6 @@ import com.sheepybot.api.entities.module.ModuleData;
 import com.sheepybot.api.entities.module.loader.ModuleLoader;
 import com.sheepybot.api.exception.module.InvalidModuleException;
 import com.sheepybot.util.Objects;
-import net.dv8tion.jda.api.sharding.ShardManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -146,13 +145,12 @@ public class ModuleLoaderImpl implements ModuleLoader {
     }
 
     @Override
-    public void enableModule(@NotNull(value = "module cannot be null") final Module module,
-                             @NotNull(value = "shard manager cannot be null") final ShardManager shardManager) {
+    public void enableModule(@NotNull(value = "module cannot be null") final Module module) {
         Objects.checkState(!module.isEnabled(), "Module already enabled");
 
         LOGGER.info("Enabling " + module.getFullName() + "...");
         try {
-            module.setEnabled(true, shardManager);
+            module.setEnabled(true);
         } catch (final Throwable ex) {
             LOGGER.info("An error occurred whilst enabling " + module.getFullName(), ex);
         }
@@ -171,7 +169,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
         }
 
         try {
-            module.setEnabled(false, null);
+            module.setEnabled(false);
         } catch (final Throwable ex) {
             LOGGER.info("An error occurred whilst disabling " + module.getFullName(), ex);
         }
@@ -186,7 +184,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
     @Override
     public void reloadModules() {
         this.disableModules();
-        this.loadModules().forEach(module -> enableModule(module, Bot.get().getShardManager()));
+        this.loadModules().forEach(this::enableModule);
     }
 
     private JarFile getJarFile(final File file) {

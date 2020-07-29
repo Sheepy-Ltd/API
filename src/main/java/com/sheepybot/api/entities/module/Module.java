@@ -6,7 +6,6 @@ import com.sheepybot.api.entities.database.Database;
 import com.sheepybot.api.entities.event.RootEventRegistry;
 import com.sheepybot.api.entities.scheduler.Scheduler;
 import com.sheepybot.util.Objects;
-import net.dv8tion.jda.api.sharding.ShardManager;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -60,7 +59,7 @@ public abstract class Module {
     /**
      * Called on {@link Module} enable
      */
-    public void onEnable(final ShardManager shardManager) {
+    public void onEnable() {
 
     }
 
@@ -216,17 +215,14 @@ public abstract class Module {
     /**
      * Sets this {@link Module}'s current enabled status.
      *
-     * @param enabled      The new enabled status of this {@link Module}
-     * @param shardManager The {@link ShardManager} to use
-     * @see Module#onEnable(ShardManager)
+     * @param enabled The new enabled status of this {@link Module}
      * @see Module#onDisable()
      */
-    public void setEnabled(final boolean enabled,
-                           final ShardManager shardManager) {
+    public void setEnabled(final boolean enabled) {
         if (this.enabled != enabled) {
             this.enabled = enabled;
             if (this.enabled) {
-                this.onEnable(shardManager);
+                this.onEnable();
             } else {
                 this.onDisable();
             }

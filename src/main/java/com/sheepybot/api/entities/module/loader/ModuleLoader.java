@@ -63,8 +63,7 @@ public interface ModuleLoader {
      */
     void disableModules();
 
-    void enableModule(@NotNull(value = "module cannot be null") Module module,
-                      @NotNull(value = "shard manager cannot be null") ShardManager shardManager);
+    void enableModule(@NotNull(value = "module cannot be null") final Module module);
 
     /**
      * @param module The {@link Module} to disable
@@ -75,7 +74,6 @@ public interface ModuleLoader {
      * Reload all {@link Module}s
      *
      * @see ModuleLoader#disableModule(Module)
-     * @see ModuleLoader#enableModule(Module, ShardManager)
      */
     void reloadModules();
 

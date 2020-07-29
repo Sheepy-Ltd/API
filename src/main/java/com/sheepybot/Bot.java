@@ -264,7 +264,7 @@ public class Bot {
 
             //If there were no modules to load it just returns an empty list, so no harm done
             final Collection<Module> modules = this.moduleLoader.loadModules();
-            modules.forEach(module -> module.onEnable(shardManager));
+            modules.forEach(module -> this.moduleLoader.enableModule(module));
 
             LOGGER.info("Starting shards and attempting to connect to the Discord API...");
 

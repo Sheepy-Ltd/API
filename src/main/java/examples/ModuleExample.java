@@ -6,7 +6,6 @@ import com.sheepybot.api.entities.command.Command;
 import com.sheepybot.api.entities.module.Metrics;
 import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.api.entities.module.ModuleData;
-import net.dv8tion.jda.api.sharding.ShardManager;
 
 import java.util.Map;
 
@@ -14,7 +13,7 @@ import java.util.Map;
 public class ModuleExample extends Module {
 
     @Override
-    public void onEnable(final ShardManager shardManager) {
+    public void onEnable() {
 
         this.getCommandRegistry().register(Command.builder()
                 .names("hello", "hi")
