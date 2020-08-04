@@ -11,7 +11,7 @@ public class JdaGenericListener extends ListenerAdapter {
     @Override
     public void onGenericEvent(final GenericEvent event) {
         //we ignore guild message received event as thats fired internally and not through JDA
-        if (event instanceof Event && !(event instanceof GuildMessageReceivedEvent)) {
+        if (!(event instanceof GuildMessageReceivedEvent)) {
             Bot.get().getEventRegistry().callEvent((Event) event);
         }
     }
