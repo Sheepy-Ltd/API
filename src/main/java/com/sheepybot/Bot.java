@@ -36,6 +36,7 @@ import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -193,7 +194,12 @@ public class Bot {
 
             if (this.config.getBoolean("db.enabled", false)) {
                 LOGGER.info("Database has been enabled in configuration file, loading up connection pool...");
-                this.database = new Database(new DatabaseInfo(this.config.getTable("db")));
+                final Toml db = this.config.getTable("db");
+                if (db == null || db.isEmpty()) {
+                    LOGGER.error("Couldn't retrieve database configuration from the configuration file, has it been removed?");
+                } else {
+                    this.database = new Database(new DatabaseInfo(db));
+                }
             }
 
             LOGGER.info("Loading data managers...");
@@ -203,6 +209,10 @@ public class Bot {
             this.moduleLoader = new ModuleLoaderImpl();
 
             final String token = this.config.getString("jda.token");
+            if (token == null || token.isEmpty()) {
+                LOGGER.error("Cannot start bot without a valid bot token.");
+                System.exit(0);
+            }
 
             int shards = Math.toIntExact(this.config.getLong("jda.shard_total"));
             int recommendedShards = BotUtils.getRecommendedShards(token);
@@ -212,9 +222,9 @@ public class Bot {
                 shards = recommendedShards;
             }
 
-            final List<GatewayIntent> gatewayIntents = BotUtils.getGatewayIntentsFromList(this.config.getList("jda.gateway_intents"));
-            final List<CacheFlag> enabledCacheFlags = BotUtils.getCacheFlagsFromList(this.config.getList("jda.enabled_cache_flags"));
-            final List<CacheFlag> disabledCacheFlags = BotUtils.getCacheFlagsFromList(this.config.getList("jda.disabled_cache_flags"));
+            final List<GatewayIntent> gatewayIntents = BotUtils.getGatewayIntentsFromList(this.config.getList("jda.gateway_intents", Collections.emptyList()));
+            final List<CacheFlag> enabledCacheFlags = BotUtils.getCacheFlagsFromList(this.config.getList("jda.enabled_cache_flags", Collections.emptyList()));
+            final List<CacheFlag> disabledCacheFlags = BotUtils.getCacheFlagsFromList(this.config.getList("jda.disabled_cache_flags", Collections.emptyList()));
 
             for (final CacheFlag flag : CacheFlag.values()) {
                 if (flag.getRequiredIntent() != null && !gatewayIntents.contains(flag.getRequiredIntent()) && enabledCacheFlags.contains(flag)) {
@@ -227,11 +237,11 @@ public class Bot {
             final DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.create(token, gatewayIntents)
                     .enableCache(enabledCacheFlags)
                     .disableCache(disabledCacheFlags)
-                    .setChunkingFilter(BotUtils.getChunkingFilterFromString(this.config.getString("jda.chunking_filter")))
-                    .setMemberCachePolicy(BotUtils.getMemberCachePolicyFromString(this.config.getString("jda.member_cache_policy")))
-                    .setAutoReconnect(this.config.getBoolean("jda.auto_reconnect"))
+                    .setChunkingFilter(BotUtils.getChunkingFilterFromString(this.config.getString("jda.chunking_filter", "NONE")))
+                    .setMemberCachePolicy(BotUtils.getMemberCachePolicyFromString(this.config.getString("jda.member_cache_policy", "NONE")))
+                    .setAutoReconnect(this.config.getBoolean("jda.auto_reconnect", true))
                     .setEnableShutdownHook(false)
-                    .setBulkDeleteSplittingEnabled(this.config.getBoolean("jda.bulk_delete_splitting"))
+                    .setBulkDeleteSplittingEnabled(this.config.getBoolean("jda.bulk_delete_splitting", false))
                     .setHttpClient(HTTP_CLIENT)
                     .setShardsTotal(shards)
                     .addEventListeners(

@@ -24,17 +24,17 @@ public class Database {
     /**
      * Construct a new {@link Database} instance
      *
-     * @param credentials The {@link DatabaseInfo} to use
+     * @param info The {@link DatabaseInfo} to use
      */
-    public Database(@NotNull(value = "credentials cannot be null") final DatabaseInfo credentials) {
+    public Database(@NotNull(value = "credentials cannot be null") final DatabaseInfo info) {
         this.dataSource = new HikariDataSource();
-        this.dataSource.setJdbcUrl(String.format("jdbc:%s://%s:%s/%s", credentials.getDatabaseType(), credentials.getHost(), credentials.getPort(), credentials.getDatabase()));
-        this.dataSource.setUsername(credentials.getUsername());
-        this.dataSource.setPassword(credentials.getPassword());
-        this.dataSource.setMaximumPoolSize(credentials.getPoolSize());
+        this.dataSource.setJdbcUrl(String.format("jdbc:%s://%s:%s/%s", info.getDatabaseType(), info.getHost(), info.getPort(), info.getDatabase()));
+        this.dataSource.setUsername(info.getUsername());
+        this.dataSource.setPassword(info.getPassword());
+        this.dataSource.setMaximumPoolSize(info.getPoolSize());
         this.dataSource.setLeakDetectionThreshold(5_000); //5 seconds
         this.dataSource.setConnectionTimeout(30_000); //30 seconds
-        this.dataSource.setDataSourceClassName(getDataSourceClassNameFromDatabaseType(credentials.getDatabaseType()));
+        this.dataSource.setDataSourceClassName(getDataSourceClassNameFromDatabaseType(info.getDatabaseType()));
         this.dataSource.setPoolName(String.format("%s-Connection-Pool", BotInfo.BOT_NAME));
     }
 
@@ -71,7 +71,7 @@ public class Database {
      *
      * @param haystack The query to execute
      * @param needles  The values
-     * @return A {@link com.sheepybot.api.entities.database.object.DBObject}, or {@code null} if an error occurred.
+     * @return A {@link DBObject} containing the rows which were returned by the database, or {@code null} if an error occurred.
      */
     public DBObject findOne(final String haystack,
                             final Object... needles) {
@@ -103,6 +103,7 @@ public class Database {
      *
      * @param haystack The query to execute
      * @param needles  The values
+     *
      * @return A {@link DBCursor}, or {@code null} if an error occurred.
      */
     public DBCursor find(@NotNull(value = "query cannot be null") final String haystack,
@@ -135,6 +136,7 @@ public class Database {
     /**
      * @param haystack The query to execute
      * @param needles  The values
+     *
      * @return {@code true} if this was successful, {@code false} if there were no rows affected or an error occurred
      */
     public boolean execute(@NotNull(value = "haystack cannot be null") final String haystack,
@@ -161,7 +163,7 @@ public class Database {
      * of other modules.</p>
      */
     public void shutdown() {
-        LOGGER.info("Shutting down HikariCP...");
+        LOGGER.info("Shutting down database connection pool...");
         if (!this.dataSource.isClosed()) {
             this.dataSource.close();
         }
