@@ -3,6 +3,7 @@ package com.sheepybot.api.entities.event;
 import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.api.exception.event.EventException;
 import net.dv8tion.jda.api.events.Event;
+import net.dv8tion.jda.api.events.GenericEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class RegisteredListener {
@@ -69,7 +70,7 @@ public class RegisteredListener {
      * @param event The {@link Event} to call
      * @throws EventException If an error occurred during event execution
      */
-    public void callEvent(@NotNull(value = "event cannot be null") final Event event) throws EventException {
+    public void callEvent(@NotNull(value = "event cannot be null") final GenericEvent event) throws EventException {
         this.executor.execute(this.listener, event);
     }
 

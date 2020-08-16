@@ -2,6 +2,7 @@ package com.sheepybot.api.entities.event;
 
 import com.sheepybot.api.entities.module.Module;
 import net.dv8tion.jda.api.events.Event;
+import net.dv8tion.jda.api.events.GenericEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,7 @@ public interface RootEventRegistry {
     /**
      * @param event The event to call
      */
-    void callEvent(@NotNull(value = "event cannot be null") final Event event);
+    void callEvent(@NotNull(value = "event cannot be null") final GenericEvent event);
 
     /**
      * Registers all {@link Event}s in the given {@link RootEventRegistry} class
@@ -28,10 +29,9 @@ public interface RootEventRegistry {
 
     /**
      * @param event The event
-     *
      * @return A {@link Collection} containing every {@link RegisteredListener} registered to this {@link Event}
      */
-    Collection<RegisteredListener> getRegisteredListeners(@NotNull(value = "event cannot be null") final Event event);
+    Collection<RegisteredListener> getRegisteredListeners(@NotNull(value = "event cannot be null") final GenericEvent event);
 
     /**
      * @param module The {@link Module} to get the listeners of
