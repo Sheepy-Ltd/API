@@ -137,8 +137,6 @@ public final class EventWaiter implements EventListener {
 
             if (this.waiters.containsKey(clazz)) {
 
-                LOGGER.info("Found valid event waiter, processing event...");
-
                 final Set<WaitingEvent> waiters = this.waiters.get(clazz);
                 final WaitingEvent[] events = waiters.toArray(new WaitingEvent[0]);
 
