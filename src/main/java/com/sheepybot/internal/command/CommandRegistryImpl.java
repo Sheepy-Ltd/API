@@ -36,8 +36,8 @@ public class CommandRegistryImpl implements RootCommandRegistry {
 
     @Override
     public void registerCommand(@NotNull(value = "command cannot be null") final Command command,
-                                @NotNull(value = "module cannot be null") final Module module) {
-        LOGGER.debug("Registering command {} in module {} to root command registry...", command.getName(), module.getName());
+                                final Module module) {
+        LOGGER.debug("Registering command {} in module {} to root command registry...", command.getName(), (module == null ? "Bot" : module.getName()));
         if (this.getCommandByNameOrAlias(command.getNames()) != null) {
             throw new IllegalArgumentException("Command '" + command.getName() + "' is already registered");
         }

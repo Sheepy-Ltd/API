@@ -303,7 +303,10 @@ public class Messaging {
                     }
                     return message;
                 } else {
-                    action.queue(this.success, this.failure);
+                    action.queue(message -> {
+                        if (this.success != null) this.success.accept(message);
+                        if (this.deleteAfter > 0) message.delete().queueAfter(this.deleteAfter, this.unit);
+                    }, this.failure);
                 }
             } catch (final InsufficientPermissionException ex) {
 

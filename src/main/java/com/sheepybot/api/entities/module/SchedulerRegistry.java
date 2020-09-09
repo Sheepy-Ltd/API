@@ -83,15 +83,9 @@ public class SchedulerRegistry {
      * Cancel a task by its task id
      *
      * @param taskId The id of the task
-     *
-     * @return {@code true} if the task was destroyed, {@code false otherwise}
      */
-    public boolean destroy(final int taskId) {
-        final boolean destroyed = this.scheduler.destroy(taskId);
-        if (destroyed) {
-            this.taskIds.remove(taskId);
-        }
-        return destroyed;
+    public void destroy(final int taskId) {
+        this.scheduler.destroy(taskId);
     }
 
 }

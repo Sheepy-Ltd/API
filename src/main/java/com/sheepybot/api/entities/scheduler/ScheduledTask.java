@@ -102,11 +102,9 @@ public class ScheduledTask {
 
     /**
      * Cancel this {@link ScheduledTask}
-     *
-     * @return {@code true} if this task was cancelled, {@code false} otherwise
      */
-    public boolean cancel() {
-        return Scheduler.getInstance().destroy(this.taskId);
+    public void cancel() {
+        Scheduler.getInstance().destroy(this.taskId);
     }
 
 }

@@ -177,13 +177,18 @@ public class ModuleLoaderImpl implements ModuleLoader {
         module.getCommandRegistry().unregisterAll();
         module.getEventRegistry().unregisterAll();
         module.getScheduler().cancelAllTasks();
+    }
 
+    @Override
+    public void unloadModule(@NotNull(value = "module cannot be null") final Module module) {
+        LOGGER.info(String.format("Unloaded module %s", module.getName()));
         this.modules.remove(module);
     }
 
     @Override
     public void reloadModules() {
         this.disableModules();
+        this.modules.forEach(this::unloadModule);
         this.loadModules().forEach(this::enableModule);
     }
 

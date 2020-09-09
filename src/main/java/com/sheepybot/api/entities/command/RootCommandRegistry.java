@@ -37,7 +37,7 @@ public interface RootCommandRegistry {
      * @param module  The owning {@link Module}.
      */
     void registerCommand(@NotNull(value = "command cannot be null") final Command command,
-                         @NotNull(value = "module cannot be null") final Module module);
+                         final Module module);
 
     /**
      * Un-register a {@link Command} from this command map

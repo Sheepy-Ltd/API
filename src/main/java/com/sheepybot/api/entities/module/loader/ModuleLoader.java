@@ -2,7 +2,6 @@ package com.sheepybot.api.entities.module.loader;
 
 import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.api.exception.module.InvalidModuleException;
-import net.dv8tion.jda.api.sharding.ShardManager;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,7 @@ public interface ModuleLoader {
     Module getModuleByName(@NotNull(value = "module names cannot be null") final String name);
 
     /**
-     * Get every loaded {@link Module}. Even if an error occurred during {@link Module#onEnable(ShardManager)} it will still appear
+     * Get every loaded {@link Module}. Even if an error occurred during {@link Module#onEnable()} it will still appear
      * in this list
      *
      * @return A {@link Collection} of loaded {@link Module}'s
@@ -63,12 +62,28 @@ public interface ModuleLoader {
      */
     void disableModules();
 
+    /**
+     * Enable a loaded {@link Module}
+     * <p></p>
+     * <p>Note that calling this method is <strong>NOT</strong> the same as calling {@link Module#onEnable()} or {@link Module#setEnabled(boolean)}
+     * and those methods are not a replacement for calling this method. Outside of all advice, iff you are loading modules outside of the API instead
+     * of using its default commands then this method <em>must</em> be called</p>
+     *
+     * @param module
+     */
     void enableModule(@NotNull(value = "module cannot be null") final Module module);
 
     /**
      * @param module The {@link Module} to disable
      */
     void disableModule(@NotNull(value = "module cannot be null") final Module module);
+
+    /**
+     * Unload a module from memory
+     *
+     * @param module The {@link Module} to unload
+     */
+    void unloadModule(@NotNull(value = "module cannot be null") Module module);
 
     /**
      * Reload all {@link Module}s

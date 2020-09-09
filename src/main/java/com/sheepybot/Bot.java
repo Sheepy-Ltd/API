@@ -3,6 +3,7 @@ package com.sheepybot;
 import com.google.gson.JsonParser;
 import com.moandjiezana.toml.Toml;
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
+import com.sheepybot.api.entities.command.Command;
 import com.sheepybot.api.entities.command.RootCommandRegistry;
 import com.sheepybot.api.entities.database.Database;
 import com.sheepybot.api.entities.database.auth.DatabaseInfo;
@@ -12,6 +13,7 @@ import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.api.entities.module.loader.ModuleLoader;
 import com.sheepybot.api.entities.scheduler.Scheduler;
 import com.sheepybot.internal.command.CommandRegistryImpl;
+import com.sheepybot.internal.command.defaults.admin.*;
 import com.sheepybot.internal.event.EventRegistryImpl;
 import com.sheepybot.internal.module.ModuleLoaderImpl;
 import com.sheepybot.listeners.GuildMessageListener;
@@ -269,6 +271,20 @@ public class Bot {
             LOGGER.info("Loading language files...");
 
             I18n.loadI18n(this.getClass());
+
+            if (this.config.getBoolean("client.load_default_commands", true)) {
+
+                LOGGER.info("Loading default commands...");
+
+                this.commandRegistry.registerCommand(Command.builder().names("reloadmodule", "rmod").usage("<module>").description("Reload a module").executor(new ReloadModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder().names("enablemodule", "emod").usage("<module>").description("Enable a module").executor(new EnableModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder().names("disablemodule", "dmod").usage("<module>").description("Disable a module").executor(new DisableModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder().names("loadmodule", "lmod").usage("<module>").description("Load a module from its exact jar file name").executor(new LoadModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder().names("unloadmodule", "umod").usage("<module>").description("Unload a module from memory").executor(new UnloadModuleCommand()).build(), null);
+
+                this.commandRegistry.registerCommand(Command.builder().names("evaluate", "eval").usage("<code>").description("Evaluate code").executor(new EvaluateCommand()).build(), null);
+
+            }
 
             LOGGER.info("Loading modules...");
 

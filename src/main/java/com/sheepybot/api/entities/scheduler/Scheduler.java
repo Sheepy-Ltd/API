@@ -68,6 +68,9 @@ public class Scheduler {
                                           final long startAfter,
                                           final long frequency) throws IllegalStateException {
         Objects.checkArgument(frequency > 0, "frequency cannot be less than 1");
+
+        LOGGER.debug("Received scheduled task starting after {}ms with frequency {}ms", startAfter, frequency);
+
         final ScheduledFuture<?> future = this.getService().scheduleWithFixedDelay(() -> { //schedule the task using the executor service
             try {
                 runnable.run();
@@ -79,6 +82,8 @@ public class Scheduler {
         final ScheduledTask task = new ScheduledTask(Scheduler.ID_GEN.incrementAndGet(), future, true, startAfter, frequency, TimeUnit.MILLISECONDS);
 
         this.futures.add(task);
+
+        LOGGER.debug("Created task with ID {}", task.getTaskId());
 
         return task;
     }
@@ -110,6 +115,9 @@ public class Scheduler {
     public ScheduledTask runTaskLater(@NotNull(value = "runnable cannot be null") final Runnable runnable,
                                       final long delay) throws IllegalStateException {
         Objects.checkArgument(delay > 0, "delay cannot be less than 1");
+
+        LOGGER.debug("Received scheduled task to run after {}ms", delay);
+
         final ScheduledFuture<?> future = this.getService().schedule(() -> {
             try {
                 runnable.run();
@@ -121,6 +129,8 @@ public class Scheduler {
         final ScheduledTask task = new ScheduledTask(Scheduler.ID_GEN.incrementAndGet(), future, false, delay, -1, TimeUnit.MILLISECONDS);
 
         this.futures.add(task);
+
+        LOGGER.debug("Created task with ID {}", task.getTaskId());
 
         return task;
     }
@@ -149,22 +159,17 @@ public class Scheduler {
      * Cancel a task by its task id
      *
      * @param taskId The id of the task
-     * @return {@code true} if the task was destroyed, {@code false} otherwise
      */
-    public boolean destroy(final int taskId) {
-        boolean destroyed = false;
+    public void destroy(final int taskId) {
 
-        for (final ScheduledTask task : this.futures) {
-            if (task.getTaskId() == taskId) { //make sure it's the task we're trying to cancel
-                final ScheduledFuture<?> future = task.getExecutor();
-                if (!future.isDone()) { //check if it's done yet
-                    destroyed = future.cancel(true);
-                    this.futures.remove(task);
-                }
+        this.futures.stream().filter(task -> task.getTaskId() == taskId).findFirst().ifPresent(task -> {
+            final ScheduledFuture<?> future = task.getExecutor();
+            if (!future.isDone()) {
+                future.cancel(true);
+                this.futures.remove(task);
             }
-        }
+        });
 
-        return destroyed;
     }
 
 }
