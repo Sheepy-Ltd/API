@@ -282,8 +282,6 @@ public class Bot {
                 this.commandRegistry.registerCommand(Command.builder().names("loadmodule", "lmod").usage("<module>").description("Load a module from its exact jar file name").executor(new LoadModuleCommand()).build(), null);
                 this.commandRegistry.registerCommand(Command.builder().names("unloadmodule", "umod").usage("<module>").description("Unload a module from memory").executor(new UnloadModuleCommand()).build(), null);
 
-                this.commandRegistry.registerCommand(Command.builder().names("evaluate", "eval").usage("<code>").description("Evaluate code").executor(new EvaluateCommand()).build(), null);
-
             }
 
             LOGGER.info("Loading modules...");
