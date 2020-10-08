@@ -24,7 +24,7 @@ version = ver.toString()
 
 mainClassName = group + '.Bot'
 shadowJar {
-    archiveFileNameName = "API.jar"
+    archiveFileName = "API.jar"
 }
 description = ''
 
