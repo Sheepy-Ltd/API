@@ -6,6 +6,7 @@ import com.sheepybot.api.entities.database.Database;
 import com.sheepybot.api.entities.event.RootEventRegistry;
 import com.sheepybot.api.entities.scheduler.Scheduler;
 import com.sheepybot.util.Objects;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.function.Function;
 
 public abstract class Module {
 
@@ -25,6 +27,7 @@ public abstract class Module {
     private Database database;
     private SchedulerRegistry schedulerRegistry;
     private Metrics metrics;
+    private Function<GuildMessageReceivedEvent, String> prefixFunction = null;
     private File dataFolder;
     private File jar;
 
@@ -163,6 +166,24 @@ public abstract class Module {
      */
     public Metrics getMetrics() {
         return this.metrics;
+    }
+
+    /**
+     * @return The {@link Function} used in generating prefixs for the API
+     */
+    public Function<GuildMessageReceivedEvent, String> getPrefixGenerator() {
+        return this.prefixFunction;
+    }
+
+    /**
+     * Sets the prefix generator to use for the entire API.
+     *
+     * <p>It's only advised to set this for an individual module as it will serve for the entire API and is not module specific</p>
+     *
+     * @param prefixFunction The {@link Function} to use in generating prefixes for the API.
+     */
+    public void setPrefixGenerator(@NotNull(value = "prefix generator cannot be null") final Function<GuildMessageReceivedEvent, String> prefixFunction) {
+        this.prefixFunction = prefixFunction;
     }
 
     /**

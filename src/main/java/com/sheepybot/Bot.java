@@ -23,6 +23,7 @@ import com.sheepybot.util.Objects;
 import com.sheepybot.util.Options;
 import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -44,6 +45,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * The main class for the bot
@@ -104,6 +106,10 @@ public class Bot {
      * A single threaded {@link ScheduledExecutorService}.
      */
     public static final ScheduledExecutorService SINGLE_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor(threadExecutor -> THREAD_FUNCTION.apply("Single Thread Service", threadExecutor));
+
+    public static Function<GuildMessageReceivedEvent, String> defaultPrefixGenerator;
+
+    public static Function<GuildMessageReceivedEvent, String> prefixGenerator;
 
     private static Bot instance;
 
@@ -284,6 +290,8 @@ public class Bot {
 
             }
 
+            Bot.prefixGenerator = Bot.defaultPrefixGenerator = (event) -> this.config.getString("client.prefix", "!");
+
             LOGGER.info("Loading modules...");
 
             //If there were no modules to load it just returns an empty list, so no harm done
@@ -299,7 +307,7 @@ public class Bot {
             //register our shutdown hook so if something happens we get properly shutdown
             Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "API-Auto-Shutdown-Thread"));
 
-            LOGGER.info(String.format("Startup completed! Took %dms, running api version: %s.", (System.currentTimeMillis() - this.startTime), BotInfo.VERSION));
+            LOGGER.info(String.format("Startup completed! Took %dms, implementing api version: %s.", (System.currentTimeMillis() - this.startTime), BotInfo.VERSION));
         }
     }
 
@@ -322,6 +330,10 @@ public class Bot {
 
         if (this.commandRegistry != null) {
             this.commandRegistry.unregisterAll();
+        }
+
+        if (this.database != null) {
+            this.database.shutdown();
         }
 
         Scheduler.getInstance().shutdown();

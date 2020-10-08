@@ -84,10 +84,33 @@ public class Objects {
     }
 
     /**
+     * Checks that the given array is not null.
+     *
+     * @param references The array to check
+     * @param message    The exception message to use if the check fails
+     * @return The array if it was not null
+     * @throws NullPointerException If the array was {@code null} or contains a null element
+     */
+    public static <T> T[] checkNotNull(final T[] references,
+                                       final String message) throws NullPointerException {
+
+        if (references == null) {
+            throw new NullPointerException(message);
+        }
+
+        for (final Object obj : references) {
+            if (obj == null) {
+                throw new NullPointerException(message);
+            }
+        }
+
+        return references;
+    }
+
+    /**
      * Checks that the given {@link String} is not null or effectively null (just whitespace).
      *
      * @param reference The reference to check
-     *
      * @throws NullPointerException If the reference was {@code null}
      */
     public static void checkNotBlank(final String reference) throws NullPointerException {

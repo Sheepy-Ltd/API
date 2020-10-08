@@ -1,8 +1,8 @@
 package com.sheepybot.agent;
 
 import com.sheepybot.Bot;
-import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.sharding.ShardManager;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -16,7 +16,7 @@ import java.io.IOException;
 public class DiscordBotListAgent implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiscordBotListAgent.class);
-    private static final String URL = "https://discordbots.org/api/bots/329668530926780426/stats";
+    private static final String URL = "https://discordbots.org/api/bots/%s/stats";
 
     private final ShardManager shardManager;
     private final String token;

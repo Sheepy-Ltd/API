@@ -65,6 +65,13 @@ public class CommandContext {
     }
 
     /**
+     * @return The self guild {@link Member}
+     */
+    public Member getSelfMember() {
+        return this.guild.getSelfMember();
+    }
+
+    /**
      * @return The {@link Guild} this command was executed in (can be null)
      */
     public Guild getGuild() {
@@ -143,6 +150,36 @@ public class CommandContext {
      */
     public void reply(@NotNull(value = "message cannot be null") final Message message) {
         Messaging.send(this.channel, message);
+    }
+
+    /**
+     * Creates a new {@link com.sheepybot.api.entities.messaging.Messaging.MessageActionBuilder} to send a message in the current channel.
+     *
+     * @param message The message to send.
+     * @return A {@link com.sheepybot.api.entities.messaging.Messaging.MessageActionBuilder}
+     */
+    public Messaging.MessageActionBuilder message(final String message) {
+        return Messaging.message(this.channel, message);
+    }
+
+    /**
+     * Sends a message in the {@link MessageChannel} this command was executed in
+     *
+     * @param embed The {@link MessageEmbed} to sent
+     * @return A {@link com.sheepybot.api.entities.messaging.Messaging.MessageActionBuilder}
+     */
+    public Messaging.MessageActionBuilder message(@NotNull(value = "embed cannot be null") final MessageEmbed embed) {
+        return Messaging.message(this.channel, embed);
+    }
+
+    /**
+     * Sends a message in the {@link MessageChannel} this command was executed in
+     *
+     * @param message The {@link Message} to send
+     * @return A {@link com.sheepybot.api.entities.messaging.Messaging.MessageActionBuilder}
+     */
+    public Messaging.MessageActionBuilder message(@NotNull(value = "message cannot be null") final Message message) {
+        return Messaging.message(this.channel, message);
     }
 
 }

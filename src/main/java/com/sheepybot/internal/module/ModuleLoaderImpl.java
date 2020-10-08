@@ -8,6 +8,7 @@ import com.sheepybot.api.entities.module.ModuleData;
 import com.sheepybot.api.entities.module.loader.ModuleLoader;
 import com.sheepybot.api.exception.module.InvalidModuleException;
 import com.sheepybot.util.Objects;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -16,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -124,7 +126,8 @@ public class ModuleLoaderImpl implements ModuleLoader {
     @Override
     public Collection<Module> loadModules() throws NullPointerException, IllegalArgumentException {
 
-        if (!ModuleLoaderImpl.MODULE_DIRECTORY.exists()) ModuleLoaderImpl.MODULE_DIRECTORY.mkdirs();
+        if (!ModuleLoaderImpl.MODULE_DIRECTORY.exists()) //noinspection ResultOfMethodCallIgnored
+            ModuleLoaderImpl.MODULE_DIRECTORY.mkdirs();
 
         final List<File> files = Arrays.stream(MODULE_DIRECTORY.listFiles()).filter(file -> file.getName().endsWith(".jar")).collect(Collectors.toList());
         final List<Module> modules = Lists.newArrayListWithCapacity(files.size());
@@ -150,7 +153,14 @@ public class ModuleLoaderImpl implements ModuleLoader {
 
         LOGGER.info("Enabling " + module.getFullName() + "...");
         try {
+
             module.setEnabled(true);
+
+            final Function<GuildMessageReceivedEvent, String> prefixGenerator = module.getPrefixGenerator();
+            if (prefixGenerator != null) {
+                Bot.prefixGenerator = prefixGenerator;
+            }
+
         } catch (final Throwable ex) {
             LOGGER.info("An error occurred whilst enabling " + module.getFullName(), ex);
         }
@@ -177,6 +187,8 @@ public class ModuleLoaderImpl implements ModuleLoader {
         module.getCommandRegistry().unregisterAll();
         module.getEventRegistry().unregisterAll();
         module.getScheduler().cancelAllTasks();
+
+        Bot.prefixGenerator = Bot.defaultPrefixGenerator;
     }
 
     @Override

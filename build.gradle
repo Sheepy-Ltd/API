@@ -14,7 +14,7 @@ plugins {
 }
 
 def git = versioning.info
-def ver = new Version(major: 1, minor: 0, patch: 0, build: git.build)
+def ver = new Version(major: 1, minor: 3, patch: 2, build: git.build)
 
 //def buildAuthor = System.getProperty('user.name')
 def buildDate = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy 'at' HH:mm:ss.SSS zZ"))
@@ -24,7 +24,7 @@ version = ver.toString()
 
 mainClassName = group + '.Bot'
 shadowJar {
-    archiveName = "API.jar"
+    archiveFileNameName = "API.jar"
 }
 description = ''
 

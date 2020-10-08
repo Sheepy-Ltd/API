@@ -1,18 +1,30 @@
 package com.sheepybot.api.entities.command;
 
 import com.google.common.collect.Lists;
+import com.sheepybot.internal.command.DefaultCommandHandler;
+import com.sheepybot.util.BotUtils;
 import com.sheepybot.util.Objects;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 public final class Command {
+
+    private static final CommandHandler DEFAULT_COMMAND_HANDLER = new DefaultCommandHandler();
 
     private final List<String> names;
     private final String description;
     private final String usage;
     private final CommandExecutor executor;
+    private final List<Permission> userPermissions;
+    private final List<Permission> botPermissions;
+    private final Function<CommandContext, Boolean> preExecutor;
+    private final boolean isOwnerOnly;
 
     /**
      * @param names       The names and aliases of this {@link Command}
@@ -23,12 +35,20 @@ public final class Command {
     private Command(@NotNull(value = "names cannot be null") final List<String> names,
                     final String description,
                     final String usage,
-                    @NotNull(value = "executor cannot be null") final CommandExecutor executor) {
+                    @NotNull(value = "executor cannot be null") final CommandExecutor executor,
+                    @NotNull(value = "userPermissions cannot be null") final List<Permission> userPermissions,
+                    @NotNull(value = "botPermissions cannot be null") final List<Permission> botPermissions,
+                    @NotNull(value = "preExecutor cannot be null") final Function<CommandContext, Boolean> preExecutor,
+                    final boolean isOwnerOnly) {
         Objects.checkArgument(names.size() > 0, "names cannot be empty");
         this.names = names;
         this.description = description;
         this.usage = usage;
         this.executor = executor;
+        this.userPermissions = userPermissions;
+        this.botPermissions = botPermissions;
+        this.preExecutor = preExecutor;
+        this.isOwnerOnly = isOwnerOnly;
     }
 
     /**
@@ -60,10 +80,51 @@ public final class Command {
     }
 
     /**
+     * @return A {@link List} of required {@link Permission}s for a {@link Member} to run this {@link Command}
+     */
+    public List<Permission> getUserPermissions() {
+        return this.userPermissions;
+    }
+
+    /**
+     * @return A list of required permissions for this {@link Command} to run
+     */
+    public List<Permission> getBotPermissions() {
+        return this.botPermissions;
+    }
+
+    /**
+     * Returns a function which should determine whether the command should
+     * be executed.
+     *
+     * @return The pre executor
+     */
+    public Function<CommandContext, Boolean> getPreExecutor() {
+        return this.preExecutor;
+    }
+
+    /**
      * @return The {@link CommandExecutor} for this {@link Command}
      */
     public CommandExecutor getExecutor() {
         return this.executor;
+    }
+
+    /**
+     * Whether this command can only be ran by its owner.
+     *
+     * <p>This should be checked by a call to {@link BotUtils#isBotAdmin(Member)} which directly checks against the API configuration
+     * for its list of bot admins.</p>
+     *
+     * @return {@code true} if this {@link Command} can only be ran by its owner.
+     */
+    public boolean isOwnerOnly() {
+        return this.isOwnerOnly;
+    }
+
+    public void handle(@NotNull(value = "context cannot be null") final CommandContext context,
+                       @NotNull(value = "args cannot be null") final Arguments args) {
+        Command.DEFAULT_COMMAND_HANDLER.handle(context, args);
     }
 
     /**
@@ -80,10 +141,21 @@ public final class Command {
      */
     public static final class Builder {
 
+        private static final Function<CommandContext, Boolean> DEFAULT_PRE_EXECUTOR = context -> true;
+
         private List<String> names;
         private String description;
         private String usage;
         private CommandExecutor executor;
+        private Function<CommandContext, Boolean> preExecutor = DEFAULT_PRE_EXECUTOR;
+        private boolean isOwnerOnly = false;
+        private final List<Permission> userPermissions;
+        private final List<Permission> botPermissions;
+
+        private Builder() {
+            this.userPermissions = new ArrayList<>();
+            this.botPermissions = new ArrayList<>();
+        }
 
 
         /**
@@ -99,16 +171,10 @@ public final class Command {
 
             this.names = Lists.newArrayList(name.toLowerCase());
 
-            final String[] newAliases = new String[names.size()];
-            newAliases[0] = name.toLowerCase();
-
             if (aliases != null) {
-                for (int i = 0; i < aliases.length; i++) { //force lower case
-                    newAliases[i] = aliases[i].toLowerCase();
-                }
+                Objects.checkNotNull(aliases, "cannot use null as an alias");
+                Collections.addAll(this.names, aliases);
             }
-
-            Collections.addAll(this.names, newAliases);
 
             return this;
         }
@@ -135,8 +201,7 @@ public final class Command {
 
         /**
          * @param executor The executor for this {@link Command}
-         *
-         * @return This {@link Command.Builder}
+         * @return This {@link Builder}
          */
         public Builder executor(@NotNull(value = "executor cannot be null") final CommandExecutor executor) {
             this.executor = executor;
@@ -144,15 +209,79 @@ public final class Command {
         }
 
         /**
-         * @return The {@link Command}
+         * Set a requirement of user permissions to execute this {@link Command}
          *
+         * @param perm1       The first {@link Permission}
+         * @param permissions Other {@link Permission}s
+         * @return This {@link Builder}
+         */
+        public Builder userPermissions(@NotNull(value = "perm1 cannot be null") final Permission perm1,
+                                       final Permission... permissions) {
+
+            if (permissions != null) {
+                Objects.checkNotNull(permissions, "cannot use null as a permission");
+                Collections.addAll(this.userPermissions, permissions);
+            }
+
+            this.userPermissions.add(perm1);
+
+            return this;
+        }
+
+        /**
+         * Set a requirement of bot permissions to execute this {@link Command}
+         *
+         * @param perm1       The first {@link Permission}
+         * @param permissions Other {@link Permission}s
+         * @return This {@link Builder}
+         */
+        public Builder botPermissions(@NotNull(value = "perm1 cannot be null") final Permission perm1,
+                                      final Permission... permissions) {
+
+            if (permissions != null) {
+                Objects.checkNotNull(permissions, "cannot use null as a permission");
+                Collections.addAll(this.botPermissions, permissions);
+            }
+
+            this.botPermissions.add(perm1);
+
+            return this;
+        }
+
+        /**
+         * Returns a function which should determine whether the command should
+         * be executed.
+         *
+         * @return This {@link Builder}
+         */
+        public Builder preExecutor(@NotNull(value = "function cannot be null") final Function<CommandContext, Boolean> preExecutor) {
+            this.preExecutor = preExecutor;
+            return this;
+        }
+
+        /**
+         * Set whether this {@link Command} can only be executed by its owner.
+         *
+         * <p>This value defaults to {@code false}</p>
+         *
+         * @param isOwnerOnly Whether this {@link Command} can only be executed by its owner.
+         * @return This {@link Builder}
+         */
+        public Builder ownerOnly(final boolean isOwnerOnly) {
+            this.isOwnerOnly = isOwnerOnly;
+            return this;
+        }
+
+        /**
+         * @return The {@link Command}
          * @throws IllegalArgumentException If there was no names specified for this {@link Command}
          * @throws NullPointerException     If this {@link Command} has no {@link CommandExecutor}
          */
         public Command build() {
             Objects.checkArgument(this.names.size() > 0, "command must have a names");
             Objects.checkNotNull(this.executor, "command executor cannot be null");
-            return new Command(this.names, this.description, this.usage, this.executor);
+            return new Command(this.names, this.description, this.usage, this.executor, this.userPermissions,
+                    this.botPermissions, this.preExecutor, this.isOwnerOnly);
         }
 
     }

@@ -50,7 +50,7 @@ public class GuildMessageListener extends ListenerAdapter {
 
             String content = raw;
 
-            final String prefix = Bot.get().getConfig().getString("client.prefix");
+            final String prefix = Bot.prefixGenerator.apply(event);
             final I18n i18n = I18n.getDefaultI18n();
 
             if (content.startsWith(prefix)) {
@@ -83,7 +83,7 @@ public class GuildMessageListener extends ListenerAdapter {
                     final RawArguments rawArgs = new RawArguments(args);
 
                     try {
-                        command.getExecutor().execute(context, new Arguments(context, rawArgs));
+                        command.handle(context, new Arguments(context, rawArgs));
                     } catch (final CommandSyntaxException ex) {
                         context.reply(context.i18n("commandCorrectUsage", ex.getCommand(), ex.getSyntax()));
                     } catch (final ParserException ex) {
