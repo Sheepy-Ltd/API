@@ -53,7 +53,7 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'com.sheepybot', name: 'API', version: '1.0.0_a297523264'
+    implementation group: 'com.sheepybot', name: 'API', version: '1.3.2'
 }
 
 compileJava.options.encoding = 'UTF-8'
