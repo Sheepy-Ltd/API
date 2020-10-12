@@ -20,6 +20,13 @@ public class EntityLoadingCache<K, V> {
 
     /**
      * Construct a new {@link EntityLoadingCache}
+     */
+    public EntityLoadingCache(@NotNull(value = "cache config cannot be null") final LoadingCache<K, V> cache) {
+        this.cache = cache;
+    }
+
+    /**
+     * Construct a new {@link EntityLoadingCache}
      *
      * @param spec   The {@link CacheBuilderSpec}
      * @param loader The {@link CacheLoader}
