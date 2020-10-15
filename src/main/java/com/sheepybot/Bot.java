@@ -314,34 +314,45 @@ public class Bot {
     private void shutdown() {
         Objects.checkArgument(this.running, "bot not running");
 
+        LOGGER.info("Shutting down...");
+
         this.running = false;
 
         if (this.moduleLoader != null) {
+            LOGGER.info("Disabling modules...");
             this.moduleLoader.disableModules();
         }
 
         if (this.shardManager != null) {
+            LOGGER.info("Shutting down shard manager...");
             this.shardManager.shutdown();
         }
 
         if (this.eventRegistry != null) {
+            LOGGER.info("Unregistering events...");
             this.eventRegistry.unregisterAll();
         }
 
         if (this.commandRegistry != null) {
+            LOGGER.info("Unregistering commands...");
             this.commandRegistry.unregisterAll();
         }
 
         if (this.database != null) {
+            LOGGER.info("Disconnecting from database...");
             this.database.shutdown();
         }
 
+        LOGGER.info("Shutting down scheduler...");
         Scheduler.getInstance().shutdown();
 
+        LOGGER.info("Shutting down threadpools...");
         Bot.SCHEDULED_EXECUTOR_SERVICE.shutdownNow();
         Bot.SINGLE_EXECUTOR_SERVICE.shutdownNow();
 
         Bot.instance = null;
+
+        LOGGER.info("Shutdown complete!");
     }
 
     /**

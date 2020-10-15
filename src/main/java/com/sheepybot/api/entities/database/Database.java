@@ -34,7 +34,7 @@ public class Database {
         this.dataSource.setMaximumPoolSize(info.getPoolSize());
         this.dataSource.setLeakDetectionThreshold(5_000); //5 seconds
         this.dataSource.setConnectionTimeout(30_000); //30 seconds
-        this.dataSource.setDataSourceClassName(getDataSourceClassNameFromDatabaseType(info.getDatabaseType()));
+        this.dataSource.setDriverClassName(getDriverClassNameFromDatabaseType(info.getDatabaseType()));
         this.dataSource.setPoolName(String.format("%s-Connection-Pool", BotInfo.BOT_NAME));
     }
 
@@ -51,16 +51,17 @@ public class Database {
      *
      * @param databaseType The database type.
      * @return The database type
+     *
      * @throws IllegalArgumentException If the input argument is not one of the accepted types.
      */
-    private String getDataSourceClassNameFromDatabaseType(final String databaseType) {
+    private String getDriverClassNameFromDatabaseType(final String databaseType) {
         switch (databaseType.toLowerCase()) {
             case "postgresql":
                 return "org.postgresql.ds.PGSimpleDataSource";
             case "mariadb":
                 return "org.mariadb.jdbc.Driver";
             case "mysql":
-                return "com.mysql.jdbc.Driver";
+                return "com.mysql.cj.jdbc.Driver";
         }
         throw new IllegalArgumentException(String.format("Invalid database type %s (must be one of postgresql, mariadb or mysql)", databaseType));
     }
