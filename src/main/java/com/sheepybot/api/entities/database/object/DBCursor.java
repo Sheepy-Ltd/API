@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class DBCursor implements Iterator<DBObject> {
 
@@ -64,6 +66,17 @@ public class DBCursor implements Iterator<DBObject> {
      */
     public void forEach(@NotNull(value = "consumer cannot be null") final Consumer<DBObject> consumer) {
         this.cursor.forEach(consumer);
+    }
+
+    /**
+     * Returns a stream consisting of the results of applying the function to the elements of this {@link DBCursor}
+     *
+     * @param mapper A {@link Function} to apply to each element in this {@link DBCursor}
+     * @param <R>    The element type of the new {@link Stream}
+     * @return The new {@link Stream}
+     */
+    public <R> Stream<R> map(@NotNull(value = "function cannot be null") final Function<DBObject, ? extends R> mapper) {
+        return this.cursor.stream().map(mapper);
     }
 
     /**
