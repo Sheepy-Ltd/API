@@ -172,6 +172,8 @@ public class ModuleLoaderImpl implements ModuleLoader {
 
         LOGGER.info("Disabling " + module.getFullName() + "...");
 
+        Bot.prefixGenerator = Bot.defaultPrefixGenerator;
+
         //false = don't init if not already
         final EventWaiter waiter = module.getEventWaiter(false);
         if (waiter != null && !waiter.isShutdown()) { //getEventWaiter(init) returns null if not already initialized
@@ -187,8 +189,6 @@ public class ModuleLoaderImpl implements ModuleLoader {
         module.getCommandRegistry().unregisterAll();
         module.getEventRegistry().unregisterAll();
         module.getScheduler().cancelAllTasks();
-
-        Bot.prefixGenerator = Bot.defaultPrefixGenerator;
     }
 
     @Override

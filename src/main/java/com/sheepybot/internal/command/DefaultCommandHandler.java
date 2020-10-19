@@ -28,7 +28,7 @@ public class DefaultCommandHandler implements CommandHandler {
 
             for (final Permission permission : command.getBotPermissions()) {
 
-                if (permission.getName().startsWith("VOICE_")) {
+                if (permission.name().startsWith("VOICE_")) {
 
                     final GuildVoiceState state = member.getVoiceState();
                     if (state == null || state.getChannel() == null) {

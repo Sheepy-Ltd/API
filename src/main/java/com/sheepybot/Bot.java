@@ -189,6 +189,9 @@ public class Bot {
             LOGGER.info(String.format("File bot.toml was created at %s, please configure it then restart the bot.", file.getCanonicalPath()));
         } else {
 
+            //register our shutdown hook so if something happens we get properly shutdown
+            Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "API-Auto-Shutdown-Thread"));
+
             LOGGER.info("Loading configuration...");
 
             this.config = new Toml().read(file);
@@ -290,7 +293,8 @@ public class Bot {
 
             }
 
-            Bot.prefixGenerator = Bot.defaultPrefixGenerator = (event) -> this.config.getString("client.prefix", "!");
+            Bot.defaultPrefixGenerator = (event) -> this.config.getString("client.prefix", "!");
+            Bot.prefixGenerator = defaultPrefixGenerator;
 
             LOGGER.info("Loading modules...");
 
@@ -303,9 +307,6 @@ public class Bot {
             this.shardManager = builder.build();
 
             LOGGER.info(String.format("Loaded %d modules", this.moduleLoader.getEnabledModules().size()));
-
-            //register our shutdown hook so if something happens we get properly shutdown
-            Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "API-Auto-Shutdown-Thread"));
 
             LOGGER.info(String.format("Startup completed! Took %dms, implementing api version: %s.", (System.currentTimeMillis() - this.startTime), BotInfo.VERSION));
         }

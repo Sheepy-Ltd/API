@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.TimeZone;
 
 public class Database {
 
@@ -28,7 +29,7 @@ public class Database {
      */
     public Database(@NotNull(value = "credentials cannot be null") final DatabaseInfo info) {
         this.dataSource = new HikariDataSource();
-        this.dataSource.setJdbcUrl(String.format("jdbc:%s://%s:%s/%s", info.getDatabaseType(), info.getHost(), info.getPort(), info.getDatabase()));
+        this.dataSource.setJdbcUrl(String.format("jdbc:%s://%s:%s/%s?useUnicode=true&useLegacyDatetimeCode=false&serverTimezone=%s", info.getDatabaseType(), info.getHost(), info.getPort(), info.getDatabase(), TimeZone.getDefault().getID()));
         this.dataSource.setUsername(info.getUsername());
         this.dataSource.setPassword(info.getPassword());
         this.dataSource.setMaximumPoolSize(info.getPoolSize());
@@ -86,7 +87,7 @@ public class Database {
             final DBObject object = new DBObject();
             try (final ResultSet set = statement.executeQuery()) {
                 if (set.next()) {
-                    for (int i = 0; i < set.getMetaData().getColumnCount() + 1; i++) {
+                    for (int i = 1; i <= set.getMetaData().getColumnCount(); i++) {
                         object.add(set.getMetaData().getColumnName(i), set.getObject(i));
                     }
                 }
@@ -120,7 +121,7 @@ public class Database {
             try (final ResultSet set = statement.executeQuery()) {
                 while (set.next()) {
                     final DBObject object = new DBObject();
-                    for (int i = 0; i < set.getMetaData().getColumnCount() + 1; i++) {
+                    for (int i = 1; i <= set.getMetaData().getColumnCount(); i++) {
                         object.add(set.getMetaData().getColumnName(i), set.getObject(i));
                     }
                     cursor.add(object);

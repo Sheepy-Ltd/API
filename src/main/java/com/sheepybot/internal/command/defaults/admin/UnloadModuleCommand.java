@@ -25,7 +25,7 @@ public class UnloadModuleCommand implements CommandExecutor {
             if (module.isEnabled()) loader.disableModule(module);
             loader.unloadModule(module);
 
-            context.reply(String.format("Unloaded module %s, you can now safely replace the jar.", module.getFullName()));
+            context.reply(String.format("Unloaded and disabled %s, you can now safely replace the jar.", module.getFullName()));
 
         }
 
