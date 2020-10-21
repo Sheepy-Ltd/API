@@ -2,8 +2,6 @@ package com.sheepybot.api.entities.language;
 
 import com.google.common.collect.Maps;
 import com.sheepybot.Bot;
-import com.sheepybot.internal.caching.EntityLoadingCache;
-import com.sheepybot.internal.caching.caches.LanguageCache;
 import com.sheepybot.util.Objects;
 import net.dv8tion.jda.api.entities.Guild;
 import org.apache.commons.io.FileUtils;
@@ -40,7 +38,6 @@ public class I18n {
     private static final Pattern DOUBLE_QUOTE = Pattern.compile("''");
 
     private static final Map<String, I18n> REGISTRY_MAP = Maps.newHashMap();
-    private static final EntityLoadingCache<Long, I18n> LANGUAGE_CACHE = new LanguageCache();
 
     /**
      * @return The default {@link I18n}
@@ -115,7 +112,7 @@ public class I18n {
      * @return The {@link I18n} instance
      */
     public static I18n getI18n(final long id) {
-        return LANGUAGE_CACHE.getEntity(id);
+        return getDefaultI18n();
     }
 
     /**

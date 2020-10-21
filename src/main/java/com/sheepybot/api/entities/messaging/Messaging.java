@@ -22,6 +22,17 @@ public class Messaging {
     private static final ThreadLocal<EmbedBuilder> EMBED_BUILDER = ThreadLocal.withInitial(EmbedBuilder::new);
     private static final ThreadLocal<MessageBuilder> MESSAGE_BUILDER = ThreadLocal.withInitial(MessageBuilder::new);
 
+    private static Consumer<Throwable> DEFAULT_FAILURE_CONSUMER = Throwable::printStackTrace;
+
+    /**
+     * Set the default failure {@link Consumer} to use in the event a rest query returns an error.
+     *
+     * @param consumer The new default {@link Consumer}
+     */
+    public static void setDefaultFailureConsumer(@NotNull(value = "failure consumer cannot be null") final Consumer<Throwable> consumer) {
+        DEFAULT_FAILURE_CONSUMER = consumer;
+    }
+
     /**
      * Retrieve a thread local instance of {@link EmbedBuilder}
      *
@@ -196,7 +207,7 @@ public class Messaging {
         private long deleteAfter;
         private TimeUnit unit;
         private Consumer<Message> success;
-        private Consumer<Throwable> failure;
+        private Consumer<Throwable> failure = DEFAULT_FAILURE_CONSUMER;
 
         /**
          * Construct a new {@link MessageActionBuilder}
