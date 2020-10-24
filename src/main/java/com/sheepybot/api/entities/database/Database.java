@@ -68,6 +68,17 @@ public class Database {
     }
 
     /**
+     * This method is provided as a courtesy for functionality that isn't already present within this class
+     * <p>You are required to close the {@link Connection} returned by this method and any associated resources.</p>
+     *
+     * @return A {@link Connection}
+     * @throws SQLException If we couldn't retrieve a connection from the pool.
+     */
+    public Connection getConnection() throws SQLException {
+        return this.dataSource.getConnection();
+    }
+
+    /**
      * Find a singular database entry, It's advised to put {@code LIMIT 1} on the query because
      * should no limit be put on the query itself then only the first item will be returned.
      *
@@ -169,14 +180,6 @@ public class Database {
         if (!this.dataSource.isClosed()) {
             this.dataSource.close();
         }
-    }
-
-    /**
-     * @return A {@link Connection}
-     * @throws SQLException If we couldn't retrieve a connection from the pool.
-     */
-    private Connection getConnection() throws SQLException {
-        return this.dataSource.getConnection();
     }
 
 }
