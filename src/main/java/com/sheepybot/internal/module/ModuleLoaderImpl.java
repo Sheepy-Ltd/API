@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.sharding.ShardManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -235,18 +236,21 @@ public class ModuleLoaderImpl implements ModuleLoader {
 
         final EventRegistry registry = module.getEventRegistry();
 
-        for (final JDA jda : Bot.get().getShardManager().getShards()) {
+        final ShardManager manager = Bot.get().getShardManager();
+        if (manager != null) {
+            for (final JDA jda : manager.getShards()) {
 
-            if (jda.getStatus() == JDA.Status.CONNECTED) {
+                if (jda.getStatus() == JDA.Status.CONNECTED) {
 
-                for (final Guild guild : jda.getGuildCache()) {
-                    registry.callEvent(new GuildReadyEvent(jda, jda.getResponseTotal(), guild));
+                    for (final Guild guild : jda.getGuildCache()) {
+                        registry.callEvent(new GuildReadyEvent(jda, jda.getResponseTotal(), guild));
+                    }
+
+                    registry.callEvent(new ReadyEvent(jda, jda.getResponseTotal()));
+
                 }
 
-                registry.callEvent(new ReadyEvent(jda, jda.getResponseTotal()));
-
             }
-
         }
 
     }
