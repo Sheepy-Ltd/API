@@ -42,13 +42,10 @@ public class SchedulerRegistry {
      * Schedule a task to be ran once immediately after scheduling
      *
      * @param runnable The {@link Runnable} to execute
-     *
-     * @return A {@link ScheduledTask} containing the task id and its executor
-     *
      * @throws IllegalStateException If the scheduler is already shutdown
      */
-    public ScheduledTask runTask(@NotNull(value = "runnable cannot be null") final Runnable runnable) throws IllegalStateException {
-        return this.runTaskLater(runnable, 0L);
+    public void runTask(@NotNull(value = "runnable cannot be null") final Runnable runnable) throws IllegalStateException {
+        this.scheduler.runTask(runnable);
     }
 
     /**

@@ -2,6 +2,7 @@ package com.sheepybot;
 
 import com.google.gson.JsonParser;
 import com.moandjiezana.toml.Toml;
+import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 import com.sheepybot.api.entities.command.Command;
 import com.sheepybot.api.entities.command.RootCommandRegistry;
@@ -15,9 +16,9 @@ import com.sheepybot.api.entities.scheduler.Scheduler;
 import com.sheepybot.internal.command.CommandRegistryImpl;
 import com.sheepybot.internal.command.defaults.admin.*;
 import com.sheepybot.internal.event.EventRegistryImpl;
+import com.sheepybot.internal.listeners.GuildMessageListener;
+import com.sheepybot.internal.listeners.JdaGenericListener;
 import com.sheepybot.internal.module.ModuleLoaderImpl;
-import com.sheepybot.listeners.GuildMessageListener;
-import com.sheepybot.listeners.JdaGenericListener;
 import com.sheepybot.util.BotUtils;
 import com.sheepybot.util.Objects;
 import com.sheepybot.util.Options;
@@ -260,6 +261,21 @@ public class Bot {
                             new JdaGenericListener()
                     );
 
+            if (this.config.getBoolean("jda.use-jda-nas")) {
+
+                final String os = System.getProperty("os.name").toLowerCase();
+                final String arch = System.getProperty("os.arch");
+
+                if ((os.contains("windows") || os.contains("linux")) && !arch.equalsIgnoreCase("arm") && !arch.equalsIgnoreCase("arm-linux")) {
+                    LOGGER.info("System supports JDA Nas, registering audio send factory...");
+                    builder.setAudioSendFactory(new NativeAudioSendFactory());
+                } else {
+                    LOGGER.info("Attempting to enable JDA Nas on a system architecture which doesn't support it, please disable this config option as there's no benefit to using it on this kind of system.");
+                    LOGGER.info(String.format("System OS: %s, arch: %s", os, arch));
+                }
+
+            }
+
             if (shards != -1) {
 
                 int shardMin = Math.toIntExact(this.config.getLong("jda.shard_min", -1L));
@@ -302,11 +318,11 @@ public class Bot {
             final Collection<Module> modules = this.moduleLoader.loadModules();
             modules.forEach(module -> this.moduleLoader.enableModule(module));
 
+            LOGGER.info(String.format("Loaded %d modules", this.moduleLoader.getEnabledModules().size()));
+
             LOGGER.info("Starting shards and attempting to connect to the Discord API...");
 
             this.shardManager = builder.build();
-
-            LOGGER.info(String.format("Loaded %d modules", this.moduleLoader.getEnabledModules().size()));
 
             LOGGER.info(String.format("Startup completed! Took %dms, implementing api version: %s.", (System.currentTimeMillis() - this.startTime), BotInfo.VERSION));
         }
@@ -316,8 +332,6 @@ public class Bot {
         Objects.checkArgument(this.running, "bot not running");
 
         LOGGER.info("Shutting down...");
-
-        this.running = false;
 
         if (this.moduleLoader != null) {
             LOGGER.info("Disabling modules...");
@@ -347,11 +361,13 @@ public class Bot {
         LOGGER.info("Shutting down scheduler...");
         Scheduler.getInstance().shutdown();
 
-        LOGGER.info("Shutting down threadpools...");
+        LOGGER.info("Shutting down thread pools...");
         Bot.SCHEDULED_EXECUTOR_SERVICE.shutdownNow();
         Bot.SINGLE_EXECUTOR_SERVICE.shutdownNow();
 
         Bot.instance = null;
+
+        this.running = false;
 
         LOGGER.info("Shutdown complete!");
     }

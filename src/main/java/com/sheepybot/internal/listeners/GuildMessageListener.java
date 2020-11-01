@@ -1,4 +1,4 @@
-package com.sheepybot.listeners;
+package com.sheepybot.internal.listeners;
 
 import com.google.common.collect.Lists;
 import com.sheepybot.Bot;

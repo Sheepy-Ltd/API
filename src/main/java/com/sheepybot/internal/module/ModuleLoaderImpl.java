@@ -2,12 +2,17 @@ package com.sheepybot.internal.module;
 
 import com.google.common.collect.Lists;
 import com.sheepybot.Bot;
+import com.sheepybot.api.entities.module.EventRegistry;
 import com.sheepybot.api.entities.module.EventWaiter;
 import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.api.entities.module.ModuleData;
 import com.sheepybot.api.entities.module.loader.ModuleLoader;
 import com.sheepybot.api.exception.module.InvalidModuleException;
 import com.sheepybot.util.Objects;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -161,6 +166,10 @@ public class ModuleLoaderImpl implements ModuleLoader {
                 Bot.prefixGenerator = prefixGenerator;
             }
 
+            LOGGER.info("Enabled " + module.getFullName() + "!");
+
+            passEvents(module);
+
         } catch (final Throwable ex) {
             LOGGER.info("An error occurred whilst enabling " + module.getFullName(), ex);
         }
@@ -189,6 +198,9 @@ public class ModuleLoaderImpl implements ModuleLoader {
         module.getCommandRegistry().unregisterAll();
         module.getEventRegistry().unregisterAll();
         module.getScheduler().cancelAllTasks();
+
+        LOGGER.info("Disabled " + module.getFullName() + "!");
+
     }
 
     @Override
@@ -210,6 +222,33 @@ public class ModuleLoaderImpl implements ModuleLoader {
         } catch (final IOException ex) {
             return null;
         }
+    }
+
+    //I really feel like there's a better way to do this.
+    //Could possibly work on passing events asynchronously instead of on the loading thread
+    //As this gets bigger that will possibly become more of an issue
+    //This method mainly just serves as a way for modules to perform actions they would when they receive a guild ready event
+    //Before this, if a Module got loaded with a command then that module wouldn't receive any form of ready event for Guilds it didn't already know about.
+
+    //TODO: Work on better solution
+    private void passEvents(final Module module) {
+
+        final EventRegistry registry = module.getEventRegistry();
+
+        for (final JDA jda : Bot.get().getShardManager().getShards()) {
+
+            if (jda.getStatus() == JDA.Status.CONNECTED) {
+
+                for (final Guild guild : jda.getGuildCache()) {
+                    registry.callEvent(new GuildReadyEvent(jda, jda.getResponseTotal(), guild));
+                }
+
+                registry.callEvent(new ReadyEvent(jda, jda.getResponseTotal()));
+
+            }
+
+        }
+
     }
 
 }

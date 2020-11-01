@@ -27,6 +27,7 @@ bulk_delete_splitting = false      #this is recommended to be kept disabled and 
 shard_total = -1                   #set to -1 to use discords recommended shard count instead, this is advised.
 shard_min = -1                     #the minimum shard ID
 shard_max = -1                     #the maximum shard ID
+use-jda-nas = false                #only enable this function if you're using lavaplayer for audio streaming https://github.com/sedmelluq/jda-nas
 
 [client]
 language = "en_GB"                 #the file name not including the .properties file type

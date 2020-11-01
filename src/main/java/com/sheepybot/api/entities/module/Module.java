@@ -59,6 +59,7 @@ public abstract class Module {
         this.jar = jar;
     }
 
+    
     /**
      * Called on {@link Module} enable
      */

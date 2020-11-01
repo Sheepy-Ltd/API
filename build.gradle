@@ -64,6 +64,7 @@ dependencies {
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.12'
     implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.21'
     implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.6.1'
+    implementation group: 'com.sedmelluq', name: 'jda-nas', version: '1.1.0'
 
     api group: 'org.jetbrains', name: 'annotations', version: '15.0'
     api group: 'com.google.guava', name: 'guava', version: '23.0'

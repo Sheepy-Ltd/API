@@ -5,8 +5,8 @@
 #The required format is: ModuleName:version
 #The name of the module is case insensitive
 module_depend = [
-    "ExampleModule:>1.0", #Specifies that we require MUST have a module with a HIGHER version than 1.0 (> is greater), when you make a breaking change to your module such as method removal it's advised to update this value.
+    "ExampleModule:>1.0", #Specifies that we MUST have a module with a HIGHER version than 1.0, when you make a breaking change to your module such as method removal it's advised to update this value.
     "ExampleModule:~", #Specifies that we aren't bothered by its version.
-    "ExampleModule:<1.0", #Specifies that we MUST have a module with a version LOWER than 1.0 (< is lower). If you've forked or are using someone elses module you should specify its current versio number.
+    "ExampleModule:<1.0", #Specifies that we MUST have a module with a version LOWER than 1.0. If you've forked or are using someone elses module you should specify its current versio number.
     "ExampleModule:1.0" #Specifies that the module MUST match this version.
 ]

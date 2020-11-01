@@ -99,7 +99,7 @@ public class Scheduler {
             try {
                 runnable.run();
             } catch (final Throwable ex) {
-                LOGGER.info("A task encountered an uncaught exception", ex);
+                LOGGER.info("Task encountered an uncaught exception", ex);
             }
         });
     }

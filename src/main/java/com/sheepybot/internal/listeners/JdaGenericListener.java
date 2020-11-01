@@ -1,4 +1,4 @@
-package com.sheepybot.listeners;
+package com.sheepybot.internal.listeners;
 
 import com.sheepybot.Bot;
 import net.dv8tion.jda.api.events.GenericEvent;
