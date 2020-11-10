@@ -61,11 +61,11 @@ public class I18n {
                 file = file.substring(0, ext);
             }
 
-            LOGGER.info(String.format("Attempting to set language as %s...", file));
+            LOGGER.info(String.format("Setting language file as %s...", file));
 
             Language language = Language.getByCode(file);
             if (language == null) {
-                LOGGER.info("Detected custom language file, setting language as unknown...");
+                LOGGER.info("Detected custom language file, language is unknown...");
                 language = Language.UNKNOWN;
             }
 
@@ -75,7 +75,6 @@ public class I18n {
             if (bundle == null) {
                 LOGGER.info(String.format("Failed to load resource bundle %s", file));
             } else {
-
                 LOGGER.info("Resource bundle has been loaded, importing language settings...");
 
                 FALLBACK_I18N = new I18n(Language.UNKNOWN);

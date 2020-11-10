@@ -65,8 +65,7 @@ public class GuildMessageListener extends ListenerAdapter {
                 return;
             }
 
-            content = content.trim();
-            if (!content.isEmpty()) {
+            if (!content.isEmpty() && !Character.isWhitespace(content.charAt(0))) {
 
                 final List<String> split = Lists.newArrayList(content.split("\\s+")); //whitespace
 

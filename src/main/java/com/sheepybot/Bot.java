@@ -39,12 +39,14 @@ import org.slf4j.LoggerFactory;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -169,12 +171,27 @@ public class Bot {
             LOGGER.info(String.format("Commit Long: %s", BotInfo.GIT_COMMIT));
             LOGGER.info(String.format("Branch: %s", BotInfo.GIT_BRANCH));
             LOGGER.info(String.format("Build Date: %s", BotInfo.BUILD_DATE));
-//            LOGGER.info(String.format("Build Author: %s", BotInfo.BUILD_AUTHOR));
             LOGGER.info(String.format("Lava Player Version: %s", PlayerLibrary.VERSION));
             LOGGER.info(String.format("JVM Version: %s", System.getProperty("java.version")));
             LOGGER.info("---------------------------------------");
 
             return;
+        }
+
+        final Options.Option ignoreUpdates = options.getOption("ignore-repository-updates");
+        if (ignoreUpdates == null || !ignoreUpdates.getAsBoolean(false)) {
+            LOGGER.info("Checking for updates...");
+        } else {
+            LOGGER.warn("You have disabled automatic update checking using the '--ignore-repository-updates' flag.");
+            LOGGER.warn("This is not advised as it means when issues are resolved you won't automatically receive them.");
+            LOGGER.warn("You can check for newer versions on the repository: https://github.com/Sheepy-Ltd/API/releases");
+            LOGGER.info("Startup will resume as normal in 10 seconds...");
+            if (options.getOption("ignore-startup-warning") != null) {
+                try {
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(10));
+                } catch (final InterruptedException ignored) {
+                }
+            }
         }
 
         //noinspection ResultOfMethodCallIgnored
@@ -196,6 +213,40 @@ public class Bot {
             LOGGER.info("Loading configuration...");
 
             this.config = new Toml().read(file);
+
+            final double configVersion = this.config.getDouble("version", -1D);
+            if (configVersion == -1D) {
+                LOGGER.warn("The version number is missing from the configuration file, have you deleted it?");
+            } else {
+
+                try (final InputStream in = Bot.class.getResourceAsStream("/bot.toml")) {
+                    if (in != null) {
+
+                        try {
+                            final Toml internalConfig = new Toml().read(in);
+
+                            final double internalVersion = internalConfig.getDouble("version", -1D);
+                            if (internalVersion == -1D) {
+                                LOGGER.info("Internal configuration file version is missing, can't properly compare versions.");
+                            } else {
+
+                                //they should always be equal, if not either they've changed it in which case we're setting it back to what
+                                //it should be or they haven't and there's actually a newer file version
+                                if (configVersion != internalVersion) {
+                                    LOGGER.info("Detected a newer internal configuration file than what is on disk, updating configuration to " + internalVersion + " from " + configVersion + "...");
+                                }
+
+                            }
+
+                        } catch (final IllegalStateException ex) {
+                            LOGGER.info("An error occurred during version comparison between hard disk config and internal config file", ex);
+                        }
+
+                    }
+
+                }
+
+            }
 
             if (this.config.getString("jda.token").isEmpty()) {
                 LOGGER.info("No discord token specified, please configure it in the bot.toml");
@@ -261,7 +312,7 @@ public class Bot {
                             new JdaGenericListener()
                     );
 
-            if (this.config.getBoolean("jda.use-jda-nas")) {
+            if (this.config.getBoolean("jda.use-jda-nas", false)) {
 
                 final String os = System.getProperty("os.name").toLowerCase();
                 final String arch = System.getProperty("os.arch");
