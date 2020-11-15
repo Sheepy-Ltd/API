@@ -27,7 +27,7 @@ public class Database {
      *
      * @param info The {@link DatabaseInfo} to use
      */
-    public Database(@NotNull(value = "credentials cannot be null") final DatabaseInfo info) {
+    public Database(@NotNull("credentials cannot be null") final DatabaseInfo info) {
         this.dataSource = new HikariDataSource();
         this.dataSource.setJdbcUrl(String.format("jdbc:%s://%s:%s/%s?useUnicode=true&useLegacyDatetimeCode=false&serverTimezone=%s", info.getDatabaseType(), info.getHost(), info.getPort(), info.getDatabase(), TimeZone.getDefault().getID()));
         this.dataSource.setUsername(info.getUsername());
@@ -116,10 +116,9 @@ public class Database {
      *
      * @param haystack The query to execute
      * @param needles  The values
-     *
      * @return A {@link DBCursor}, or {@code null} if an error occurred.
      */
-    public DBCursor find(@NotNull(value = "query cannot be null") final String haystack,
+    public DBCursor find(@NotNull("query cannot be null") final String haystack,
                          final Object... needles) {
         try (final Connection connection = this.getConnection();
              final PreparedStatement statement = connection.prepareStatement(haystack)) {
@@ -152,7 +151,7 @@ public class Database {
      *
      * @return {@code true} if this was successful, {@code false} if there were no rows affected or an error occurred
      */
-    public boolean execute(@NotNull(value = "haystack cannot be null") final String haystack,
+    public boolean execute(@NotNull("haystack cannot be null") final String haystack,
                            final Object... needles) {
         try (final Connection connection = this.getConnection();
              final PreparedStatement statement = connection.prepareStatement(haystack)) {

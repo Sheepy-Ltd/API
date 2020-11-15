@@ -220,11 +220,10 @@ public class ArgumentParsers {
      * @param parser1     a parser
      * @param parser2     another parser
      * @param moreParsers more parsers...
-     *
      * @return The {@link ArgumentParser}
      */
-    public static ArgumentParser<Object> anyOf(@NotNull(value = "parser1 cannot be null") final ArgumentParser<?> parser1,
-                                               @NotNull(value = "parser2 cannot be null") final ArgumentParser<?> parser2,
+    public static ArgumentParser<Object> anyOf(@NotNull("parser1 cannot be null") final ArgumentParser<?> parser1,
+                                               @NotNull("parser2 cannot be null") final ArgumentParser<?> parser2,
                                                final ArgumentParser<?>... moreParsers) {
         return new ArgumentParser<Object>() {
 

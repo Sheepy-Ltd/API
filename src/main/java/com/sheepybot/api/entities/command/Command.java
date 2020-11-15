@@ -32,13 +32,13 @@ public final class Command {
      * @param usage       The usage of this {@link Command}
      * @param executor    The {@link CommandExecutor} for this {@link Command}
      */
-    private Command(@NotNull(value = "names cannot be null") final List<String> names,
+    private Command(@NotNull("names cannot be null") final List<String> names,
                     final String description,
                     final String usage,
-                    @NotNull(value = "executor cannot be null") final CommandExecutor executor,
-                    @NotNull(value = "userPermissions cannot be null") final List<Permission> userPermissions,
-                    @NotNull(value = "botPermissions cannot be null") final List<Permission> botPermissions,
-                    @NotNull(value = "preExecutor cannot be null") final Function<CommandContext, Boolean> preExecutor,
+                    @NotNull("executor cannot be null") final CommandExecutor executor,
+                    @NotNull("userPermissions cannot be null") final List<Permission> userPermissions,
+                    @NotNull("botPermissions cannot be null") final List<Permission> botPermissions,
+                    @NotNull("preExecutor cannot be null") final Function<CommandContext, Boolean> preExecutor,
                     final boolean isOwnerOnly) {
         Objects.checkArgument(names.size() > 0, "names cannot be empty");
         this.names = names;
@@ -122,8 +122,8 @@ public final class Command {
         return this.isOwnerOnly;
     }
 
-    public void handle(@NotNull(value = "context cannot be null") final CommandContext context,
-                       @NotNull(value = "args cannot be null") final Arguments args) {
+    public void handle(@NotNull("context cannot be null") final CommandContext context,
+                       @NotNull("args cannot be null") final Arguments args) {
         Command.DEFAULT_COMMAND_HANDLER.handle(context, args);
     }
 
@@ -162,10 +162,9 @@ public final class Command {
          * Set the unique names of this {@link Command}
          *
          * @param name The names of this {@link Command}
-         *
          * @return This {@link Builder}
          */
-        public Builder names(@NotNull(value = "command must have a names") final String name,
+        public Builder names(@NotNull("command must have a names") final String name,
                              final String... aliases) {
             Objects.checkArgument(name.length() > 0, "command cannot have an effectively null names");
 
@@ -184,7 +183,7 @@ public final class Command {
          *
          * @return This {@link Builder}
          */
-        public Builder description(@NotNull(value = "description cannot be null") final String description) {
+        public Builder description(@NotNull("description cannot be null") final String description) {
             this.description = description;
             return this;
         }
@@ -194,7 +193,7 @@ public final class Command {
          *
          * @return This {@link Builder}
          */
-        public Builder usage(@NotNull(value = "usage cannot be null") final String usage) {
+        public Builder usage(@NotNull("usage cannot be null") final String usage) {
             this.usage = usage;
             return this;
         }
@@ -203,7 +202,7 @@ public final class Command {
          * @param executor The executor for this {@link Command}
          * @return This {@link Builder}
          */
-        public Builder executor(@NotNull(value = "executor cannot be null") final CommandExecutor executor) {
+        public Builder executor(@NotNull("executor cannot be null") final CommandExecutor executor) {
             this.executor = executor;
             return this;
         }
@@ -215,7 +214,7 @@ public final class Command {
          * @param permissions Other {@link Permission}s
          * @return This {@link Builder}
          */
-        public Builder userPermissions(@NotNull(value = "perm1 cannot be null") final Permission perm1,
+        public Builder userPermissions(@NotNull("perm1 cannot be null") final Permission perm1,
                                        final Permission... permissions) {
 
             if (permissions != null) {
@@ -235,7 +234,7 @@ public final class Command {
          * @param permissions Other {@link Permission}s
          * @return This {@link Builder}
          */
-        public Builder botPermissions(@NotNull(value = "perm1 cannot be null") final Permission perm1,
+        public Builder botPermissions(@NotNull("perm1 cannot be null") final Permission perm1,
                                       final Permission... permissions) {
 
             if (permissions != null) {
@@ -254,7 +253,7 @@ public final class Command {
          *
          * @return This {@link Builder}
          */
-        public Builder preExecutor(@NotNull(value = "function cannot be null") final Function<CommandContext, Boolean> preExecutor) {
+        public Builder preExecutor(@NotNull("function cannot be null") final Function<CommandContext, Boolean> preExecutor) {
             this.preExecutor = preExecutor;
             return this;
         }

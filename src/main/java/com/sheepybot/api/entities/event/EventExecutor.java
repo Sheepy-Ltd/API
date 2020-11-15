@@ -12,6 +12,6 @@ public interface EventExecutor {
      * @param event    The {@link Event} to execute
      * @throws EventException If an error occurred during the {@link Event}s execution
      */
-    void execute(@NotNull(value = "listener cannot be null") final EventListener listener,
-                 @NotNull(value = "event cannot be null") final GenericEvent event) throws EventException;
+    void execute(@NotNull("listener cannot be null") final EventListener listener,
+                 @NotNull("event cannot be null") final GenericEvent event) throws EventException;
 }

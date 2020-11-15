@@ -16,9 +16,10 @@ public class DatabaseInfo {
 
     /**
      * Construct a new {@link DatabaseInfo} instance from a {@link Toml} instance
+     *
      * @param table The {@link Toml} table
      */
-    public DatabaseInfo(@NotNull(value = "table cannot be null") final Toml table) {
+    public DatabaseInfo(@NotNull("table cannot be null") final Toml table) {
         this(table.getString("username"), table.getString("password"), table.getString("host"),
                 table.getString("database"), Math.toIntExact(table.getLong("port")), Math.toIntExact(table.getLong("poolSize")),
                 table.getString("database_type", "postgresql"));
@@ -40,13 +41,13 @@ public class DatabaseInfo {
      *                         <li>postgresql</li>
      *                     </ul>
      */
-    public DatabaseInfo(@NotNull(value = "username cannot be null") final String username,
-                        @NotNull(value = "password cannot be null") final String password,
-                        @NotNull(value = "host cannot be null") final String host,
-                        @NotNull(value = "database cannot be null") final String database,
+    public DatabaseInfo(@NotNull("username cannot be null") final String username,
+                        @NotNull("password cannot be null") final String password,
+                        @NotNull("host cannot be null") final String host,
+                        @NotNull("database cannot be null") final String database,
                         final int port,
                         final int poolSize,
-                        @NotNull(value = "database type cannot be null") final String databaseType) {
+                        @NotNull("database type cannot be null") final String databaseType) {
         Objects.checkArgument(port > 0, "port must be greater than 0");
         Objects.checkArgument(poolSize > 0, "pool size must be greater than 0");
         this.username = username;

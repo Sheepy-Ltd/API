@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 public interface CommandHandler {
 
-    void handle(@NotNull(value = "context cannot be null") final CommandContext context,
-                @NotNull(value = "args cannot be null") final Arguments args);
+    void handle(@NotNull("context cannot be null") final CommandContext context,
+                @NotNull("args cannot be null") final Arguments args);
 
 }

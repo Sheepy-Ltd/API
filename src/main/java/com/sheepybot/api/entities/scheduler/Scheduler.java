@@ -64,7 +64,7 @@ public class Scheduler {
      * @return A {@link ScheduledTask} containing the task id and its executor
      * @throws IllegalStateException If the scheduler is already shutdown
      */
-    public ScheduledTask runTaskRepeating(@NotNull(value = "runnable cannot be null") final Runnable runnable,
+    public ScheduledTask runTaskRepeating(@NotNull("runnable cannot be null") final Runnable runnable,
                                           final long startAfter,
                                           final long frequency) throws IllegalStateException {
         Objects.checkArgument(frequency > 0, "frequency cannot be less than 1");
@@ -94,7 +94,7 @@ public class Scheduler {
      * @param runnable The {@link Runnable} to execute
      * @throws IllegalStateException If the scheduler is already shutdown
      */
-    public void runTask(@NotNull(value = "runnable cannot be null") final Runnable runnable) throws IllegalStateException {
+    public void runTask(@NotNull("runnable cannot be null") final Runnable runnable) throws IllegalStateException {
         this.getService().execute(() -> {
             try {
                 runnable.run();
@@ -112,7 +112,7 @@ public class Scheduler {
      * @return A {@link ScheduledTask} containing the task id and its executor
      * @throws IllegalStateException If the scheduler is already shutdown
      */
-    public ScheduledTask runTaskLater(@NotNull(value = "runnable cannot be null") final Runnable runnable,
+    public ScheduledTask runTaskLater(@NotNull("runnable cannot be null") final Runnable runnable,
                                       final long delay) throws IllegalStateException {
         Objects.checkArgument(delay > 0, "delay cannot be less than 1");
 

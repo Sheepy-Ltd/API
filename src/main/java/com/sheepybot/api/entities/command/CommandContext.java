@@ -18,21 +18,21 @@ public class CommandContext {
     private final JDA jda;
 
     /**
-     * @param channel  The channel this {@link Command} was executed in
-     * @param sender   The {@link User} who executed this {@link Command}
-     * @param guild    The {@link Guild} this command was executed in
-     * @param trigger  The command trigger
-     * @param command  The {@link Command} executed
-     * @param message  The whole message that caused this {@link Command} to trigger
+     * @param channel The channel this {@link Command} was executed in
+     * @param sender  The {@link User} who executed this {@link Command}
+     * @param guild   The {@link Guild} this command was executed in
+     * @param trigger The command trigger
+     * @param command The {@link Command} executed
+     * @param message The whole message that caused this {@link Command} to trigger
      */
-    public CommandContext(@NotNull(value = "channel cannot be null") final TextChannel channel,
-                          @NotNull(value = "sender cannot be null") final Member sender,
-                          @NotNull(value = "guild cannot be null") final Guild guild,
-                          @NotNull(value = "trigger cannot be null") final String trigger,
-                          @NotNull(value = "command cannot be null") final Command command,
-                          @NotNull(value = "message cannot be null") final Message message,
-                          @NotNull(value = "i18n cannot be null") final I18n i18n,
-                          @NotNull(value = "jda cannot be null") final JDA jda) {
+    public CommandContext(@NotNull("channel cannot be null") final TextChannel channel,
+                          @NotNull("sender cannot be null") final Member sender,
+                          @NotNull("guild cannot be null") final Guild guild,
+                          @NotNull("trigger cannot be null") final String trigger,
+                          @NotNull("command cannot be null") final Command command,
+                          @NotNull("message cannot be null") final Message message,
+                          @NotNull("i18n cannot be null") final I18n i18n,
+                          @NotNull("jda cannot be null") final JDA jda) {
         this.channel = channel;
         this.sender = sender;
         this.guild = guild;
@@ -130,7 +130,7 @@ public class CommandContext {
      *
      * @param message The message to send
      */
-    public void reply(@NotNull(value = "message cannot be null") final String message) {
+    public void reply(@NotNull("message cannot be null") final String message) {
         Messaging.send(this.channel, message);
     }
 
@@ -139,7 +139,7 @@ public class CommandContext {
      *
      * @param embed The {@link MessageEmbed} to sent
      */
-    public void reply(@NotNull(value = "embed cannot be null") final MessageEmbed embed) {
+    public void reply(@NotNull("embed cannot be null") final MessageEmbed embed) {
         Messaging.send(this.channel, embed);
     }
 
@@ -148,7 +148,7 @@ public class CommandContext {
      *
      * @param message The {@link Message} to send
      */
-    public void reply(@NotNull(value = "message cannot be null") final Message message) {
+    public void reply(@NotNull("message cannot be null") final Message message) {
         Messaging.send(this.channel, message);
     }
 
@@ -168,7 +168,7 @@ public class CommandContext {
      * @param embed The {@link MessageEmbed} to sent
      * @return A {@link com.sheepybot.api.entities.messaging.Messaging.MessageActionBuilder}
      */
-    public Messaging.MessageActionBuilder message(@NotNull(value = "embed cannot be null") final MessageEmbed embed) {
+    public Messaging.MessageActionBuilder message(@NotNull("embed cannot be null") final MessageEmbed embed) {
         return Messaging.message(this.channel, embed);
     }
 
@@ -178,7 +178,7 @@ public class CommandContext {
      * @param message The {@link Message} to send
      * @return A {@link com.sheepybot.api.entities.messaging.Messaging.MessageActionBuilder}
      */
-    public Messaging.MessageActionBuilder message(@NotNull(value = "message cannot be null") final Message message) {
+    public Messaging.MessageActionBuilder message(@NotNull("message cannot be null") final Message message) {
         return Messaging.message(this.channel, message);
     }
 

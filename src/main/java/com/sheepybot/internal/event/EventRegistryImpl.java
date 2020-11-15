@@ -25,13 +25,13 @@ public class EventRegistryImpl implements RootEventRegistry {
     }
 
     @Override
-    public void callEvent(@NotNull(value = "event cannot be null") final GenericEvent event) {
+    public void callEvent(@NotNull("event cannot be null") final GenericEvent event) {
         this.fireEvent(event);
     }
 
     @Override
-    public void registerEvents(@NotNull(value = "listener cannot be null") final EventListener listener,
-                               @NotNull(value = "module cannot be null") final Module module) {
+    public void registerEvents(@NotNull("listener cannot be null") final EventListener listener,
+                               @NotNull("module cannot be null") final Module module) {
 
         LOGGER.debug("Registering listeners from class {}.{} in module {}...", listener.getClass().getPackage().getName(), listener.getClass().getName(), module.getName());
 
@@ -80,21 +80,21 @@ public class EventRegistryImpl implements RootEventRegistry {
     }
 
     @Override
-    public Collection<RegisteredListener> getRegisteredListeners(@NotNull(value = "event cannot be null") final GenericEvent event) {
+    public Collection<RegisteredListener> getRegisteredListeners(@NotNull("event cannot be null") final GenericEvent event) {
         LOGGER.debug("Retrieving registered listeners for event {}...", event.getClass().getName());
         return this.listeners.keySet().stream().filter(clazz -> clazz.isAssignableFrom(event.getClass()))
                 .flatMap(clazz -> this.listeners.get(clazz).stream()).collect(Collectors.toList());
     }
 
     @Override
-    public Collection<RegisteredListener> getRegisteredListeners(@NotNull(value = "module cannot be null") final Module module) {
+    public Collection<RegisteredListener> getRegisteredListeners(@NotNull("module cannot be null") final Module module) {
         LOGGER.debug("Retrieving registered listeners of module {}...", module.getName());
         return this.listeners.values().stream().flatMap(listeners -> listeners.stream().filter(listener ->
                 listener.getModule() == module)).collect(Collectors.toList());
     }
 
     @Override
-    public void unregisterAll(@NotNull(value = "module cannot be null") final Module module) {
+    public void unregisterAll(@NotNull("module cannot be null") final Module module) {
         LOGGER.debug("Unregistering event listeners of module {}...", module.getName());
         this.listeners.keySet().forEach(clazz -> this.listeners.get(clazz).removeIf(listener -> listener.getModule() == module));
     }
@@ -105,7 +105,7 @@ public class EventRegistryImpl implements RootEventRegistry {
         this.listeners.clear();
     }
 
-    private void fireEvent(@NotNull(value = "event cannot be null") final GenericEvent event) {
+    private void fireEvent(@NotNull("event cannot be null") final GenericEvent event) {
         LOGGER.debug("Retrieved fireEvent call for event {}...", event.getClass().getName());
         this.getRegisteredListeners(event).forEach(listener -> {
             LOGGER.debug("Passing event {} to registered listener class {} in module {}", event.getClass().getName(), listener.getListener().getClass().getName(), listener.getModule().getName());

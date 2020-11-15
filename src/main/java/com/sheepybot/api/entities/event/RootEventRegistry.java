@@ -16,7 +16,7 @@ public interface RootEventRegistry {
     /**
      * @param event The event to call
      */
-    void callEvent(@NotNull(value = "event cannot be null") final GenericEvent event);
+    void callEvent(@NotNull("event cannot be null") final GenericEvent event);
 
     /**
      * Registers all {@link Event}s in the given {@link RootEventRegistry} class
@@ -24,28 +24,27 @@ public interface RootEventRegistry {
      * @param listener The {@link EventListener} to register
      * @param module   The {@link Module} to register
      */
-    void registerEvents(@NotNull(value = "listener cannot be null") final EventListener listener,
-                        @NotNull(value = "parent module cannot be null") final Module module);
+    void registerEvents(@NotNull("listener cannot be null") final EventListener listener,
+                        @NotNull("parent module cannot be null") final Module module);
 
     /**
      * @param event The event
      * @return A {@link Collection} containing every {@link RegisteredListener} registered to this {@link Event}
      */
-    Collection<RegisteredListener> getRegisteredListeners(@NotNull(value = "event cannot be null") final GenericEvent event);
+    Collection<RegisteredListener> getRegisteredListeners(@NotNull("event cannot be null") final GenericEvent event);
 
     /**
      * @param module The {@link Module} to get the listeners of
-     *
      * @return A {@link Collection} containing every listener registered to the {@link Module}
      */
-    Collection<RegisteredListener> getRegisteredListeners(@NotNull(value = "parent module cannot be null") final Module module);
+    Collection<RegisteredListener> getRegisteredListeners(@NotNull("parent module cannot be null") final Module module);
 
     /**
      * Unregisters every listener for the {@link Module}
      *
      * @param module The {@link Module} to unregister
      */
-    void unregisterAll(@NotNull(value = "parent module cannot be null") final Module module);
+    void unregisterAll(@NotNull("parent module cannot be null") final Module module);
 
     /**
      * Unregisters all listeners

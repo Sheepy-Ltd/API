@@ -31,7 +31,7 @@ public enum Language {
      * @param code The lang code
      * @return The {@link Language}
      */
-    public static Language getByCode(@NotNull(value = "id cannot be null") final String code) {
+    public static Language getByCode(@NotNull("id cannot be null") final String code) {
         for (final Language language : Language.values()) {
             if (language.getCode().equalsIgnoreCase(code) && !language.isFake()) {
                 return language;

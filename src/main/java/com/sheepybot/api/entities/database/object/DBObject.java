@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class DBObject {
 
@@ -23,7 +25,7 @@ public class DBObject {
     /**
      * @param data The {@link Map} to initialize this {@link DBObject} with
      */
-    public DBObject(@NotNull(value = "initMap cannot be null") final Map<String, Object> data) {
+    public DBObject(@NotNull("initMap cannot be null") final Map<String, Object> data) {
         this.data = data;
     }
 
@@ -31,7 +33,7 @@ public class DBObject {
      * @param key The key to search for
      * @return {@code true} if the key is present, {@code false} otherwise
      */
-    public boolean has(@NotNull(value = "key cannot be null") final String key) {
+    public boolean has(@NotNull("key cannot be null") final String key) {
         Objects.checkNotBlank(key, "key cannot be empty");
         return this.data.containsKey(key);
     }
@@ -39,13 +41,12 @@ public class DBObject {
     /**
      * Add a key/value pair to the internal data {@link Map}
      *
-     * @param key The key
+     * @param key   The key
      * @param value The value for the given key
-     *
      * @return This {@link DBObject} instance, useful for chaining.
      */
-    public DBObject add(@NotNull(value = "key cannot be null") final String key,
-                       @NotNull(value = "value cannot be null") final Object value) {
+    public DBObject add(@NotNull("key cannot be null") final String key,
+                        @NotNull("value cannot be null") final Object value) {
         Objects.checkNotBlank(key, "key cannot be empty");
         Objects.checkNotNull(value, "value cannot be null");
         this.data.put(key, value);
@@ -57,7 +58,7 @@ public class DBObject {
      *
      * @param data The {@link Map} to copy
      */
-    public void addAll(@NotNull(value = "data cannot be null") final Map<String, Object> data) {
+    public void addAll(@NotNull("data cannot be null") final Map<String, Object> data) {
         this.data.putAll(data);
     }
 
@@ -66,23 +67,40 @@ public class DBObject {
      *
      * @param consumer The {@link BiConsumer}
      */
-    public void forEach(@NotNull(value = "consumer cannot be null") final BiConsumer<String, Object> consumer) {
+    public void forEach(@NotNull("consumer cannot be null") final BiConsumer<String, Object> consumer) {
         this.data.forEach(consumer);
     }
 
     /**
+     * Returns a stream consisting of the results of applying the function to the elements of this {@link DBObject}
+     *
+     * @param mapper A {@link Function} to apply to each element in this {@link DBObject}
+     * @param <R>    The element type of the new {@link Stream}
+     * @return The new {@link Stream}
+     */
+    public <R> Stream<R> map(@NotNull(value = "function cannot be null") final Function<Object, ? extends R> mapper) {
+        return this.data.values().stream().map(mapper);
+    }
+
+    private void throwError(final String key) {
+        throw new NullPointerException("No value exists for key '" + key + "'");
+    }
+
+    private Number toNumber(final Object node) {
+        return new LazilyParsedNumber(node.toString());
+    }
+
+    /**
      * @param key The key
-     *
      * @return The {@link Integer} value associated with the key
-     *
      * @throws IllegalArgumentException If the key is null or effectively null (empty)
      * @throws NullPointerException     If there is no value for the given key
      * @throws IllegalArgumentException If the value for the given key is not a {@link Number}
      */
-    public int getInt(@NotNull(value = "key cannot be null") final String key) throws IllegalArgumentException, NullPointerException {
+    public int getInt(@NotNull("key cannot be null") final String key) throws IllegalArgumentException, NullPointerException {
         Objects.checkNotBlank(key, "key cannot be empty");
 
-        final Object result = this.get(key);
+        final Object result = this.getObject(key);
         if (result == null) {
             this.throwError(key);
         }
@@ -99,17 +117,9 @@ public class DBObject {
      *
      * @throws IllegalArgumentException If the key is null or effectively null (empty)
      */
-    public Object get(@NotNull(value = "key cannot be null") final String key) throws IllegalArgumentException {
+    public Object getObject(@NotNull("key cannot be null") final String key) throws IllegalArgumentException {
         Objects.checkNotBlank(key, "key cannot be empty");
         return this.data.get(key);
-    }
-
-    private void throwError(final String key) {
-        throw new NullPointerException("No value exists for key '" + key + "'");
-    }
-
-    private Number toNumber(final Object node) {
-        return new LazilyParsedNumber(node.toString());
     }
 
     /**
@@ -120,9 +130,9 @@ public class DBObject {
      *
      * @throws IllegalArgumentException If the value for the given key is not a {@link Number}
      */
-    public int getInt(@NotNull(value = "key cannot be null") final String key,
+    public int getInt(@NotNull("key cannot be null") final String key,
                       final int def) throws IllegalArgumentException {
-        final Object result = this.get(key);
+        final Object result = this.getObject(key);
         if (result == null) {
             return def;
         }
@@ -139,8 +149,8 @@ public class DBObject {
      * @throws NullPointerException     If there is no value for the given key
      * @throws IllegalArgumentException If the value for the given key is not a {@link Number}
      */
-    public long getLong(@NotNull(value = "key cannot be null") final String key) throws IllegalArgumentException, NullPointerException {
-        final Object result = this.get(key);
+    public long getLong(@NotNull("key cannot be null") final String key) throws IllegalArgumentException, NullPointerException {
+        final Object result = this.getObject(key);
         if (result == null) {
             this.throwError(key);
         }
@@ -156,9 +166,9 @@ public class DBObject {
      *
      * @throws IllegalArgumentException If the value for the given key is not a {@link Number}
      */
-    public long getLong(@NotNull(value = "key cannot be null") final String key,
+    public long getLong(@NotNull("key cannot be null") final String key,
                         final long def) throws IllegalArgumentException {
-        final Object result = this.get(key);
+        final Object result = this.getObject(key);
         if (result == null) {
             return def;
         }
@@ -175,8 +185,8 @@ public class DBObject {
      * @throws NullPointerException     If there is no value for the given key
      * @throws IllegalArgumentException If the value for the given key is not a {@link Number}
      */
-    public float getFloat(@NotNull(value = "key cannot be null") final String key) throws IllegalArgumentException, NullPointerException {
-        final Object result = this.get(key);
+    public float getFloat(@NotNull("key cannot be null") final String key) throws IllegalArgumentException, NullPointerException {
+        final Object result = this.getObject(key);
         if (result == null) {
             this.throwError(key);
         }
@@ -192,9 +202,9 @@ public class DBObject {
      *
      * @throws IllegalArgumentException If the value for the given key is not a {@link Number}
      */
-    public float getFloat(@NotNull(value = "key cannot be null") final String key,
+    public float getFloat(@NotNull("key cannot be null") final String key,
                           final long def) throws IllegalArgumentException {
-        final Object result = this.get(key);
+        final Object result = this.getObject(key);
         if (result == null) {
             return def;
         }
@@ -211,8 +221,8 @@ public class DBObject {
      * @throws NullPointerException     If there is no value for the given key
      * @throws IllegalArgumentException If the value for the given key is not a {@link Number}
      */
-    public double getDouble(@NotNull(value = "key cannot be null") final String key) throws IllegalArgumentException, NullPointerException {
-        final Object result = this.get(key);
+    public double getDouble(@NotNull("key cannot be null") final String key) throws IllegalArgumentException, NullPointerException {
+        final Object result = this.getObject(key);
         if (result == null) {
             this.throwError(key);
         }
@@ -228,9 +238,9 @@ public class DBObject {
      *
      * @throws IllegalArgumentException If the value for the given key is not a {@link Number}
      */
-    public double getDouble(@NotNull(value = "key cannot be null") final String key,
+    public double getDouble(@NotNull("key cannot be null") final String key,
                             final double def) throws IllegalArgumentException {
-        final Object result = this.get(key);
+        final Object result = this.getObject(key);
         if (result == null) {
             return def;
         }
@@ -245,7 +255,7 @@ public class DBObject {
      *
      * @throws IllegalArgumentException If the value for the given key is not a {@link Boolean}
      */
-    public boolean getBoolean(@NotNull(value = "key cannot be null") final String key) throws IllegalArgumentException {
+    public boolean getBoolean(@NotNull("key cannot be null") final String key) throws IllegalArgumentException {
         return this.getBoolean(key, false);
     }
 
@@ -257,9 +267,9 @@ public class DBObject {
      *
      * @throws IllegalArgumentException If the value for the given key is not a {@link Boolean}
      */
-    public boolean getBoolean(@NotNull(value = "key cannot be null") final String key,
+    public boolean getBoolean(@NotNull("key cannot be null") final String key,
                               final boolean def) throws IllegalArgumentException {
-        final Object result = this.get(key);
+        final Object result = this.getObject(key);
         if (result == null) {
             return def;
         }
@@ -275,8 +285,8 @@ public class DBObject {
      * @throws IllegalArgumentException If the key is null or effectively null (empty)
      * @throws NullPointerException     If there is no value for the given key
      */
-    public String getString(@NotNull(value = "key cannot be null") final String key) throws IllegalArgumentException, NullPointerException {
-        final Object result = this.get(key);
+    public String getString(@NotNull("key cannot be null") final String key) throws IllegalArgumentException, NullPointerException {
+        final Object result = this.getObject(key);
         if (result == null) {
             this.throwError(key);
         }
@@ -292,9 +302,9 @@ public class DBObject {
      *
      * @throws IllegalArgumentException If the key is null or effectively null (empty)
      */
-    public String getString(@NotNull(value = "key cannot be null") final String key,
-                            @NotNull(value = "def cannot be null") final String def) throws IllegalArgumentException {
-        final Object result = this.get(key);
+    public String getString(@NotNull("key cannot be null") final String key,
+                            @NotNull("def cannot be null") final String def) throws IllegalArgumentException {
+        final Object result = this.getObject(key);
         if (result == null || result.toString().isEmpty()) {
             return def;
         }

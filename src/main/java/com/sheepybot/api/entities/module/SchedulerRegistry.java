@@ -28,7 +28,7 @@ public class SchedulerRegistry {
      *
      * @throws IllegalStateException If the scheduler is already shutdown
      */
-    public ScheduledTask runTaskRepeating(@NotNull(value = "runnable cannot be null") final Runnable runnable,
+    public ScheduledTask runTaskRepeating(@NotNull("runnable cannot be null") final Runnable runnable,
                                           final long startAfter,
                                           final long delay) throws IllegalStateException {
         final ScheduledTask task = this.scheduler.runTaskRepeating(runnable, startAfter, delay);
@@ -44,7 +44,7 @@ public class SchedulerRegistry {
      * @param runnable The {@link Runnable} to execute
      * @throws IllegalStateException If the scheduler is already shutdown
      */
-    public void runTask(@NotNull(value = "runnable cannot be null") final Runnable runnable) throws IllegalStateException {
+    public void runTask(@NotNull("runnable cannot be null") final Runnable runnable) throws IllegalStateException {
         this.scheduler.runTask(runnable);
     }
 
@@ -53,12 +53,10 @@ public class SchedulerRegistry {
      *
      * @param runnable The {@link Runnable} to execute
      * @param delay    How many milliseconds to wait before executing this task
-     *
      * @return A {@link ScheduledTask} containing the task id and its executor
-     *
      * @throws IllegalStateException If the scheduler is already shutdown
      */
-    public ScheduledTask runTaskLater(@NotNull(value = "runnable cannot be null") final Runnable runnable,
+    public ScheduledTask runTaskLater(@NotNull("runnable cannot be null") final Runnable runnable,
                                       final long delay) throws IllegalStateException {
         final ScheduledTask task = this.scheduler.runTaskLater(runnable, delay);
 

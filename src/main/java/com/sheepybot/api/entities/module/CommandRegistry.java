@@ -11,8 +11,8 @@ public final class CommandRegistry {
     private final RootCommandRegistry rootCommandRegistry;
     private final Module module;
 
-    CommandRegistry(@NotNull(value = "rootCommandRegistry cannot be null") final RootCommandRegistry rootCommandRegistry,
-                    @NotNull(value = "module cannot be null") final Module module) {
+    CommandRegistry(@NotNull("rootCommandRegistry cannot be null") final RootCommandRegistry rootCommandRegistry,
+                    @NotNull("module cannot be null") final Module module) {
         this.rootCommandRegistry = rootCommandRegistry;
         this.module = module;
     }
@@ -23,16 +23,15 @@ public final class CommandRegistry {
      * @param aliases A name that may be used to execute a {@link Command}
      * @return The {@link Command} if it exists, {@code null} otherwise
      */
-    public Command getCommandByNameOrAlias(@NotNull(value = "command cannot be null") final List<String> aliases) {
+    public Command getCommandByNameOrAlias(@NotNull("command cannot be null") final List<String> aliases) {
         return this.rootCommandRegistry.getCommandByNameOrAlias(aliases);
     }
 
     /**
      * @param command The {@link Command} to register
-     *
      * @throws IllegalArgumentException If the {@link Command} is already registered
      */
-    public void register(@NotNull(value = "command cannot be null") final Command command) throws IllegalArgumentException {
+    public void register(@NotNull("command cannot be null") final Command command) throws IllegalArgumentException {
         if (this.rootCommandRegistry.getCommandByNameOrAlias(command.getNames()) != null) {
             throw new IllegalArgumentException("Command '" + command.getName() + "' already exists");
         }
@@ -44,7 +43,7 @@ public final class CommandRegistry {
      *
      * @throws IllegalArgumentException If the {@link Command} is not registered
      */
-    public void unregister(@NotNull(value = "command cannot be null") final Command command) throws IllegalArgumentException {
+    public void unregister(@NotNull("command cannot be null") final Command command) throws IllegalArgumentException {
         if (this.rootCommandRegistry.getCommandByNameOrAlias(command.getNames()) != null) {
             throw new IllegalArgumentException("Command '" + command.getName() + "' is not registered");
         }

@@ -22,7 +22,7 @@ public class ScheduledTask {
      * @param future The executor of this {@link ScheduledTask}
      */
     ScheduledTask(final int taskId,
-                  @NotNull(value = "future cannot be null") final ScheduledFuture<?> future) {
+                  @NotNull("future cannot be null") final ScheduledFuture<?> future) {
         this(taskId, future, false, -1, -1, TimeUnit.MILLISECONDS);
     }
 
@@ -37,11 +37,11 @@ public class ScheduledTask {
      * @param unit         The {@link TimeUnit} used to calculate frequency of execution
      */
     ScheduledTask(final int taskId,
-                  @NotNull(value = "future cannot be null") final ScheduledFuture<?> future,
+                  @NotNull("future cannot be null") final ScheduledFuture<?> future,
                   final boolean repeating,
                   final long initialDelay,
                   final long repeatAfter,
-                  @NotNull(value = "unit cannot be null") final TimeUnit unit) {
+                  @NotNull("unit cannot be null") final TimeUnit unit) {
         Objects.checkArgument(taskId > 0, "task id cannot be negative");
         this.taskId = taskId;
         this.future = future;
@@ -82,7 +82,7 @@ public class ScheduledTask {
     /**
      * @return The remaining delay before execution
      */
-    public long getRemainingDelay(@NotNull(value = "unit cannot be null") final TimeUnit unit) {
+    public long getRemainingDelay(@NotNull("unit cannot be null") final TimeUnit unit) {
         return this.future.getDelay(unit);
     }
 

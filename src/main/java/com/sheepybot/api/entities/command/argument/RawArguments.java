@@ -16,7 +16,7 @@ public class RawArguments implements Iterable<String> {
     /**
      * @param args The raw arguments
      */
-    public RawArguments(@NotNull(value = "args cannot be null") final List<String> args) {
+    public RawArguments(@NotNull("args cannot be null") final List<String> args) {
         this.args = args;
         this.current = 0;
     }
@@ -49,7 +49,7 @@ public class RawArguments implements Iterable<String> {
      *
      * @param args The new args
      */
-    public void setRaw(@NotNull(value = "args cannot be null") final List<String> args) {
+    public void setRaw(@NotNull("args cannot be null") final List<String> args) {
         this.args = args;
         this.current = 0;
     }
@@ -61,7 +61,7 @@ public class RawArguments implements Iterable<String> {
      *
      * @param args The new args
      */
-    public void setRaw(@NotNull(value = "args cannot be null") final String[] args) {
+    public void setRaw(@NotNull("args cannot be null") final String[] args) {
         this.args = Lists.newArrayList(args);
         this.current = 0;
     }

@@ -14,14 +14,14 @@ public class EntityLoadingCache<K, V> {
      *
      * @param loader The {@link CacheLoader}
      */
-    public EntityLoadingCache(@NotNull(value = "loader cannot be null") final CacheLoader<K, V> loader) {
+    public EntityLoadingCache(@NotNull("loader cannot be null") final CacheLoader<K, V> loader) {
         this.cache = CacheBuilder.newBuilder().build(loader);
     }
 
     /**
      * Construct a new {@link EntityLoadingCache}
      */
-    public EntityLoadingCache(@NotNull(value = "cache config cannot be null") final LoadingCache<K, V> cache) {
+    public EntityLoadingCache(@NotNull("cache config cannot be null") final LoadingCache<K, V> cache) {
         this.cache = cache;
     }
 
@@ -31,8 +31,8 @@ public class EntityLoadingCache<K, V> {
      * @param spec   The {@link CacheBuilderSpec}
      * @param loader The {@link CacheLoader}
      */
-    public EntityLoadingCache(@NotNull(value = "cache config cannot be null") final CacheBuilderSpec spec,
-                              @NotNull(value = "loader cannot be null") final CacheLoader<K, V> loader) {
+    public EntityLoadingCache(@NotNull("cache config cannot be null") final CacheBuilderSpec spec,
+                              @NotNull("loader cannot be null") final CacheLoader<K, V> loader) {
         this.cache = CacheBuilder.from(spec).build(loader);
     }
 
@@ -54,10 +54,9 @@ public class EntityLoadingCache<K, V> {
      * Get an entity from the internal cache or load it if no entity exists.
      *
      * @param key The key used in searching for the requested entity
-     *
      * @return The entity, or {@code null} if an error occurred whilst querying the cache or no entity was found.
      */
-    public V getEntity(@NotNull(value = "key cannot be null") final K key) {
+    public V getEntity(@NotNull("key cannot be null") final K key) {
         try {
             return this.cache.get(key);
         } catch (final ExecutionException ignored) {
@@ -73,11 +72,11 @@ public class EntityLoadingCache<K, V> {
      *
      * @return The cached entities value, or {@code def} if no value is present or the value is {@code null}
      */
-    public V getEntity(@NotNull(value = "key cannot be null") final K key,
-                       @NotNull(value = "default cannot be null") final V d) {
+    public V getEntity(@NotNull("key cannot be null") final K key,
+                       @NotNull("default cannot be null") final V d) {
         final V v = this.getEntity(key);
         if (v == null) {
-            return  d;
+            return d;
         }
         return v;
     }

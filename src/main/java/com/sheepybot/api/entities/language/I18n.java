@@ -51,7 +51,7 @@ public class I18n {
      *
      * @param file The file name
      */
-    public static void setDefaultI18n(@NotNull(value = "file cannot be null") String file) {
+    public static void setDefaultI18n(@NotNull("file cannot be null") String file) {
 
 
         try {
@@ -97,7 +97,7 @@ public class I18n {
      * @param guild The {@link Guild}
      * @return The {@link I18n} instance
      */
-    public static I18n getI18n(@NotNull(value = "guild cannot be null") final Guild guild) {
+    public static I18n getI18n(@NotNull("guild cannot be null") final Guild guild) {
         return getI18n(guild.getIdLong());
     }
 
@@ -121,10 +121,9 @@ public class I18n {
      * is {@link Language#ENGLISH}.</p>
      *
      * @param language The {@link Language}
-     *
      * @return The {@link I18n} instance
      */
-    public static I18n getI18n(@NotNull(value = "language cannot be null") final Language language) {
+    public static I18n getI18n(@NotNull("language cannot be null") final Language language) {
         return REGISTRY_MAP.getOrDefault(language.getCode(), getDefaultI18n());
     }
 
@@ -135,7 +134,7 @@ public class I18n {
      *
      * @param clazz The {@link Class}
      */
-    public static void loadI18n(@NotNull(value = "clazz cannot be null") final Class clazz) {
+    public static void loadI18n(@NotNull("clazz cannot be null") final Class clazz) {
 
         LOGGER.info("Loading language files...");
 
@@ -200,7 +199,7 @@ public class I18n {
     private final Language language;
     private final Map<String, String> translations;
 
-    private I18n(@NotNull(value = "language cannot be null") final Language language) {
+    private I18n(@NotNull("language cannot be null") final Language language) {
         this.language = language;
         this.translations = Maps.newHashMap();
     }
@@ -231,7 +230,7 @@ public class I18n {
      *
      * @return The translated string
      */
-    public String tl(@NotNull(value = "key cannot be null") final String key,
+    public String tl(@NotNull("key cannot be null") final String key,
                      final Object... args) {
         Objects.checkArgument(!key.isEmpty(), "key cannot be effectively null");
 
@@ -247,7 +246,7 @@ public class I18n {
      *
      * @return The string
      */
-    private String getMessage(@NotNull(value = "key cannot be null") final String key) {
+    private String getMessage(@NotNull("key cannot be null") final String key) {
         Objects.checkArgument(!key.isEmpty(), "key cannot be effectively null");
 
         String translation = getString(key);
@@ -263,7 +262,7 @@ public class I18n {
      *
      * @param bundle The {@link ResourceBundle} to load from
      */
-    private void load(@NotNull(value = "bundle cannot be null") final ResourceBundle bundle) {
+    private void load(@NotNull("bundle cannot be null") final ResourceBundle bundle) {
 
         final Enumeration<String> iterator = bundle.getKeys();
         while (iterator.hasMoreElements()) {

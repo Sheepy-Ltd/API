@@ -21,8 +21,8 @@ public class DiscordBotListAgent implements Runnable {
     private final ShardManager shardManager;
     private final String token;
 
-    public DiscordBotListAgent(@NotNull(value = "bot cannot be null") final Bot bot,
-                               @NotNull(value = "token cannot be null") final String token) {
+    public DiscordBotListAgent(@NotNull("bot cannot be null") final Bot bot,
+                               @NotNull("token cannot be null") final String token) {
         this.shardManager = bot.getShardManager();
         this.token = token;
     }

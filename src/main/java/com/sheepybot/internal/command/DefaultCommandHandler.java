@@ -16,8 +16,8 @@ public class DefaultCommandHandler implements CommandHandler {
      * @param context The {@link CommandContext}
      * @param args    The {@link Arguments}
      */
-    public void handle(@NotNull(value = "context cannot be null") final CommandContext context,
-                       @NotNull(value = "args cannot be null") final Arguments args) {
+    public void handle(@NotNull("context cannot be null") final CommandContext context,
+                       @NotNull("args cannot be null") final Arguments args) {
 
         final Command command = context.getCommand();
         final Member member = context.getMember();

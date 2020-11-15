@@ -42,7 +42,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
     }
 
     @Override
-    public Module getModuleByName(@NotNull(value = "module names cannot be null") final String name) {
+    public Module getModuleByName(@NotNull("module names cannot be null") final String name) {
         return this.modules.stream().filter(module -> module.getData().name().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
 
@@ -57,7 +57,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
     }
 
     @Override
-    public Module loadModule(@NotNull(value = "module file cannot be null") final File file) throws IllegalArgumentException, IllegalStateException, InvalidModuleException {
+    public Module loadModule(@NotNull("module file cannot be null") final File file) throws IllegalArgumentException, IllegalStateException, InvalidModuleException {
         Objects.checkArgument(file.exists(), "file doesn't exist");
         Objects.checkArgument(file.isFile(), "file is not a file");
 
@@ -154,7 +154,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
     }
 
     @Override
-    public void enableModule(@NotNull(value = "module cannot be null") final Module module) {
+    public void enableModule(@NotNull("module cannot be null") final Module module) {
         Objects.checkState(!module.isEnabled(), "Module already enabled");
 
         LOGGER.info("Enabling " + module.getFullName() + "...");
@@ -177,7 +177,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
     }
 
     @Override
-    public void disableModule(@NotNull(value = "module cannot be null") final Module module) {
+    public void disableModule(@NotNull("module cannot be null") final Module module) {
         Objects.checkState(module.isEnabled(), "Module is not enabled");
 
         LOGGER.info("Disabling " + module.getFullName() + "...");
@@ -205,7 +205,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
     }
 
     @Override
-    public void unloadModule(@NotNull(value = "module cannot be null") final Module module) {
+    public void unloadModule(@NotNull("module cannot be null") final Module module) {
         LOGGER.info(String.format("Unloaded module %s", module.getName()));
         this.modules.remove(module);
     }

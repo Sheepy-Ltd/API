@@ -26,10 +26,9 @@ public class Options implements Iterator<Options.Option> {
      * Retrieve an option by its name
      *
      * @param option The option
-     *
      * @return The {@link Option} or {@code null} if no option was present
      */
-    public Option getOption(@NotNull(value = "option cannot be null") final String option) {
+    public Option getOption(@NotNull("option cannot be null") final String option) {
         return this.options.stream().filter(opt -> opt.getName().equalsIgnoreCase(option)).findFirst().orElse(null);
     }
 
@@ -88,7 +87,7 @@ public class Options implements Iterator<Options.Option> {
          * @param name  The flag name
          * @param value The flags value, or {@code null} if there is no value
          */
-        public Option(@NotNull(value = "name cannot be null") final String name,
+        public Option(@NotNull("name cannot be null") final String name,
                       final String value) {
             this.name = name;
             this.value = value;

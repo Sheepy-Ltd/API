@@ -20,10 +20,10 @@ public class RegisteredListener {
      * @param handler  The {@link EventHandler} for this {@link Event}
      * @param module   The {@link Module} to register this {@link RegisteredListener} to
      */
-    public RegisteredListener(@NotNull(value = "listener cannot be null") final EventListener listener,
-                              @NotNull(value = "executor cannot be null") final EventExecutor executor,
-                              @NotNull(value = "handler cannot be null") final EventHandler handler,
-                              @NotNull(value = "parent module cannot be null") final Module module) {
+    public RegisteredListener(@NotNull("listener cannot be null") final EventListener listener,
+                              @NotNull("executor cannot be null") final EventExecutor executor,
+                              @NotNull("handler cannot be null") final EventHandler handler,
+                              @NotNull("parent module cannot be null") final Module module) {
         this.listener = listener;
         this.executor = executor;
         this.handler = handler;
@@ -70,7 +70,7 @@ public class RegisteredListener {
      * @param event The {@link Event} to call
      * @throws EventException If an error occurred during event execution
      */
-    public void callEvent(@NotNull(value = "event cannot be null") final GenericEvent event) throws EventException {
+    public void callEvent(@NotNull("event cannot be null") final GenericEvent event) throws EventException {
         this.executor.execute(this.listener, event);
     }
 

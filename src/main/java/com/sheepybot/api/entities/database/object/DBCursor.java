@@ -25,7 +25,7 @@ public class DBCursor implements Iterator<DBObject> {
     /**
      * @param cursor The {@link List} of {@link DBObject}s to initialize this {@link DBCursor} with
      */
-    public DBCursor(@NotNull(value = "cursor cannot be null") final List<DBObject> cursor) {
+    public DBCursor(@NotNull("cursor cannot be null") final List<DBObject> cursor) {
         this.cursor = cursor;
     }
 
@@ -33,10 +33,9 @@ public class DBCursor implements Iterator<DBObject> {
      * Add a {@link DBObject} to the internal {@link List}
      *
      * @param object The {@link DBObject}  to use
-     *
      * @return This {@link DBCursor} instance, useful for chaining.
      */
-    public DBCursor add(@NotNull(value = "key cannot be null") final DBObject object) {
+    public DBCursor add(@NotNull("key cannot be null") final DBObject object) {
         this.cursor.add(object);
         return this;
     }
@@ -46,7 +45,7 @@ public class DBCursor implements Iterator<DBObject> {
      *
      * @param data The {@link List} to copy
      */
-    public void addAll(@NotNull(value = "data cannot be null") final List<DBObject> data) {
+    public void addAll(@NotNull("data cannot be null") final List<DBObject> data) {
         this.cursor.addAll(data);
     }
 
@@ -55,7 +54,7 @@ public class DBCursor implements Iterator<DBObject> {
      *
      * @param data The {@link List} to copy
      */
-    public void addAll(@NotNull(value = "data cannot be null") final DBCursor data) {
+    public void addAll(@NotNull("data cannot be null") final DBCursor data) {
         this.cursor.addAll(data.getCursor());
     }
 
@@ -64,7 +63,7 @@ public class DBCursor implements Iterator<DBObject> {
      *
      * @param consumer The {@link Consumer}
      */
-    public void forEach(@NotNull(value = "consumer cannot be null") final Consumer<DBObject> consumer) {
+    public void forEach(@NotNull("consumer cannot be null") final Consumer<DBObject> consumer) {
         this.cursor.forEach(consumer);
     }
 
@@ -75,7 +74,7 @@ public class DBCursor implements Iterator<DBObject> {
      * @param <R>    The element type of the new {@link Stream}
      * @return The new {@link Stream}
      */
-    public <R> Stream<R> map(@NotNull(value = "function cannot be null") final Function<DBObject, ? extends R> mapper) {
+    public <R> Stream<R> map(@NotNull("function cannot be null") final Function<DBObject, ? extends R> mapper) {
         return this.cursor.stream().map(mapper);
     }
 

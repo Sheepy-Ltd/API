@@ -29,13 +29,13 @@ public class CommandRegistryImpl implements RootCommandRegistry {
     }
 
     @Override
-    public Command getCommandByNameOrAlias(@NotNull(value = "alias cannot be null") final List<String> aliases) {
+    public Command getCommandByNameOrAlias(@NotNull("alias cannot be null") final List<String> aliases) {
         LOGGER.debug("Retrieving all commands with any name/alias matching {}...", Arrays.toString(aliases.toArray()));
         return this.commandMap.values().stream().flatMap(commands -> commands.stream().filter(command -> command.getNames().stream().anyMatch(aliases::contains))).findFirst().orElse(null);
     }
 
     @Override
-    public void registerCommand(@NotNull(value = "command cannot be null") final Command command,
+    public void registerCommand(@NotNull("command cannot be null") final Command command,
                                 final Module module) {
         LOGGER.debug("Registering command {} in module {} to root command registry...", command.getName(), (module == null ? "Bot" : module.getName()));
         if (this.getCommandByNameOrAlias(command.getNames()) != null) {
@@ -46,13 +46,13 @@ public class CommandRegistryImpl implements RootCommandRegistry {
     }
 
     @Override
-    public void unregisterCommand(@NotNull(value = "command cannot be null") final Command command) {
+    public void unregisterCommand(@NotNull("command cannot be null") final Command command) {
         LOGGER.debug("Unregistering command {}...", command.getName());
         this.commandMap.keySet().forEach(module -> this.commandMap.get(module).removeIf(cmd -> cmd.getName().equalsIgnoreCase(command.getName())));
     }
 
     @Override
-    public void unregisterAll(@NotNull(value = "module cannot be null") final Module module) {
+    public void unregisterAll(@NotNull("module cannot be null") final Module module) {
         LOGGER.debug("Unregistering all commands from module {}...", module.getName());
         this.commandMap.remove(module);
     }

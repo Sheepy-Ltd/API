@@ -25,10 +25,9 @@ public interface RootCommandRegistry {
      * Retrieve a {@link Command} by its name or any alias it may use to be referenced or executed
      *
      * @param aliases The names a command may used to be executed
-     *
      * @return The {@link Command}, or {@code null} if no command was found
      */
-    Command getCommandByNameOrAlias(@NotNull(value = "aliases cannot be null") final List<String> aliases);
+    Command getCommandByNameOrAlias(@NotNull("aliases cannot be null") final List<String> aliases);
 
     /**
      * Register a {@link Command} in this {@link RootCommandRegistry}
@@ -36,7 +35,7 @@ public interface RootCommandRegistry {
      * @param command The {@link Command} to register
      * @param module  The owning {@link Module}.
      */
-    void registerCommand(@NotNull(value = "command cannot be null") final Command command,
+    void registerCommand(@NotNull("command cannot be null") final Command command,
                          final Module module);
 
     /**
@@ -44,14 +43,14 @@ public interface RootCommandRegistry {
      *
      * @param command The {@link Command} to un-register
      */
-    void unregisterCommand(@NotNull(value = "command cannot be null") final Command command);
+    void unregisterCommand(@NotNull("command cannot be null") final Command command);
 
     /**
      * Un-register all {@link Command}'s associated with the given {@link Module}
      *
      * @param module The {@link Module} to un-register commands from.
      */
-    void unregisterAll(@NotNull(value = "parent module cannot be null") final Module module);
+    void unregisterAll(@NotNull("parent module cannot be null") final Module module);
 
     /**
      * Un-register all {@link Command}'s in this command map

@@ -45,8 +45,8 @@ public final class EventWaiter implements EventListener {
      * @param registry The {@link EventRegistry} to build to
      * @param service  The {@link ScheduledExecutorService} to use
      */
-    EventWaiter(@NotNull(value = "registry cannot be null") final EventRegistry registry,
-                @NotNull(value = "executor service cannot be null") final ScheduledExecutorService service) {
+    EventWaiter(@NotNull("registry cannot be null") final EventRegistry registry,
+                @NotNull("executor service cannot be null") final ScheduledExecutorService service) {
         this.service = service;
         this.waiters = Maps.newHashMap();
         registry.registerEvent(this);
@@ -68,11 +68,11 @@ public final class EventWaiter implements EventListener {
      * @return The {@link WaitingEvent}
      * @throws IllegalArgumentException If this {@link EventWaiter} is shutdown or if there is no timeout set
      */
-    public <T extends GenericEvent> WaitingEvent<T> newWaiter(@NotNull(value = "event cannot be null") final Class<T> event,
+    public <T extends GenericEvent> WaitingEvent<T> newWaiter(@NotNull("event cannot be null") final Class<T> event,
                                                               final Predicate<T> predicate,
-                                                              @NotNull(value = "function cannot be null") final Function<T, Boolean> function,
+                                                              @NotNull("function cannot be null") final Function<T, Boolean> function,
                                                               final long timeoutAfter,
-                                                              @NotNull(value = "unit cannot be null") final TimeUnit unit,
+                                                              @NotNull("unit cannot be null") final TimeUnit unit,
                                                               final Runnable timeoutAction) {
 
         Objects.checkArgument(!this.isShutdown(), "Cannot register new WaitingEvent's on a shutdown EventWaiter");
@@ -211,10 +211,9 @@ public final class EventWaiter implements EventListener {
          * Set the {@link Predicate} to check prior to execution of the {@link WaitingEvent}
          *
          * @param predicate The {@link Predicate}
-         *
          * @return This {@link WaitingEventBuilder}
          */
-        public WaitingEventBuilder<T> before(@NotNull(value = "predicate cannot be null") final Predicate<T> predicate) {
+        public WaitingEventBuilder<T> before(@NotNull("predicate cannot be null") final Predicate<T> predicate) {
             this.predicate = predicate;
             return this;
         }
@@ -230,7 +229,7 @@ public final class EventWaiter implements EventListener {
          *
          * @return This {@link WaitingEventBuilder}
          */
-        public WaitingEventBuilder<T> executor(@NotNull(value = "consumer cannot be null") final Consumer<T> consumer) {
+        public WaitingEventBuilder<T> executor(@NotNull("consumer cannot be null") final Consumer<T> consumer) {
             this.function = (event) -> {
                 try {
                     consumer.accept(event);
@@ -252,7 +251,7 @@ public final class EventWaiter implements EventListener {
          *
          * @return This {@link WaitingEventBuilder}
          */
-        public WaitingEventBuilder<T> executor(@NotNull(value = "function cannot be null") final Function<T, Boolean> function) {
+        public WaitingEventBuilder<T> executor(@NotNull("function cannot be null") final Function<T, Boolean> function) {
             this.function = function;
             return this;
         }
@@ -285,7 +284,7 @@ public final class EventWaiter implements EventListener {
          * @return This {@link WaitingEventBuilder}
          */
         public WaitingEventBuilder<T> timeoutAfter(final long timeout,
-                                                   @NotNull(value = "unit cannot be null") final TimeUnit unit) {
+                                                   @NotNull("unit cannot be null") final TimeUnit unit) {
             Objects.checkArgument(timeout > 0, "timeout cannot be negative or equal to 0");
             this.timeout = timeout;
             this.unit = unit;
@@ -300,7 +299,7 @@ public final class EventWaiter implements EventListener {
          *
          * @return This {@link WaitingEventBuilder}
          */
-        public WaitingEventBuilder<T> timeoutAction(@NotNull(value = "timeoutAction cannot be null") final Runnable timeoutAction) {
+        public WaitingEventBuilder<T> timeoutAction(@NotNull("timeoutAction cannot be null") final Runnable timeoutAction) {
             this.timeoutAction = timeoutAction;
             return this;
         }

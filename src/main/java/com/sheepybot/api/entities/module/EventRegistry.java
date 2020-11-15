@@ -13,8 +13,8 @@ public final class EventRegistry {
     private final RootEventRegistry eventManager;
     private final Module module;
 
-    EventRegistry(@NotNull(value = "eventManager cannot be null") final RootEventRegistry eventManager,
-                  @NotNull(value = "module cannot be null") final Module module) {
+    EventRegistry(@NotNull("eventManager cannot be null") final RootEventRegistry eventManager,
+                  @NotNull("module cannot be null") final Module module) {
         this.eventManager = eventManager;
         this.module = module;
     }
@@ -29,7 +29,7 @@ public final class EventRegistry {
     /**
      * @param event The event to call
      */
-    public void callEvent(@NotNull(value = "event cannot be null") final Event event) {
+    public void callEvent(@NotNull("event cannot be null") final Event event) {
         this.eventManager.callEvent(event);
     }
 
@@ -38,7 +38,7 @@ public final class EventRegistry {
      *
      * @param listener The {@link EventListener} to register
      */
-    public void registerEvent(@NotNull(value = "listener cannot be null") final EventListener listener) {
+    public void registerEvent(@NotNull("listener cannot be null") final EventListener listener) {
         this.eventManager.registerEvents(listener, this.module);
     }
 

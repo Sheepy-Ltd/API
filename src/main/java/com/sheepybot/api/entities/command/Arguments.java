@@ -104,7 +104,7 @@ public class Arguments {
 //     *
 //     * @return The flags value if it was present, or {@code null} if no flag by that name was passed.
 //     */
-//    public Command.Flag getFlag(@NotNull(value = "flag cannot be null") final String flag) {
+//    public Command.Flag getFlag(@NotNull("flag cannot be null") final String flag) {
 //        return this.flags.stream().filter(pair -> pair.getName().equalsIgnoreCase(flag)).findFirst().orElse(null);
 //    }
 //
@@ -115,7 +115,7 @@ public class Arguments {
 //     *
 //     * @return {@code true} if the {@code flag} was present, {@code false} otherwise
 //     */
-//    public boolean hasFlag(@NotNull(value = "flag cannot be null") final String flag) {
+//    public boolean hasFlag(@NotNull("flag cannot be null") final String flag) {
 //        return this.getFlag(flag) != null;
 //    }
 

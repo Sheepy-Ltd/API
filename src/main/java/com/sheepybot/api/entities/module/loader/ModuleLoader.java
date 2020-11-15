@@ -17,10 +17,9 @@ public interface ModuleLoader {
      * Retrieve a {@link Module} by-names
      *
      * @param name The names of the {@link Module}
-     *
      * @return The {@link Module}, or {@code null} if no module was found
      */
-    Module getModuleByName(@NotNull(value = "module names cannot be null") final String name);
+    Module getModuleByName(@NotNull("module names cannot be null") final String name);
 
     /**
      * Get every loaded {@link Module}. Even if an error occurred during {@link Module#onEnable()} it will still appear
@@ -44,7 +43,7 @@ public interface ModuleLoader {
      * @throws IllegalArgumentException If this module is already loaded
      * @throws InvalidModuleException   If this module does not contain a main class
      */
-    Module loadModule(@NotNull(value = "module file cannot be null") final File directory) throws IllegalArgumentException, IllegalStateException, InvalidModuleException;
+    Module loadModule(@NotNull("module file cannot be null") final File directory) throws IllegalArgumentException, IllegalStateException, InvalidModuleException;
 
     /**
      * Loads all {@link Module}'s in the current directory, if the directory has no child files it will just return an
@@ -71,19 +70,19 @@ public interface ModuleLoader {
      *
      * @param module
      */
-    void enableModule(@NotNull(value = "module cannot be null") final Module module);
+    void enableModule(@NotNull("module cannot be null") final Module module);
 
     /**
      * @param module The {@link Module} to disable
      */
-    void disableModule(@NotNull(value = "module cannot be null") final Module module);
+    void disableModule(@NotNull("module cannot be null") final Module module);
 
     /**
      * Unload a module from memory
      *
      * @param module The {@link Module} to unload
      */
-    void unloadModule(@NotNull(value = "module cannot be null") Module module);
+    void unloadModule(@NotNull("module cannot be null") Module module);
 
     /**
      * Reload all {@link Module}s

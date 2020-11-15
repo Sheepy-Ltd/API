@@ -45,7 +45,7 @@ public class BotUtils {
      * @param member The {@link Member}
      * @return {@code true} if the provided {@link Member} is an administrator, {@code false} otherwise
      */
-    public static boolean isBotAdmin(@NotNull(value = "member cannot be null") final Member member) {
+    public static boolean isBotAdmin(@NotNull("member cannot be null") final Member member) {
         return isBotAdmin(member.getUser());
     }
 
@@ -53,10 +53,9 @@ public class BotUtils {
      * Check whether a {@link Member} is a bot admin
      *
      * @param user The {@link User}
-     *
      * @return {@code true} if the provided {@link Member} is an administrator, {@code false} otherwise
      */
-    public static boolean isBotAdmin(@NotNull(value = "user cannot be null") final User user) {
+    public static boolean isBotAdmin(@NotNull("user cannot be null") final User user) {
         for (final long id : Bot.get().getConfig().<Long>getList("client.bot_admins", Lists.newArrayListWithCapacity(0))) {
             if (id == user.getIdLong()) {
                 return true;
@@ -72,7 +71,7 @@ public class BotUtils {
      * @return A {@link BufferedImage}
      * @throws IOException If an I/O error occurred
      */
-    public static BufferedImage getImageFromURL(@NotNull(value = "url cannot be null") final String url) throws IOException {
+    public static BufferedImage getImageFromURL(@NotNull("url cannot be null") final String url) throws IOException {
 
         final Request request = new Request.Builder()
                 .url(url)
@@ -99,7 +98,7 @@ public class BotUtils {
      * @return The time
      * @throws Exception If the input {@code time} isn't parsable
      */
-    public static long getDateFromInputTime(@NotNull(value = "time cannot be null;") final String time,
+    public static long getDateFromInputTime(@NotNull("time cannot be null;") final String time,
                                             final boolean future) throws Exception {
 
         final Matcher matcher = TIME_PATTERN.matcher(time);
@@ -211,7 +210,7 @@ public class BotUtils {
      * @param token The bot token
      * @return The recommended shard count or -1 if an I/O error occurred
      */
-    public static int getRecommendedShards(@NotNull(value = "token cannot be null") final String token) {
+    public static int getRecommendedShards(@NotNull("token cannot be null") final String token) {
 
         final Request request = new Request.Builder()
                 .get()
@@ -257,7 +256,7 @@ public class BotUtils {
      * @param activityType The activity type
      * @return The {@link Activity.ActivityType}
      */
-    public static Activity.ActivityType getActivityTypeFromString(@NotNull(value = "activity type cannot be null") final String activityType) {
+    public static Activity.ActivityType getActivityTypeFromString(@NotNull("activity type cannot be null") final String activityType) {
         switch (activityType.toLowerCase()) {
             case "streaming":
                 return Activity.ActivityType.STREAMING;
@@ -268,7 +267,7 @@ public class BotUtils {
         }
     }
 
-    public static List<GatewayIntent> getGatewayIntentsFromList(@NotNull(value = "intents cannot be null") final List<String> intents) {
+    public static List<GatewayIntent> getGatewayIntentsFromList(@NotNull("intents cannot be null") final List<String> intents) {
         final List<GatewayIntent> gatewayIntents = new ArrayList<>();
 
         for (final String intent : intents) {
@@ -283,7 +282,7 @@ public class BotUtils {
         return gatewayIntents;
     }
 
-    public static GatewayIntent getGatewayIntentFromString(@NotNull(value = "gateway intent cannot be null") final String gatewayIntent) {
+    public static GatewayIntent getGatewayIntentFromString(@NotNull("gateway intent cannot be null") final String gatewayIntent) {
         for (final GatewayIntent intent : GatewayIntent.values()) {
             if (intent.name().equalsIgnoreCase(gatewayIntent)) {
                 return intent;
@@ -292,7 +291,7 @@ public class BotUtils {
         return null;
     }
 
-    public static List<CacheFlag> getCacheFlagsFromList(@NotNull(value = "cache flags cannot be null") final List<String> cacheFlags) {
+    public static List<CacheFlag> getCacheFlagsFromList(@NotNull("cache flags cannot be null") final List<String> cacheFlags) {
         final List<CacheFlag> flags = new ArrayList<>();
 
         for (final String flag : cacheFlags) {
@@ -307,7 +306,7 @@ public class BotUtils {
         return flags;
     }
 
-    public static CacheFlag getCacheFlagFromString(@NotNull(value = "cache flag cannot be null") final String cacheFlag) {
+    public static CacheFlag getCacheFlagFromString(@NotNull("cache flag cannot be null") final String cacheFlag) {
         for (final CacheFlag flag : CacheFlag.values()) {
             if (flag.name().equalsIgnoreCase(cacheFlag)) {
                 return flag;
@@ -316,7 +315,7 @@ public class BotUtils {
         return null;
     }
 
-    public static MemberCachePolicy getMemberCachePolicyFromString(@NotNull(value = "cache policy cannot be null") final String cachePolicy) {
+    public static MemberCachePolicy getMemberCachePolicyFromString(@NotNull("cache policy cannot be null") final String cachePolicy) {
         switch (cachePolicy.toLowerCase()) {
             case "all":
                 return MemberCachePolicy.ALL;
@@ -333,7 +332,7 @@ public class BotUtils {
         }
     }
 
-    public static ChunkingFilter getChunkingFilterFromString(@NotNull(value = "chunking filter cannot be null") final String chunkingFilter) {
+    public static ChunkingFilter getChunkingFilterFromString(@NotNull("chunking filter cannot be null") final String chunkingFilter) {
         if (chunkingFilter.equalsIgnoreCase("all")) {
             return ChunkingFilter.ALL;
         }
@@ -347,7 +346,7 @@ public class BotUtils {
      * @return The bot user ID
      * @throws RuntimeException If we couldn't retrieve the self user ID
      */
-    public static long getUserIdFromToken(@NotNull(value = "token cannot be null") final String token) {
+    public static long getUserIdFromToken(@NotNull("token cannot be null") final String token) {
 
         final Request request = new Request.Builder()
                 .get()

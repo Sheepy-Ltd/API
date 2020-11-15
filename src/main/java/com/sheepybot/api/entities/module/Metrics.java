@@ -21,7 +21,7 @@ public final class Metrics {
 
     private ScheduledTask task;
 
-    Metrics(@NotNull(value = "module cannot be null") final String name) {
+    Metrics(@NotNull("module cannot be null") final String name) {
         this.name = name;
         this.graphs = Lists.newArrayList();
     }
@@ -42,11 +42,10 @@ public final class Metrics {
 
     /**
      * @param graph The {@link Graph}
-     *
      * @throws IllegalArgumentException If the provided {@link Graph} is {@code null}
      * @throws IllegalArgumentException If there is another {@link Graph} with the same names
      */
-    public void addGraph(@NotNull(value = "graph cannot be null") final Metrics.Graph graph) throws IllegalArgumentException {
+    public void addGraph(@NotNull("graph cannot be null") final Metrics.Graph graph) throws IllegalArgumentException {
         if (this.graphs.stream().anyMatch(f -> f.getName().equalsIgnoreCase(graph.getName()))) {
             throw new IllegalArgumentException(String.format("Duplicate field for names %s", graph.getName()));
         }
@@ -83,8 +82,8 @@ public final class Metrics {
      * @throws IllegalArgumentException If the provided {@code names} is empty
      * @throws IllegalArgumentException If the provided {@code names} is not unique
      */
-    public Graph createGraph(@NotNull(value = "names cannot be null") final String name,
-                             @NotNull(value = "callable cannot be null") final Callable<Map<String, Integer>> callable) throws IllegalArgumentException {
+    public Graph createGraph(@NotNull("names cannot be null") final String name,
+                             @NotNull("callable cannot be null") final Callable<Map<String, Integer>> callable) throws IllegalArgumentException {
         return this.createGraph(name, null, callable);
     }
 
@@ -100,9 +99,9 @@ public final class Metrics {
      * @throws IllegalArgumentException If the provided {@code names} is empty
      * @throws IllegalArgumentException If the provided {@code names} is not unique
      */
-    public Graph createGraph(@NotNull(value = "names cannot be null") final String name,
+    public Graph createGraph(@NotNull("names cannot be null") final String name,
                              final String description,
-                             @NotNull(value = "callable cannot be null") final Callable<Map<String, Integer>> callable) throws IllegalArgumentException {
+                             @NotNull("callable cannot be null") final Callable<Map<String, Integer>> callable) throws IllegalArgumentException {
         Objects.checkArgument(!name.isEmpty(), "names cannot be effectively null");
 
         final Graph field = new Graph(name, description, callable);
@@ -124,8 +123,8 @@ public final class Metrics {
         /**
          * @param name The names of this {@link Graph}
          */
-        Graph(@NotNull(value = "names cannot be null") final String name,
-              @NotNull(value = "callable cannot be null") final Callable<Map<String, Integer>> callable) {
+        Graph(@NotNull("names cannot be null") final String name,
+              @NotNull("callable cannot be null") final Callable<Map<String, Integer>> callable) {
             this(name, null, callable);
         }
 
@@ -134,9 +133,9 @@ public final class Metrics {
          * @param description A brief description of this {@link Graph}s purpose
          * @param callable    The {@link Callable} to execute when it comes time to submit this {@link Graph}s data
          */
-        Graph(@NotNull(value = "names cannot be null") final String name,
+        Graph(@NotNull("names cannot be null") final String name,
               final String description,
-              @NotNull(value = "callable cannot be null") final Callable<Map<String, Integer>> callable) {
+              @NotNull("callable cannot be null") final Callable<Map<String, Integer>> callable) {
             Objects.checkArgument(!name.isEmpty(), "names cannot be effectively null");
             this.name = name;
             this.description = description;
@@ -172,8 +171,8 @@ public final class Metrics {
          *
          * @return The {@link Graph}
          */
-        public static Graph of(@NotNull(value = "names cannot be null") final String name,
-                                   @NotNull(value = "callable cannot be null") final Callable<Map<String, Integer>> callable) {
+        public static Graph of(@NotNull("names cannot be null") final String name,
+                               @NotNull("callable cannot be null") final Callable<Map<String, Integer>> callable) {
             return new Graph(name, callable);
         }
 
@@ -186,9 +185,9 @@ public final class Metrics {
          *
          * @return The {@link Graph}
          */
-        public static Graph of(@NotNull(value = "names cannot be null") final String name,
-                                   final String description,
-                                   @NotNull(value = "callable cannot be null") final Callable<Map<String, Integer>> callable) {
+        public static Graph of(@NotNull("names cannot be null") final String name,
+                               final String description,
+                               @NotNull("callable cannot be null") final Callable<Map<String, Integer>> callable) {
             return new Graph(name, description, callable);
         }
 

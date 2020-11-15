@@ -29,7 +29,7 @@ public class Messaging {
      *
      * @param consumer The new default {@link Consumer}
      */
-    public static void setDefaultFailureConsumer(@NotNull(value = "failure consumer cannot be null") final Consumer<Throwable> consumer) {
+    public static void setDefaultFailureConsumer(@NotNull("failure consumer cannot be null") final Consumer<Throwable> consumer) {
         DEFAULT_FAILURE_CONSUMER = consumer;
     }
 
@@ -55,10 +55,9 @@ public class Messaging {
      * Convert the input {@code message} into a {@link Message}
      *
      * @param message The message content
-     *
      * @return The {@link Message}
      */
-    public static Message getAsMessage(@NotNull(value = "message cannot be null") final String message) {
+    public static Message getAsMessage(@NotNull("message cannot be null") final String message) {
         return getLocalMessageBuilder().setContent(message).build();
     }
 
@@ -69,7 +68,7 @@ public class Messaging {
      *
      * @return The {@link Message}
      */
-    public static Message getAsMessage(@NotNull(value = "embed cannot be null") final MessageEmbed embed) {
+    public static Message getAsMessage(@NotNull("embed cannot be null") final MessageEmbed embed) {
         return getLocalMessageBuilder().setEmbed(embed).build();
     }
 
@@ -79,8 +78,8 @@ public class Messaging {
      * @param channel The {@link MessageChannel} to send to
      * @param message The message to send
      */
-    public static void send(@NotNull(value = "channel cannot be null") final MessageChannel channel,
-                            @NotNull(value = "message cannot be null") final String message) {
+    public static void send(@NotNull("channel cannot be null") final MessageChannel channel,
+                            @NotNull("message cannot be null") final String message) {
         Messaging.message(channel, message).send();
     }
 
@@ -90,8 +89,8 @@ public class Messaging {
      * @param channel The {@link MessageChannel} to send to
      * @param embed   The {@link MessageEmbed} to send
      */
-    public static void send(@NotNull(value = "channel cannot be null") final MessageChannel channel,
-                            @NotNull(value = "embed cannot be null") final MessageEmbed embed) {
+    public static void send(@NotNull("channel cannot be null") final MessageChannel channel,
+                            @NotNull("embed cannot be null") final MessageEmbed embed) {
         Messaging.message(channel, embed).send();
     }
 
@@ -101,8 +100,8 @@ public class Messaging {
      * @param channel The {@link MessageChannel} to send to
      * @param message The {@link Message} to send
      */
-    public static void send(@NotNull(value = "channel cannot be null") final MessageChannel channel,
-                            @NotNull(value = "message cannot be null") final Message message) {
+    public static void send(@NotNull("channel cannot be null") final MessageChannel channel,
+                            @NotNull("message cannot be null") final Message message) {
         Messaging.message(channel, message).send();
     }
 
@@ -116,8 +115,8 @@ public class Messaging {
      *
      * @return A new {@link MessageActionBuilder}
      */
-    public static MessageActionBuilder message(@NotNull(value = "channel cannot be null") final MessageChannel channel,
-                                               @NotNull(value = "message cannot be null") final String message) {
+    public static MessageActionBuilder message(@NotNull("channel cannot be null") final MessageChannel channel,
+                                               @NotNull("message cannot be null") final String message) {
         return new MessageActionBuilder(channel, Messaging.getAsMessage(message));
     }
 
@@ -129,8 +128,8 @@ public class Messaging {
      *
      * @return A new {@link MessageActionBuilder}
      */
-    public static MessageActionBuilder message(@NotNull(value = "channel cannot be null") final MessageChannel channel,
-                                               @NotNull(value = "message cannot be null") final MessageEmbed embed) {
+    public static MessageActionBuilder message(@NotNull("channel cannot be null") final MessageChannel channel,
+                                               @NotNull("message cannot be null") final MessageEmbed embed) {
         return new MessageActionBuilder(channel, Messaging.getAsMessage(embed));
     }
 
@@ -142,8 +141,8 @@ public class Messaging {
      *
      * @return A new {@link MessageActionBuilder}
      */
-    public static MessageActionBuilder message(@NotNull(value = "channel cannot be null") final MessageChannel channel,
-                                               @NotNull(value = "message cannot be null") final Message message) {
+    public static MessageActionBuilder message(@NotNull("channel cannot be null") final MessageChannel channel,
+                                               @NotNull("message cannot be null") final Message message) {
         return new MessageActionBuilder(channel, message);
     }
 
@@ -155,8 +154,8 @@ public class Messaging {
      *
      * @throws NumberFormatException Should the input {@code id} not be convertible to a {@link Long}
      */
-    public static void deleteMessageById(@NotNull(value = "channel cannot be null") final MessageChannel channel,
-                                         @NotNull(value = "id cannot be null") final String id) throws NumberFormatException {
+    public static void deleteMessageById(@NotNull("channel cannot be null") final MessageChannel channel,
+                                         @NotNull("id cannot be null") final String id) throws NumberFormatException {
         Messaging.deleteMessageById(channel, Long.parseLong(id));
     }
 
@@ -166,7 +165,7 @@ public class Messaging {
      * @param channel The {@link MessageChannel}
      * @param id      The id of the message to delete
      */
-    public static void deleteMessageById(@NotNull(value = "channel cannot be null") final MessageChannel channel,
+    public static void deleteMessageById(@NotNull("channel cannot be null") final MessageChannel channel,
                                          final long id) {
         deleteMessageById(channel, id, null);
     }
@@ -178,7 +177,7 @@ public class Messaging {
      * @param id      The id of the message to delete
      * @param reason  The reason for deleting the message
      */
-    public static void deleteMessageById(@NotNull(value = "channel cannot be null") final MessageChannel channel,
+    public static void deleteMessageById(@NotNull("channel cannot be null") final MessageChannel channel,
                                          final long id,
                                          final String reason) {
         Objects.checkNotNegative(id, "id cannot be negative");
@@ -190,9 +189,10 @@ public class Messaging {
      *
      * @param message The {@link Message} to delete
      */
-    public static void deleteMessage(@NotNull(value = "message cannot be null") final Message message) {
+    public static void deleteMessage(@NotNull("message cannot be null") final Message message) {
         try {
-            message.delete().queue(null, __ -> {});
+            message.delete().queue(null, __ -> {
+            });
         } catch (final InsufficientPermissionException ex) {
             LOGGER.info("Couldn't delete message from channel %s due to missing permission %s",
                     message.getTextChannel().getId(), ex.getPermission().getName());
@@ -215,8 +215,8 @@ public class Messaging {
          * @param channel The {@link MessageChannel} to send to
          * @param message The {@link Message} to send
          */
-        public MessageActionBuilder(@NotNull(value = "channel cannot be null") final MessageChannel channel,
-                                    @NotNull(value = "message cannot be null") final Message message)  {
+        public MessageActionBuilder(@NotNull("channel cannot be null") final MessageChannel channel,
+                                    @NotNull("message cannot be null") final Message message) {
             this.channel = channel;
             this.message = message;
             this.unit = TimeUnit.MILLISECONDS;
@@ -229,7 +229,7 @@ public class Messaging {
          *
          * @return This {@link MessageActionBuilder}
          */
-        public MessageActionBuilder channel(@NotNull(value = "channel cannot be null") final MessageChannel channel) {
+        public MessageActionBuilder channel(@NotNull("channel cannot be null") final MessageChannel channel) {
             this.channel = channel;
             return this;
         }
@@ -239,7 +239,7 @@ public class Messaging {
          *
          * @param message The {@link Message} to be sent
          */
-        public MessageActionBuilder message(@NotNull(value = "message cannot be null") final Message message) {
+        public MessageActionBuilder message(@NotNull("message cannot be null") final Message message) {
             this.message = message;
             return this;
         }
@@ -264,7 +264,7 @@ public class Messaging {
          * @return This {@link Messaging.MessageActionBuilder}
          */
         public MessageActionBuilder deleteAfter(final long deleteAfter,
-                                                @NotNull(value = "unit cannot be null") final TimeUnit unit) {
+                                                @NotNull("unit cannot be null") final TimeUnit unit) {
             Objects.checkNotNegative(deleteAfter, "deleteAfter cannot be negative");
             this.deleteAfter = deleteAfter;
             this.unit = unit;
@@ -276,7 +276,7 @@ public class Messaging {
          *
          * @return This {@link Messaging.MessageActionBuilder}
          */
-        public MessageActionBuilder success(@NotNull(value = "consumer cannot be null") final Consumer<Message> success) {
+        public MessageActionBuilder success(@NotNull("consumer cannot be null") final Consumer<Message> success) {
             this.success = success;
             return this;
         }
@@ -286,7 +286,7 @@ public class Messaging {
          *
          * @return This {@link Messaging.MessageActionBuilder}
          */
-        public MessageActionBuilder failure(@NotNull(value = "consumer cannot be null") final Consumer<Throwable> failure) {
+        public MessageActionBuilder failure(@NotNull("consumer cannot be null") final Consumer<Throwable> failure) {
             this.failure = failure;
             return this;
         }

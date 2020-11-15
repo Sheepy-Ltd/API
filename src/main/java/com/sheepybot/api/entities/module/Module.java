@@ -44,11 +44,11 @@ public abstract class Module {
     }
 
     //this is called in the module loader, making it final prevents it being overridden
-    public final void init(@NotNull(value = "command manager cannot be null") final RootCommandRegistry rootCommandRegistry,
-                           @NotNull(value = "event manager cannot be null") final RootEventRegistry rootEventRegistry,
+    public final void init(@NotNull("command manager cannot be null") final RootCommandRegistry rootCommandRegistry,
+                           @NotNull("event manager cannot be null") final RootEventRegistry rootEventRegistry,
                            final Database database,
-                           @NotNull(value = "data folder cannot be null") final File dataFolder,
-                           @NotNull(value = "jar cannot be null") final File jar) {
+                           @NotNull("data folder cannot be null") final File dataFolder,
+                           @NotNull("jar cannot be null") final File jar) {
         this.logger = LoggerFactory.getLogger(this.data.name());
         this.commandRegistry = new CommandRegistry(rootCommandRegistry, this);
         this.eventRegistry = new EventRegistry(rootEventRegistry, this);
@@ -183,7 +183,7 @@ public abstract class Module {
      *
      * @param prefixFunction The {@link Function} to use in generating prefixes for the API.
      */
-    public void setPrefixGenerator(@NotNull(value = "prefix generator cannot be null") final Function<GuildMessageReceivedEvent, String> prefixFunction) {
+    public void setPrefixGenerator(@NotNull("prefix generator cannot be null") final Function<GuildMessageReceivedEvent, String> prefixFunction) {
         this.prefixFunction = prefixFunction;
     }
 
