@@ -78,8 +78,19 @@ public class DBObject {
      * @param <R>    The element type of the new {@link Stream}
      * @return The new {@link Stream}
      */
-    public <R> Stream<R> map(@NotNull(value = "function cannot be null") final Function<String, ? extends R> mapper) {
+    public <R> Stream<R> mapKeys(@NotNull(value = "function cannot be null") final Function<String, ? extends R> mapper) {
         return this.data.keySet().stream().map(mapper);
+    }
+
+    /**
+     * Returns a stream which is the result of applying entries from this {@link DBObject}
+     *
+     * @param mapper A {@link Function} to apply to each element in this {@link DBObject}
+     * @param <R>    The element type of the new {@link Stream}
+     * @return The new {@link Stream}
+     */
+    public <R> Stream<R> mapValues(@NotNull(value = "function cannot be null") final Function<Object, ? extends R> mapper) {
+        return this.data.values().stream().map(mapper);
     }
 
     private void throwError(final String key) {
