@@ -25,7 +25,7 @@ public class DBObject {
     /**
      * @param data The {@link Map} to initialize this {@link DBObject} with
      */
-    public DBObject(@NotNull("initMap cannot be null") final Map<String, Object> data) {
+    public DBObject(@NotNull("data cannot be null") final Map<String, Object> data) {
         this.data = data;
     }
 
@@ -72,14 +72,14 @@ public class DBObject {
     }
 
     /**
-     * Returns a stream consisting of the results of applying the function to the elements of this {@link DBObject}
+     * Returns a stream which is the result of applying entries from this {@link DBObject}
      *
      * @param mapper A {@link Function} to apply to each element in this {@link DBObject}
      * @param <R>    The element type of the new {@link Stream}
      * @return The new {@link Stream}
      */
-    public <R> Stream<R> map(@NotNull(value = "function cannot be null") final Function<Object, ? extends R> mapper) {
-        return this.data.values().stream().map(mapper);
+    public <R> Stream<R> map(@NotNull(value = "function cannot be null") final Function<String, ? extends R> mapper) {
+        return this.data.keySet().stream().map(mapper);
     }
 
     private void throwError(final String key) {
