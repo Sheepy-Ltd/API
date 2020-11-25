@@ -218,6 +218,7 @@ public class CommandContext {
         final EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle(this.doReplace(embed.getTitle()), embed.getUrl());
         builder.setDescription(this.doReplace(embed.getDescription()));
+        builder.setColor(embed.getColor());
 
         if (embed.getAuthor() != null) {
             final MessageEmbed.AuthorInfo info = embed.getAuthor();
