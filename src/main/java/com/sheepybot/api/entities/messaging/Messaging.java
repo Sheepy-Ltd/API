@@ -194,8 +194,8 @@ public class Messaging {
             message.delete().queue(null, __ -> {
             });
         } catch (final InsufficientPermissionException ex) {
-            LOGGER.info("Couldn't delete message from channel %s due to missing permission %s",
-                    message.getTextChannel().getId(), ex.getPermission().getName());
+            LOGGER.info(String.format("Couldn't delete message from channel %s due to missing permission %s",
+                    message.getTextChannel().getId(), ex.getPermission().getName()));
         }
     }
 
