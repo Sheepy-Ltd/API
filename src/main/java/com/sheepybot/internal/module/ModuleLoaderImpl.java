@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import org.jetbrains.annotations.NotNull;
 
@@ -162,7 +161,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
 
             module.setEnabled(true);
 
-            final Function<GuildMessageReceivedEvent, String> prefixGenerator = module.getPrefixGenerator();
+            final Function<Guild, String> prefixGenerator = module.getPrefixGenerator();
             if (prefixGenerator != null) {
                 Bot.prefixGenerator = prefixGenerator;
             }

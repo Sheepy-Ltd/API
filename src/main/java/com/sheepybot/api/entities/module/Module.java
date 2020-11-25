@@ -6,7 +6,7 @@ import com.sheepybot.api.entities.database.Database;
 import com.sheepybot.api.entities.event.RootEventRegistry;
 import com.sheepybot.api.entities.scheduler.Scheduler;
 import com.sheepybot.util.Objects;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.Guild;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ public abstract class Module {
     private Database database;
     private SchedulerRegistry schedulerRegistry;
     private Metrics metrics;
-    private Function<GuildMessageReceivedEvent, String> prefixFunction = null;
+    private Function<Guild, String> prefixFunction = null;
     private File dataFolder;
     private File jar;
 
@@ -172,7 +172,7 @@ public abstract class Module {
     /**
      * @return The {@link Function} used in generating prefixs for the API
      */
-    public Function<GuildMessageReceivedEvent, String> getPrefixGenerator() {
+    public Function<Guild, String> getPrefixGenerator() {
         return this.prefixFunction;
     }
 
@@ -183,7 +183,7 @@ public abstract class Module {
      *
      * @param prefixFunction The {@link Function} to use in generating prefixes for the API.
      */
-    public void setPrefixGenerator(@NotNull("prefix generator cannot be null") final Function<GuildMessageReceivedEvent, String> prefixFunction) {
+    public void setPrefixGenerator(@NotNull("prefix generator cannot be null") final Function<Guild, String> prefixFunction) {
         this.prefixFunction = prefixFunction;
     }
 

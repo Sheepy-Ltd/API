@@ -7,7 +7,6 @@ import com.sheepybot.api.entities.command.Command;
 import com.sheepybot.api.entities.command.CommandContext;
 import com.sheepybot.api.entities.command.argument.RawArguments;
 import com.sheepybot.api.entities.language.I18n;
-import com.sheepybot.api.entities.messaging.Messaging;
 import com.sheepybot.api.exception.command.CommandSyntaxException;
 import com.sheepybot.api.exception.parser.ParserException;
 import net.dv8tion.jda.api.JDA;
@@ -33,9 +32,10 @@ public class GuildMessageListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
 
-        final Member member = event.getMember();
-        final User user = event.getAuthor();
         final Guild guild = event.getGuild();
+        final Member member = event.getMember();
+        final Member self = guild.getSelfMember();
+        final User user = event.getAuthor();
         final TextChannel channel = event.getChannel();
         final Message message = event.getMessage();
         final JDA jda = event.getJDA();
@@ -48,17 +48,17 @@ public class GuildMessageListener extends ListenerAdapter {
 
         final Future<?> future = Bot.SCHEDULED_EXECUTOR_SERVICE.submit(() -> {
 
-            String content = raw;
+            String content = raw.toLowerCase();
 
-            final String prefix = Bot.prefixGenerator.apply(event);
+            final String prefix = Bot.prefixGenerator.apply(guild).toLowerCase();
             final I18n i18n = I18n.getDefaultI18n();
 
             if (content.startsWith(prefix)) {
                 content = content.substring(prefix.length());
-            } else if (content.startsWith(guild.getSelfMember().getAsMention())) {
-                content = content.substring(guild.getSelfMember().getAsMention().length());
-                if (content.trim().isEmpty()) { //@Mention for prefix
-                    Messaging.send(channel, i18n.tl("commandPrefixMention", prefix));
+            } else if (content.startsWith("<@!" + self.getIdLong() + ">") || raw.startsWith("<@" + self.getIdLong() + ">")) {
+                content = content.replaceFirst("<@!?" + self.getIdLong() + ">", "");
+                if (content.isEmpty()) { //@Mention for prefix
+                    message.getTextChannel().sendMessage(i18n.tl("commandPrefixMention", prefix, jda.getShardInfo().getShardId())).queue();
                 }
             } else {
                 Bot.get().getEventRegistry().callEvent(event);

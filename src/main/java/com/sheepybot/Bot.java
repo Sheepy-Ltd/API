@@ -24,7 +24,7 @@ import com.sheepybot.util.Objects;
 import com.sheepybot.util.Options;
 import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -110,9 +110,9 @@ public class Bot {
      */
     public static final ScheduledExecutorService SINGLE_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor(threadExecutor -> THREAD_FUNCTION.apply("Single Thread Service", threadExecutor));
 
-    public static Function<GuildMessageReceivedEvent, String> defaultPrefixGenerator;
+    public static Function<Guild, String> defaultPrefixGenerator;
 
-    public static Function<GuildMessageReceivedEvent, String> prefixGenerator;
+    public static Function<Guild, String> prefixGenerator;
 
     private static Bot instance;
 
