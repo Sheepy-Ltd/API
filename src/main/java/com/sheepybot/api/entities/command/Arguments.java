@@ -71,7 +71,7 @@ public class Arguments {
         //Sometimes a command may want null instead of just erroring like with >bal in economy
         //You have two options, >bal or >bal @member, nobody wants to >bal @self
         if ((parse == null || parse.trim().isEmpty()) && argument.getValue() == null && !argument.isNullable()) {
-            throw new CommandSyntaxException(this.context.getLabel(), this.context.getCommand().getUsage());
+            throw new CommandSyntaxException(this.context.getTrigger(), this.context.getCommand().getUsage());
         } else {
             final Parameter<T> parameter;
             if (parse == null || parse.isEmpty()) {
