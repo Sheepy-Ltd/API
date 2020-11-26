@@ -352,11 +352,11 @@ public class Bot {
 
                 LOGGER.info("Loading default commands...");
 
-                this.commandRegistry.registerCommand(Command.builder().names("reloadmodule", "rmod").usage("<module>").description("Reload a module").executor(new ReloadModuleCommand()).build(), null);
-                this.commandRegistry.registerCommand(Command.builder().names("enablemodule", "emod").usage("<module>").description("Enable a module").executor(new EnableModuleCommand()).build(), null);
-                this.commandRegistry.registerCommand(Command.builder().names("disablemodule", "dmod").usage("<module>").description("Disable a module").executor(new DisableModuleCommand()).build(), null);
-                this.commandRegistry.registerCommand(Command.builder().names("loadmodule", "lmod").usage("<module>").description("Load a module from its exact jar file name").executor(new LoadModuleCommand()).build(), null);
-                this.commandRegistry.registerCommand(Command.builder().names("unloadmodule", "umod").usage("<module>").description("Unload a module from memory").executor(new UnloadModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder(null).names("reloadmodule", "rmod").usage("<module>").description("Reload a module").executor(new ReloadModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder(null).names("enablemodule", "emod").usage("<module>").description("Enable a module").executor(new EnableModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder(null).names("disablemodule", "dmod").usage("<module>").description("Disable a module").executor(new DisableModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder(null).names("loadmodule", "lmod").usage("<module>").description("Load a module from its exact jar file name").executor(new LoadModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder(null).names("unloadmodule", "umod").usage("<module>").description("Unload a module from memory").executor(new UnloadModuleCommand()).build(), null);
 
             }
 

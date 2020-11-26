@@ -1,6 +1,7 @@
 package com.sheepybot.api.entities.command;
 
 import com.google.common.collect.Lists;
+import com.sheepybot.api.entities.module.Module;
 import com.sheepybot.internal.command.DefaultCommandHandler;
 import com.sheepybot.util.BotUtils;
 import com.sheepybot.util.Objects;
@@ -25,6 +26,7 @@ public final class Command {
     private final List<Permission> botPermissions;
     private final Function<CommandContext, Boolean> preExecutor;
     private final boolean isOwnerOnly;
+    private final Module module;
 
     /**
      * @param names       The names and aliases of this {@link Command}
@@ -39,7 +41,8 @@ public final class Command {
                     @NotNull("userPermissions cannot be null") final List<Permission> userPermissions,
                     @NotNull("botPermissions cannot be null") final List<Permission> botPermissions,
                     @NotNull("preExecutor cannot be null") final Function<CommandContext, Boolean> preExecutor,
-                    final boolean isOwnerOnly) {
+                    final boolean isOwnerOnly,
+                    final Module module) {
         Objects.checkArgument(names.size() > 0, "names cannot be empty");
         this.names = names;
         this.description = description;
@@ -49,6 +52,7 @@ public final class Command {
         this.botPermissions = botPermissions;
         this.preExecutor = preExecutor;
         this.isOwnerOnly = isOwnerOnly;
+        this.module = module;
     }
 
     /**
@@ -124,7 +128,11 @@ public final class Command {
 
     public void handle(@NotNull("context cannot be null") final CommandContext context,
                        @NotNull("args cannot be null") final Arguments args) {
-        Command.DEFAULT_COMMAND_HANDLER.handle(context, args);
+        if (this.module != null && this.module.getCommandRegistry().getCommandHandler() != null) {
+            this.module.getCommandRegistry().getCommandHandler().handle(context, args);
+        } else {
+            Command.DEFAULT_COMMAND_HANDLER.handle(context, args);
+        }
     }
 
     /**
@@ -132,8 +140,8 @@ public final class Command {
      *
      * @return The {@link Command.Builder}
      */
-    public static Builder builder() {
-        return new Command.Builder();
+    public static Builder builder(final Module module) {
+        return new Command.Builder(module);
     }
 
     /**
@@ -149,10 +157,13 @@ public final class Command {
         private CommandExecutor executor;
         private Function<CommandContext, Boolean> preExecutor = DEFAULT_PRE_EXECUTOR;
         private boolean isOwnerOnly = false;
+
+        private final Module module;
         private final List<Permission> userPermissions;
         private final List<Permission> botPermissions;
 
-        private Builder() {
+        private Builder(final Module module) {
+            this.module = module;
             this.userPermissions = new ArrayList<>();
             this.botPermissions = new ArrayList<>();
         }
@@ -280,7 +291,7 @@ public final class Command {
             Objects.checkArgument(this.names.size() > 0, "command must have a names");
             Objects.checkNotNull(this.executor, "command executor cannot be null");
             return new Command(this.names, this.description, this.usage, this.executor, this.userPermissions,
-                    this.botPermissions, this.preExecutor, this.isOwnerOnly);
+                    this.botPermissions, this.preExecutor, this.isOwnerOnly, this.module);
         }
 
     }

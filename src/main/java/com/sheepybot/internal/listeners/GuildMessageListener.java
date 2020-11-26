@@ -48,12 +48,12 @@ public class GuildMessageListener extends ListenerAdapter {
 
         final Future<?> future = Bot.SCHEDULED_EXECUTOR_SERVICE.submit(() -> {
 
-            String content = raw.toLowerCase();
+            String content = raw;
 
             final String prefix = Bot.prefixGenerator.apply(guild).toLowerCase();
             final I18n i18n = I18n.getDefaultI18n();
 
-            if (content.startsWith(prefix)) {
+            if (raw.toLowerCase().startsWith(prefix)) {
                 content = content.substring(prefix.length());
             } else if (content.startsWith("<@!" + self.getIdLong() + ">") || raw.startsWith("<@" + self.getIdLong() + ">")) {
                 content = content.replaceFirst("<@!?" + self.getIdLong() + ">", "");
