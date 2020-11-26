@@ -15,7 +15,7 @@ public class ModuleExample extends Module {
     @Override
     public void onEnable() {
 
-        this.getCommandRegistry().register(Command.builder()
+        this.getCommandRegistry().register(Command.builder(this)
                 .names("hello", "hi")
                 .executor(new CommandExample())
                 .build());
