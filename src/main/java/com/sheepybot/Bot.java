@@ -122,6 +122,7 @@ public class Bot {
 
     private long startTime;
     private boolean running;
+    private API api;
     private Toml config;
     private RootCommandRegistry commandRegistry;
     private RootEventRegistry eventRegistry;
@@ -146,6 +147,9 @@ public class Bot {
      */
     public static Bot get() {
         return Bot.instance;
+    }
+
+    private Bot() {
     }
 
     private void start(final String[] args) throws IOException, LoginException {
@@ -183,12 +187,13 @@ public class Bot {
             LOGGER.info("Checking for updates...");
         } else {
             LOGGER.warn("You have disabled automatic update checking using the '--ignore-repository-updates' flag.");
-            LOGGER.warn("This is not advised as it means when issues are resolved you won't automatically receive them.");
+            LOGGER.warn("This is not advised as it means when issues are resolved or new features are implemented, you won't automatically receive them.");
             LOGGER.warn("You can check for newer versions on the repository: https://github.com/Sheepy-Ltd/API/releases");
-            LOGGER.info("Startup will resume as normal in 10 seconds...");
+            LOGGER.info("To disable this warning you can use the '--ignore-startup-warning' flag.");
+            LOGGER.info("Startup will resume as normal in 15 seconds...");
             if (options.getOption("ignore-startup-warning") != null) {
                 try {
-                    Thread.sleep(TimeUnit.SECONDS.toMillis(10));
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(15));
                 } catch (final InterruptedException ignored) {
                 }
             }
@@ -257,22 +262,18 @@ public class Bot {
 
             if (this.config.getBoolean("db.enabled", false)) {
                 LOGGER.info("Database has been enabled in configuration file, loading up connection pool...");
-                final Toml db = this.config.getTable("db");
-                if (db == null || db.isEmpty()) {
-                    LOGGER.error("Couldn't retrieve database configuration from the configuration file, has it been removed?");
-                } else {
-                    this.database = new Database(new DatabaseInfo(db));
-                }
+                this.database = new Database(new DatabaseInfo(this.config.getTable("db")));
             }
 
             LOGGER.info("Loading data managers...");
 
             this.commandRegistry = new CommandRegistryImpl();
             this.eventRegistry = new EventRegistryImpl();
-            this.moduleLoader = new ModuleLoaderImpl();
+            this.api = new API();
+            this.moduleLoader = new ModuleLoaderImpl(this.commandRegistry, this.eventRegistry, this.database, this.api);
 
             final String token = this.config.getString("jda.token");
-            if (token == null || token.isEmpty()) {
+            if (token == null || token.trim().isEmpty()) {
                 LOGGER.error("Cannot start bot without a valid bot token.");
                 System.exit(0);
             }
@@ -304,11 +305,11 @@ public class Bot {
                     .setMemberCachePolicy(BotUtils.getMemberCachePolicyFromString(this.config.getString("jda.member_cache_policy", "NONE")))
                     .setAutoReconnect(this.config.getBoolean("jda.auto_reconnect", true))
                     .setEnableShutdownHook(false)
-                    .setBulkDeleteSplittingEnabled(this.config.getBoolean("jda.bulk_delete_splitting", false))
+                    .setBulkDeleteSplittingEnabled(this.config.getBoolean("jda.bulk_delete_splitting", true))
                     .setHttpClient(HTTP_CLIENT)
                     .setShardsTotal(shards)
                     .addEventListeners(
-                            new GuildMessageListener(),
+                            new GuildMessageListener(this),
                             new JdaGenericListener()
                     );
 
@@ -421,6 +422,13 @@ public class Bot {
         this.running = false;
 
         LOGGER.info("Shutdown complete!");
+    }
+
+    /**
+     * @return The {@link API} instance
+     */
+    public API getAPI() {
+        return this.api;
     }
 
     /**

@@ -1,7 +1,11 @@
 package com.sheepybot.internal.module;
 
 import com.google.common.collect.Lists;
+import com.sheepybot.API;
 import com.sheepybot.Bot;
+import com.sheepybot.api.entities.command.RootCommandRegistry;
+import com.sheepybot.api.entities.database.Database;
+import com.sheepybot.api.entities.event.RootEventRegistry;
 import com.sheepybot.api.entities.module.EventRegistry;
 import com.sheepybot.api.entities.module.EventWaiter;
 import com.sheepybot.api.entities.module.Module;
@@ -35,9 +39,20 @@ public class ModuleLoaderImpl implements ModuleLoader {
     public static final File MODULE_DIRECTORY = new File("modules");
 
     private final List<Module> modules;
+    private final RootCommandRegistry commandRegistry;
+    private final RootEventRegistry eventRegistry;
+    private final Database database;
+    private final API api;
 
-    public ModuleLoaderImpl() {
+    public ModuleLoaderImpl(@NotNull("command registry cannot be null") final RootCommandRegistry commandRegistry,
+                            @NotNull("event registry cannot be null") final RootEventRegistry eventRegistry,
+                            final Database database,
+                            @NotNull("api cannot be null") final API api) {
         this.modules = Lists.newArrayList();
+        this.commandRegistry = commandRegistry;
+        this.eventRegistry = eventRegistry;
+        this.database = database;
+        this.api = api;
     }
 
     @Override
@@ -106,9 +121,10 @@ public class ModuleLoaderImpl implements ModuleLoader {
 
                         LOGGER.info(String.format("Loading module %s v%s...", data.name(), data.version()));
 
-                        module.init(Bot.get().getCommandRegistry(),
-                                Bot.get().getEventRegistry(),
-                                Bot.get().getDatabase(),
+                        module.init(this.commandRegistry,
+                                this.eventRegistry,
+                                this.database,
+                                this.api,
                                 dataFolder,
                                 file);
 
@@ -198,6 +214,14 @@ public class ModuleLoaderImpl implements ModuleLoader {
         module.getCommandRegistry().unregisterAll();
         module.getEventRegistry().unregisterAll();
         module.getScheduler().cancelAllTasks();
+
+        synchronized (API.DEFAULT_COMMAND_HANDLER) {
+            this.api.setCommandHandler(API.DEFAULT_COMMAND_HANDLER);
+        }
+
+        synchronized (API.DEFAULT_ERROR_HANDLER) {
+            this.api.setErrorHandler(API.DEFAULT_ERROR_HANDLER);
+        }
 
         LOGGER.info("Disabled " + module.getFullName() + "!");
 

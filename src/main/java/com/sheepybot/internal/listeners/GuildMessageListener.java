@@ -7,14 +7,14 @@ import com.sheepybot.api.entities.command.Command;
 import com.sheepybot.api.entities.command.CommandContext;
 import com.sheepybot.api.entities.command.argument.RawArguments;
 import com.sheepybot.api.entities.language.I18n;
-import com.sheepybot.api.exception.command.CommandSyntaxException;
-import com.sheepybot.api.exception.parser.ParserException;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.internal.utils.PermissionUtil;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,10 +24,19 @@ import java.util.stream.Collectors;
 
 public class GuildMessageListener extends ListenerAdapter {
 
-    /**
-     * How long commands may run before it's assumed they ran into an improperly handled error / infinite loop
-     */
-    private static final long COMMAND_TIMEOUT_AFTER = 5_000L;
+    private static final Logger LOGGER = LoggerFactory.getLogger(GuildMessageListener.class);
+
+    private final Bot bot;
+    private long commandTimeoutAfter;
+
+    public GuildMessageListener(@NotNull("api cannot be null") final Bot bot) {
+        this.bot = bot;
+        this.commandTimeoutAfter = bot.getConfig().getLong("client.command_timeout_after", 5_000L);
+        if (this.commandTimeoutAfter < 5_000L) {
+            LOGGER.warn("Command timeout after cannot be less than 5_000L (5 seconds).");
+            this.commandTimeoutAfter = 5_000L;
+        }
+    }
 
     @Override
     public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
@@ -42,7 +51,7 @@ public class GuildMessageListener extends ListenerAdapter {
 
         final String raw = message.getContentRaw().trim();
 
-        if (member == null || raw.isEmpty() || user.isBot() || message.isWebhookMessage() || !PermissionUtil.checkPermission(channel, guild.getSelfMember(), Permission.MESSAGE_WRITE, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_READ, Permission.MESSAGE_EXT_EMOJI)) {
+        if (member == null || raw.isEmpty() || user.isBot() || message.isWebhookMessage() || !self.hasPermission(channel, Permission.MESSAGE_WRITE, Permission.MESSAGE_READ)) {
             return;
         }
 
@@ -53,12 +62,13 @@ public class GuildMessageListener extends ListenerAdapter {
             final String prefix = Bot.prefixGenerator.apply(guild).toLowerCase();
             final I18n i18n = I18n.getDefaultI18n();
 
-            if (raw.toLowerCase().startsWith(prefix)) {
+            if (content.toLowerCase().startsWith(prefix)) {
                 content = content.substring(prefix.length());
-            } else if (content.startsWith("<@!" + self.getIdLong() + ">") || raw.startsWith("<@" + self.getIdLong() + ">")) {
+            } else if (content.startsWith("<@!" + self.getIdLong() + ">") || content.startsWith("<@" + self.getIdLong() + ">")) {
                 content = content.replaceFirst("<@!?" + self.getIdLong() + ">", "");
-                if (content.isEmpty()) { //@Mention for prefix
-                    message.getTextChannel().sendMessage(i18n.tl("commandPrefixMention", prefix, jda.getShardInfo().getShardId())).queue();
+                if (content.trim().isEmpty()) { //@Mention for prefix
+                    message.getTextChannel().sendMessage(i18n.tl("commandPrefixMention", prefix, jda.getShardInfo().getShardId())).queue(null, __ -> {
+                    });
                 }
             } else {
                 Bot.get().getEventRegistry().callEvent(event);
@@ -83,13 +93,8 @@ public class GuildMessageListener extends ListenerAdapter {
 
                     try {
                         command.handle(context, new Arguments(context, rawArgs));
-                    } catch (final CommandSyntaxException ex) {
-                        context.reply(context.i18n("commandCorrectUsage", ex.getCommand(), ex.getSyntax()));
-                    } catch (final ParserException ex) {
-                        context.reply(ex.getMessage());
-                    } catch (final Exception ex) {
-                        context.reply(context.i18n("commandUncaughtError", ex.getMessage()));
-                        ex.printStackTrace();
+                    } catch (final Throwable throwable) {
+                        this.bot.getAPI().getErrorHandler().handle(throwable, context);
                     }
 
                 }
@@ -103,7 +108,7 @@ public class GuildMessageListener extends ListenerAdapter {
         Bot.SCHEDULED_EXECUTOR_SERVICE.submit(() -> {
 
             try {
-                future.get(COMMAND_TIMEOUT_AFTER, TimeUnit.MILLISECONDS);
+                future.get(this.commandTimeoutAfter, TimeUnit.MILLISECONDS);
             } catch (final Exception ex) {
                 ex.printStackTrace();
             }

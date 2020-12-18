@@ -31,7 +31,8 @@ use-jda-nas = false                #only enable this function if you're using la
 
 [client]
 language = "en_GB"                 #the file name not including the .properties file type
-prefix = "!"                       #this is the default prefix used for commands, change it as you wish
+prefix = "!"                       #this is the default prefix used for commands, change it as you wish. Modules may override this setting at runtime by using the Module#setPrefixGenerator function
+command_timeout_after = 5_000      #how long (in milliseconds) commands may be able to run for, this is for the watchdog thread so if something goes wrong with a command it doesn't slowly consume all the worker threads
 
 #A list of User-ID's representing Administrators, you can retrieve your user ID by enabling
 #developer mode and then right clicking the user and hit "Copy ID"
@@ -48,9 +49,9 @@ metrics_table = "metrics"
 [db]
 enabled = false                     #whether to use the database for GuildSettings, if enabled this will automatically create a table of its own
 database_type = "postgresql"        #choose from mysql, mariadb or postgresql. Default is Postgresql and the reason for this is explained on the repository.
-database = "discord"                #the postgres database to use
+database = "discord"                #the database to use
 username = "user"                   #the username for authentication
 password = "pass"                   #the password for authentication
 host = "localhost"                  #where your database is hosted, be it localhost or an IP address
-port = 5432                         #the port your postgresql database runs on, this is usually 5432 but can be changed
-poolSize = 5                        #the connection pool size, more isn't better and is often more harmful than good. https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
+port = 5432                         #the port your database runs on, this is usually 5432 for postgres and 3306 for MySQL/MariaDB
+poolSize = 15                        #the connection pool size, more isn't better and is often more harmful than good. https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing

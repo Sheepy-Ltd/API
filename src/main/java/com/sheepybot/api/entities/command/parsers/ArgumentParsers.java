@@ -29,29 +29,47 @@ public class ArgumentParsers {
                 return null;
             }
 
-            final String first = args.next();
+            String first = args.next();
             final char qc = first.charAt(0);
 
             if (qc == '"' || qc == '\'') {
 
-                final StringBuilder builder = new StringBuilder();
-                builder.append(first, 1, first.length());
+                final StringBuilder builder = new StringBuilder(first);
+
+                boolean in = false;
 
                 while (args.peek() != null) {
 
                     final String next = args.next();
-                    final char ch = next.charAt(next.length() - 1);
+                    final int len = next.length();
 
-                    if (ch == qc) {
-                        return builder.append(next, 0, next.length() - 1).toString();
-                    } else {
-                        builder.append(next).append(" ");
+                    builder.append(' ');
+
+                    for (int i = 0; i < len; i++) {
+                        final char ch = next.charAt(i);
+                        if (ch == '\\' && i + 1 < len && next.charAt(i + 1) == qc) {
+                            builder.append(qc);
+                            i++;
+                        } else if (ch == qc) {
+                            builder.append(qc);
+                            if (!in) {
+                                in = true;
+                            } else {
+                                if (i != len - 1) throw new ParserException("Missing end quote for input");
+                                break;
+                            }
+                        } else {
+                            builder.append(ch);
+                        }
                     }
-
                 }
 
-                throw new ParserException(context.i18n("parserStringUnfinishedQuotedString"));
+                first = builder.toString();
+                if (first.endsWith("\\" + qc) || !first.endsWith(qc + "") || first.equals("\"")) {
+                    throw new ParserException("Missing end quote for input");
+                }
 
+                return first.substring(1, first.length() - 1);
             }
 
             return first;
@@ -260,7 +278,6 @@ public class ArgumentParsers {
      * @param parser  The {@link ArgumentParser} used
      * @param choice  a choice
      * @param choices more choices
-     *
      * @return The {@link ArgumentParser}
      */
     public static <T> ArgumentParser<T> options(final ArgumentParser<T> parser,

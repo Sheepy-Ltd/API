@@ -3,7 +3,6 @@ package com.sheepybot.api.entities.language;
 import com.google.common.collect.Maps;
 import com.sheepybot.Bot;
 import com.sheepybot.util.Objects;
-import net.dv8tion.jda.api.entities.Guild;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -53,7 +52,6 @@ public class I18n {
      */
     public static void setDefaultI18n(@NotNull("file cannot be null") String file) {
 
-
         try {
 
             final int ext = file.indexOf('.');
@@ -71,7 +69,7 @@ public class I18n {
 
             LOGGER.info("Loading resource bundle...");
 
-            final ResourceBundle bundle = getBundleFromURL(file, new File("/lang/" + file + ".properties").toURI().toURL());
+            final ResourceBundle bundle = getBundleFromURL(file, new File("lang/" + file + ".properties").toURI().toURL());
             if (bundle == null) {
                 LOGGER.info(String.format("Failed to load resource bundle %s", file));
             } else {
@@ -87,31 +85,6 @@ public class I18n {
             LOGGER.info("An error occurred and the language file could not be set", ex);
         }
 
-    }
-
-    /**
-     * Retrieve an {@link I18n} instance based on the specified {@link Language} of the {@link Guild}
-     * <p>
-     * <p>Should the {@link Guild} have no configured language, the default returned is the english {@link I18n}</p>
-     *
-     * @param guild The {@link Guild}
-     * @return The {@link I18n} instance
-     */
-    public static I18n getI18n(@NotNull("guild cannot be null") final Guild guild) {
-        return getI18n(guild.getIdLong());
-    }
-
-    /**
-     * Retrieve an {@link I18n} instance based on the specified {@link Language} of the {@link Guild}
-     * <p>
-     * <p>Should the {@link Guild} have no configured language, the default returned is the english version</p>
-     *
-     * @param id The guild id as a {@link Long}
-     *
-     * @return The {@link I18n} instance
-     */
-    public static I18n getI18n(final long id) {
-        return getDefaultI18n();
     }
 
     /**
@@ -135,7 +108,6 @@ public class I18n {
      * @param clazz The {@link Class}
      */
     public static void loadI18n(@NotNull("clazz cannot be null") final Class clazz) {
-
         LOGGER.info("Loading language files...");
 
         for (final Language language : Language.values()) {
@@ -145,7 +117,7 @@ public class I18n {
             try {
                 LOGGER.info(String.format("Loading language file %s.properties...", language.getCode()));
 
-                final ResourceBundle bundle = getBundleFromURL(language.getCode(), new File("/lang/" + language.getCode() + ".properties").toURI().toURL());
+                final ResourceBundle bundle = getBundleFromURL(language.getCode(), new File("lang/" + language.getCode() + ".properties").toURI().toURL());
                 if (bundle == null) {
                     LOGGER.info(String.format("Couldn't load language file %s.properties, this language wont be available for use.", language.getCode()));
                     continue;
@@ -153,7 +125,6 @@ public class I18n {
 
                 final I18n i18n = REGISTRY_MAP.computeIfAbsent(language.getCode(), __ -> new I18n(language));
                 i18n.load(bundle);
-
             } catch (final MalformedURLException ignored) {
                 LOGGER.info(String.format("Couldn't load external language file %s.properties, skipping it...", language.getCode()));
             }
@@ -239,6 +210,7 @@ public class I18n {
         } else {
             return MessageFormat.format(getMessage(key), args);
         }
+
     }
 
     /**
@@ -263,6 +235,8 @@ public class I18n {
      * @param bundle The {@link ResourceBundle} to load from
      */
     private void load(@NotNull("bundle cannot be null") final ResourceBundle bundle) {
+
+        LOGGER.info(bundle.getBaseBundleName());
 
         final Enumeration<String> iterator = bundle.getKeys();
         while (iterator.hasMoreElements()) {

@@ -1,6 +1,7 @@
 package com.sheepybot.api.entities.module;
 
 import com.moandjiezana.toml.Toml;
+import com.sheepybot.API;
 import com.sheepybot.api.entities.command.RootCommandRegistry;
 import com.sheepybot.api.entities.database.Database;
 import com.sheepybot.api.entities.event.RootEventRegistry;
@@ -25,6 +26,7 @@ public abstract class Module {
     private CommandRegistry commandRegistry;
     private EventRegistry eventRegistry;
     private Database database;
+    private API api;
     private SchedulerRegistry schedulerRegistry;
     private Metrics metrics;
     private Function<Guild, String> prefixFunction = null;
@@ -47,11 +49,13 @@ public abstract class Module {
     public final void init(@NotNull("command manager cannot be null") final RootCommandRegistry rootCommandRegistry,
                            @NotNull("event manager cannot be null") final RootEventRegistry rootEventRegistry,
                            final Database database,
+                           @NotNull("api cannot be null") final API api,
                            @NotNull("data folder cannot be null") final File dataFolder,
                            @NotNull("jar cannot be null") final File jar) {
         this.logger = LoggerFactory.getLogger(this.data.name());
         this.commandRegistry = new CommandRegistry(rootCommandRegistry, this);
         this.eventRegistry = new EventRegistry(rootEventRegistry, this);
+        this.api = api;
         this.database = database;
         this.schedulerRegistry = new SchedulerRegistry();
         this.metrics = new Metrics(this.getName());
@@ -121,6 +125,13 @@ public abstract class Module {
      */
     public Database getDatabase() {
         return this.database;
+    }
+
+    /**
+     * @return The {@link API} instance
+     */
+    public API getAPI() {
+        return this.api;
     }
 
     /**

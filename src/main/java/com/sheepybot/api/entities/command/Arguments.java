@@ -40,6 +40,13 @@ public class Arguments {
     }
 
     /**
+     * @return {@code true} if there is another argument to parse, {@code false} otherwise.
+     */
+    public boolean hasNext() {
+        return this.args.peek() != null;
+    }
+
+    /**
      * Retrieve the value of the next {@link Parameter}
      *
      * @param parser The {@link ArgumentParser} to use
