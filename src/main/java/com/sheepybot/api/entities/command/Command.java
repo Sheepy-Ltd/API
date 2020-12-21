@@ -21,6 +21,7 @@ public final class Command {
     private final List<String> names;
     private final String description;
     private final String usage;
+    private final List<String> usageExamples;
     private final CommandExecutor executor;
     private final List<Permission> userPermissions;
     private final List<Permission> botPermissions;
@@ -37,6 +38,7 @@ public final class Command {
     private Command(@NotNull("names cannot be null") final List<String> names,
                     final String description,
                     final String usage,
+                    @NotNull("usage examples cannot be null") final List<String> usageExamples,
                     @NotNull("executor cannot be null") final CommandExecutor executor,
                     @NotNull("userPermissions cannot be null") final List<Permission> userPermissions,
                     @NotNull("botPermissions cannot be null") final List<Permission> botPermissions,
@@ -47,6 +49,7 @@ public final class Command {
         this.names = names;
         this.description = description;
         this.usage = usage;
+        this.usageExamples = usageExamples;
         this.executor = executor;
         this.userPermissions = userPermissions;
         this.botPermissions = botPermissions;
@@ -81,6 +84,13 @@ public final class Command {
      */
     public final String getUsage() {
         return this.usage;
+    }
+
+    /**
+     * @return A {@link List} of {@link String}s with each element showing how a command may be used.
+     */
+    public List<String> getUsageExamples() {
+        return this.usageExamples;
     }
 
     /**
@@ -159,11 +169,13 @@ public final class Command {
         private boolean isOwnerOnly = false;
 
         private final Module module;
+        private final List<String> usageExamples;
         private final List<Permission> userPermissions;
         private final List<Permission> botPermissions;
 
         private Builder(final Module module) {
             this.module = module;
+            this.usageExamples = new ArrayList<>();
             this.userPermissions = new ArrayList<>();
             this.botPermissions = new ArrayList<>();
         }
@@ -201,11 +213,33 @@ public final class Command {
 
         /**
          * @param usage The usage of this {@link Command}
-         *
          * @return This {@link Builder}
          */
         public Builder usage(@NotNull("usage cannot be null") final String usage) {
             this.usage = usage;
+            return this;
+        }
+
+        /**
+         * Adds all the elements of a {@link List} to the usage examples.
+         *
+         * @param usageExamples The {@link List} of usage examples
+         * @return This {@link Builder}
+         */
+        public Builder examples(@NotNull("usage examples cannot be null") final List<String> usageExamples) {
+            Objects.checkNotNull(usageExamples, "cannot use null as a usage examples");
+            this.usageExamples.addAll(usageExamples);
+            return this;
+        }
+
+        /**
+         * Adds a usage example to the usage examples.
+         *
+         * @param example The usage example
+         * @return This {@link Builder}
+         */
+        public Builder example(@NotNull("example cannot be null") final String example) {
+            Objects.checkNotBlank(example, "example cannot be empty");
             return this;
         }
 
@@ -228,12 +262,12 @@ public final class Command {
         public Builder userPermissions(@NotNull("perm1 cannot be null") final Permission perm1,
                                        final Permission... permissions) {
 
+            this.userPermissions.add(perm1);
+
             if (permissions != null) {
                 Objects.checkNotNull(permissions, "cannot use null as a permission");
                 Collections.addAll(this.userPermissions, permissions);
             }
-
-            this.userPermissions.add(perm1);
 
             return this;
         }
@@ -248,12 +282,12 @@ public final class Command {
         public Builder botPermissions(@NotNull("perm1 cannot be null") final Permission perm1,
                                       final Permission... permissions) {
 
+            this.botPermissions.add(perm1);
+
             if (permissions != null) {
                 Objects.checkNotNull(permissions, "cannot use null as a permission");
                 Collections.addAll(this.botPermissions, permissions);
             }
-
-            this.botPermissions.add(perm1);
 
             return this;
         }
@@ -290,7 +324,7 @@ public final class Command {
         public Command build() {
             Objects.checkArgument(this.names.size() > 0, "command must have a names");
             Objects.checkNotNull(this.executor, "command executor cannot be null");
-            return new Command(this.names, this.description, this.usage, this.executor, this.userPermissions,
+            return new Command(this.names, this.description, this.usage, this.usageExamples, this.executor, this.userPermissions,
                     this.botPermissions, this.preExecutor, this.isOwnerOnly, this.module);
         }
 

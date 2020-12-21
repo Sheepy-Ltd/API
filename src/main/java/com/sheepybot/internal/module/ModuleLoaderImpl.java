@@ -215,13 +215,12 @@ public class ModuleLoaderImpl implements ModuleLoader {
         module.getEventRegistry().unregisterAll();
         module.getScheduler().cancelAllTasks();
 
-        synchronized (API.DEFAULT_COMMAND_HANDLER) {
-            this.api.setCommandHandler(API.DEFAULT_COMMAND_HANDLER);
-        }
-
-        synchronized (API.DEFAULT_ERROR_HANDLER) {
-            this.api.setErrorHandler(API.DEFAULT_ERROR_HANDLER);
-        }
+        //this is just really really really really really really really really really shit
+        //it should only EVER be doing this when the module that registered it has been disabled
+        //i can scream "fuck" more when I end up changing how this works.
+        this.api.setCommandHandler(API.DEFAULT_COMMAND_HANDLER);
+        this.api.setErrorHandler(API.DEFAULT_ERROR_HANDLER);
+        this.api.setUsageFormatter(API.DEFAULT_USAGE_FORMATTER);
 
         LOGGER.info("Disabled " + module.getFullName() + "!");
 
