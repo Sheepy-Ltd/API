@@ -9,10 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Arrays;
 import java.util.TimeZone;
 
@@ -148,23 +145,37 @@ public class Database {
     /**
      * @param haystack The query to execute
      * @param needles  The values
-     *
      * @return {@code true} if this was successful, {@code false} if there were no rows affected or an error occurred
      */
-    public boolean execute(@NotNull("haystack cannot be null") final String haystack,
-                           final Object... needles) {
+    public DBObject execute(@NotNull("haystack cannot be null") final String haystack,
+                            final Object... needles) {
         try (final Connection connection = this.getConnection();
-             final PreparedStatement statement = connection.prepareStatement(haystack)) {
+             final PreparedStatement statement = connection.prepareStatement(haystack, Statement.RETURN_GENERATED_KEYS)) {
 
             for (int i = 0; i < needles.length; i++) {
                 statement.setObject((i + 1), needles[i]);
             }
 
-            return statement.executeUpdate() > 0;
+            final int resID = statement.executeUpdate();
+
+            final DBObject result = new DBObject();
+
+            result.add("success", resID >= 1);
+
+            try (final ResultSet set = statement.getGeneratedKeys()) {
+                if (set.next()) {
+                    for (int i = 1; i <= set.getMetaData().getColumnCount(); i++) {
+                        result.add(set.getMetaData().getColumnName(i), set.getObject(i));
+                    }
+                }
+            } catch (final SQLException ignored) {
+            }
+
+            return result;
         } catch (final SQLException ex) {
             LOGGER.error(String.format("An SQLException was thrown whilst attempting to execute query '%s' with values %s", haystack, (needles.length == 0 ? "no values" : Arrays.toString(needles))), ex);
         }
-        return false;
+        return null;
     }
 
     /**

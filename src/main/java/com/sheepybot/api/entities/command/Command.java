@@ -240,6 +240,7 @@ public final class Command {
          */
         public Builder example(@NotNull("example cannot be null") final String example) {
             Objects.checkNotBlank(example, "example cannot be empty");
+            this.usageExamples.add(example);
             return this;
         }
 
