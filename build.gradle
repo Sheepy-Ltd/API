@@ -14,7 +14,7 @@ plugins {
 }
 
 def git = versioning.info
-def ver = new Version(major: 2, minor: 5, patch: 13, build: git.build)
+def ver = new Version(major: 2, minor: 5, patch: 14, build: git.build)
 
 //def buildAuthor = System.getProperty('user.name')
 def buildDate = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy 'at' HH:mm:ss.SSS zZ"))
@@ -57,22 +57,36 @@ repositories {
 
 dependencies {
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.1'
-    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
-    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
-    implementation group: 'com.zaxxer', name: 'HikariCP', version: '3.4.2'
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
+    implementation (group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3') {
+        exclude(group: 'org.slf4j', module: 'slf4j-api')
+    }
+    implementation (group: 'com.zaxxer', name: 'HikariCP', version: '3.4.5') {
+        exclude(group: 'org.slf4j', module: 'slf4j-api')
+    }
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.12'
     implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.21'
-    implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.6.1'
-    implementation group: 'com.sedmelluq', name: 'jda-nas', version: '1.1.0'
+    implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.7.1'
+    implementation (group: 'com.sedmelluq', name: 'jda-nas', version: '1.1.0') {
+        exclude(group: 'org.slf4j', module: 'slf4j-api')
+        exclude(group: 'commons-io', module: 'commons-io')
+    }
 
-    api group: 'org.jetbrains', name: 'annotations', version: '15.0'
-    api group: 'com.google.guava', name: 'guava', version: '23.0'
-    api group: 'com.sedmelluq', name: 'lavaplayer', version: '1.3.61'
-    api group: 'com.moandjiezana.toml', name: 'toml4j', version: '0.7.1'
-    api group: 'com.github.FredBoat', name: 'Lavalink-Client', version: '6ccbeb146e'
-    api group: 'net.dv8tion', name: 'JDA', version: '4.2.0_214'
-
+    api group: 'org.jetbrains', name: 'annotations', version: '20.1.0'
+    api group: 'com.google.guava', name: 'guava', version: '30.1-jre'
+    api group: 'com.sedmelluq', name: 'lavaplayer', version: '1.3.65'
+    api (group: 'com.moandjiezana.toml', name: 'toml4j', version: '0.7.2') {
+        exclude(group: 'com.google.code.gson', module: 'gson')
+    }
+    api (group: 'com.github.FredBoat', name: 'Lavalink-Client', version: '7492a36d20') {
+        exclude(group: 'org.slf4j', module: 'slf4j-api')
+        exclude(group: 'com.sedmelluq', module: 'lavaplayer')
+    }
+    api (group: 'net.dv8tion', name: 'JDA', version: '4.2.0_223') {
+        exclude(group: 'org.slf4j', module: 'slf4j-api')
+    }
+    api (group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.8.6')
 }
 
 //my attempt at bintray, im new to this so hope it works
