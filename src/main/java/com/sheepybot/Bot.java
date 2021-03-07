@@ -29,6 +29,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import net.robinfriedli.threadpool.ThreadPool;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -103,7 +104,9 @@ public class Bot {
     /**
      * A scheduled {@link ExecutorService}
      */
-    public static final ExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newScheduledThreadPool(30, threadExecutor -> THREAD_FUNCTION.apply("Cached Thread Service", threadExecutor));
+//    public static final ExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newScheduledThreadPool(30, threadExecutor -> THREAD_FUNCTION.apply("Cached Thread Service", threadExecutor));
+
+    public static final ThreadPool THREAD_POOL = ThreadPool.Builder.create().setCoreSize(30).setMaxSize(90).setKeepAlive(5L, TimeUnit.MINUTES).build();
 
     /**
      * A single threaded {@link ScheduledExecutorService}.
@@ -320,7 +323,8 @@ public class Bot {
 
                 if ((os.contains("windows") || os.contains("linux")) && !arch.equalsIgnoreCase("arm") && !arch.equalsIgnoreCase("arm-linux")) {
                     LOGGER.info("System supports JDA Nas, registering audio send factory...");
-                    builder.setAudioSendFactory(new NativeAudioSendFactory());
+                    final int bufferDuration = Math.toIntExact(this.config.getLong("jda.jda-nas-buffer-duration", 400L));
+                    builder.setAudioSendFactory(new NativeAudioSendFactory(bufferDuration));
                 } else {
                     LOGGER.info("Attempting to enable JDA Nas on a system architecture which doesn't support it, please disable this config option as there's no benefit to using it on this kind of system.");
                     LOGGER.info(String.format("System OS: %s, arch: %s", os, arch));
@@ -342,8 +346,10 @@ public class Bot {
 
             final String activity = this.config.getString("jda.activity");
             if (activity != null && !activity.isEmpty()) {
-                builder.setActivity(Activity.of(Activity.ActivityType.DEFAULT, activity));
+                builder.setActivity(Activity.of(BotUtils.getActivityTypeFromString(this.config.getString("jda.activity_type", "")), activity));
             }
+
+            builder.setStatus(BotUtils.getOnlineStatusFromString(this.config.getString("jda.status", "")));
 
             LOGGER.info("Loading language files...");
 
@@ -353,11 +359,12 @@ public class Bot {
 
                 LOGGER.info("Loading default commands...");
 
-                this.commandRegistry.registerCommand(Command.builder(null).names("reloadmodule", "rmod").usage("<module>").description("Reload a module").executor(new ReloadModuleCommand()).build(), null);
-                this.commandRegistry.registerCommand(Command.builder(null).names("enablemodule", "emod").usage("<module>").description("Enable a module").executor(new EnableModuleCommand()).build(), null);
-                this.commandRegistry.registerCommand(Command.builder(null).names("disablemodule", "dmod").usage("<module>").description("Disable a module").executor(new DisableModuleCommand()).build(), null);
-                this.commandRegistry.registerCommand(Command.builder(null).names("loadmodule", "lmod").usage("<module>").description("Load a module from its exact jar file name").executor(new LoadModuleCommand()).build(), null);
-                this.commandRegistry.registerCommand(Command.builder(null).names("unloadmodule", "umod").usage("<module>").description("Unload a module from memory").executor(new UnloadModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder(null).ownerOnly(true).names("reloadmodule", "rmod").usage("<module>").description("Reload a module").executor(new ReloadModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder(null).ownerOnly(true).names("enablemodule", "emod").usage("<module>").description("Enable a module").executor(new EnableModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder(null).ownerOnly(true).names("disablemodule", "dmod").usage("<module>").description("Disable a module").executor(new DisableModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder(null).ownerOnly(true).names("loadmodule", "lmod").usage("<module>").description("Load a module from its exact jar file name").executor(new LoadModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder(null).ownerOnly(true).names("unloadmodule", "umod").usage("<module>").description("Unload a module from memory").executor(new UnloadModuleCommand()).build(), null);
+                this.commandRegistry.registerCommand(Command.builder(null).ownerOnly(true).names("evaluate", "eval").usage("<code>").description("Evaluate code live").executor(new EvaluateCommand()).build(), null);
 
             }
 
@@ -390,6 +397,17 @@ public class Bot {
             this.moduleLoader.disableModules();
         }
 
+        LOGGER.info("Shutting down scheduler...");
+        Scheduler.getInstance().shutdown();
+
+        LOGGER.info("Shutting down thread pools...");
+        Bot.THREAD_POOL.shutdown();
+
+        try {
+            Bot.THREAD_POOL.join();
+        } catch (final InterruptedException ignored) {
+        }
+
         if (this.shardManager != null) {
             LOGGER.info("Shutting down shard manager...");
             this.shardManager.shutdown();
@@ -405,17 +423,14 @@ public class Bot {
             this.commandRegistry.unregisterAll();
         }
 
+        Bot.SINGLE_EXECUTOR_SERVICE.shutdownNow();
+
         if (this.database != null) {
             LOGGER.info("Disconnecting from database...");
             this.database.shutdown();
         }
 
-        LOGGER.info("Shutting down scheduler...");
-        Scheduler.getInstance().shutdown();
-
-        LOGGER.info("Shutting down thread pools...");
-        Bot.SCHEDULED_EXECUTOR_SERVICE.shutdownNow();
-        Bot.SINGLE_EXECUTOR_SERVICE.shutdownNow();
+        HTTP_CLIENT.dispatcher().executorService().shutdownNow();
 
         Bot.instance = null;
 

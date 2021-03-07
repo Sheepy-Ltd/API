@@ -55,12 +55,14 @@ public class GuildMessageListener extends ListenerAdapter {
             return;
         }
 
-        final Future<?> future = Bot.SCHEDULED_EXECUTOR_SERVICE.submit(() -> {
+        final Future<?> future = Bot.THREAD_POOL.submit(() -> {
 
             String content = raw;
 
             final String prefix = Bot.prefixGenerator.apply(guild).toLowerCase();
             final I18n i18n = I18n.getDefaultI18n();
+
+            boolean prefixMention = false;
 
             if (content.toLowerCase().startsWith(prefix)) {
                 content = content.substring(prefix.length());
@@ -69,15 +71,17 @@ public class GuildMessageListener extends ListenerAdapter {
                 if (content.trim().isEmpty()) { //@Mention for prefix
                     message.getTextChannel().sendMessage(i18n.tl("commandPrefixMention", prefix, jda.getShardInfo().getShardId())).queue(null, __ -> {
                     });
+                } else {
+                    prefixMention = true;
                 }
             } else {
                 Bot.get().getEventRegistry().callEvent(event);
                 return;
             }
 
-            if (!content.isEmpty() && !Character.isWhitespace(content.charAt(0))) {
+            if (!content.isEmpty() && (prefixMention || !Character.isWhitespace(content.charAt(0)))) {
 
-                final List<String> split = Lists.newArrayList(content.split("\\s+")); //whitespace
+                final List<String> split = Lists.newArrayList(content.trim().split("\\s+")); //whitespace
 
                 final String trigger = split.get(0).toLowerCase();
                 final Command command = Bot.get().getCommandRegistry().getCommandByNameOrAlias(Collections.singletonList(trigger));
@@ -105,7 +109,7 @@ public class GuildMessageListener extends ListenerAdapter {
 
         //This is just a watchdog, so in the event a command messed up it doesn't slowly start killing the bot
         //Insurance is wonderful when you need it, however unlike most companies this should payout
-        Bot.SCHEDULED_EXECUTOR_SERVICE.submit(() -> {
+        Bot.THREAD_POOL.submit(() -> {
 
             try {
                 future.get(this.commandTimeoutAfter, TimeUnit.MILLISECONDS);

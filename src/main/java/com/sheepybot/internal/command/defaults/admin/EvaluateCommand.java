@@ -8,12 +8,14 @@ import com.sheepybot.api.entities.command.CommandExecutor;
 import com.sheepybot.api.entities.command.parsers.ArgumentParsers;
 import com.sheepybot.api.entities.messaging.Messaging;
 import com.sheepybot.util.BotUtils;
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.codehaus.groovy.control.CompilationFailedException;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.awt.*;
 import java.io.IOException;
 import java.util.concurrent.Future;
@@ -22,11 +24,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 public class EvaluateCommand implements CommandExecutor {
-
-    /**
-     * The script engine we use for eval
-     */
-    private static final String SCRIPT_ENGINE = "ECMAScript";
 
     /**
      * How long to wait before we give up and assume the process just ran into some kind of infinite loop
@@ -48,18 +45,24 @@ public class EvaluateCommand implements CommandExecutor {
             "java.util",
             "java.util.concurrent",
             "java.time",
+            "net.dv8tion.jda.api",
+            "com.sheepybot.api.entities"
     };
 
-    private final ScriptEngine scriptEngine;
+    private final Binding binding;
+    private final GroovyShell shell;
 
     public EvaluateCommand() {
-        //Change this to graal in the event we ever move to JDK 11+
-        this.scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE);
-        try {
-            this.scriptEngine.eval(String.format("var imports = new JavaImporter(%s)", String.join(", ", EVAL_IMPORTS)));
-        } catch (final ScriptException ex) {
-            ex.printStackTrace();
-        }
+
+        this.binding = new Binding();
+
+        final ImportCustomizer imports = new ImportCustomizer();
+        imports.addStarImports(EVAL_IMPORTS);
+
+        final CompilerConfiguration configuration = new CompilerConfiguration();
+        configuration.addCompilationCustomizers(imports);
+
+        this.shell = new GroovyShell(this.binding, configuration);
     }
 
     @Override
@@ -70,16 +73,6 @@ public class EvaluateCommand implements CommandExecutor {
             context.reply(context.i18n("notBotAdmin"));
         } else {
 
-            this.scriptEngine.put("context", context);
-            this.scriptEngine.put("channel", context.getChannel());
-            this.scriptEngine.put("member", context.getMember());
-            this.scriptEngine.put("user", context.getUser());
-            this.scriptEngine.put("guild", context.getGuild());
-            this.scriptEngine.put("message", context.getMessage());
-            this.scriptEngine.put("bot", context.getGuild().getSelfMember());
-            this.scriptEngine.put("jda", context.getJDA());
-            this.scriptEngine.put("this", this);
-
             String input = args.next(ArgumentParsers.REMAINING_STRING_NO_QUOTE);
             if (input.startsWith("```") && input.endsWith("```")) {
                 input = input.substring(3, input.length() - 3);
@@ -87,24 +80,34 @@ public class EvaluateCommand implements CommandExecutor {
                 input = this.getPageContent(this.getAsPastebinUrl(input));
             }
 
+            this.binding.setVariable("context", context);
+            this.binding.setVariable("channel", context.getChannel());
+            this.binding.setVariable("member", context.getMember());
+            this.binding.setVariable("user", context.getUser());
+            this.binding.setVariable("guild", context.getGuild());
+            this.binding.setVariable("message", context.getMessage());
+            this.binding.setVariable("bot", context.getGuild().getSelfMember());
+            this.binding.setVariable("jda", context.getJDA());
+            this.binding.setVariable("this", this);
+
             final String finput = input; //I hate lambda sometimes
             final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
-            final Future<?> future = Bot.SCHEDULED_EXECUTOR_SERVICE.submit(() -> {
+            final Future<?> future = Bot.THREAD_POOL.submit(() -> {
 
                 String output;
                 Color color;
                 try {
                     stopwatch.start();
 
-                    final Object result = this.scriptEngine.eval(String.format("with (imports) { %s }", finput));
+                    final Object result = this.shell.evaluate(String.format("%s", finput));
 
                     stopwatch.stop();
 
                     output = result == null ? "null" : result.toString();
                     color = Color.GREEN;
 
-                } catch (final ScriptException ex) {
+                } catch (final CompilationFailedException ex) {
                     output = ex.getMessage();
                     color = Color.RED;
                 }
@@ -118,7 +121,7 @@ public class EvaluateCommand implements CommandExecutor {
 
             });
 
-            Bot.SCHEDULED_EXECUTOR_SERVICE.submit(() -> {
+            Bot.THREAD_POOL.submit(() -> {
 
                 try {
                     future.get(EVAL_TIMEOUT_AFTER, TimeUnit.MILLISECONDS);

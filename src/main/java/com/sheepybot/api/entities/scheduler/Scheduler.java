@@ -44,7 +44,7 @@ public class Scheduler {
     private ScheduledExecutorService getService() throws IllegalStateException {
         Objects.checkArgument(!this.shutdown, "cannot retrieve executor service as this scheduler is shutdown");
         if (this.service == null || this.service.isShutdown() || this.service.isTerminated()) { //if the service wasn't created or its shutdown of a new one
-            this.service = Executors.newScheduledThreadPool(10, runnable -> new Thread(THREAD_GROUP, runnable, "Scheduled Task"));
+            this.service = Executors.newScheduledThreadPool(50, runnable -> new Thread(THREAD_GROUP, runnable, "Scheduled Task"));
         }
         return this.service;
     }
@@ -165,7 +165,7 @@ public class Scheduler {
         this.futures.stream().filter(task -> task.getTaskId() == taskId).findFirst().ifPresent(task -> {
             final ScheduledFuture<?> future = task.getExecutor();
             if (!future.isDone()) {
-                future.cancel(true);
+                future.cancel(false);
                 this.futures.remove(task);
             }
         });

@@ -46,9 +46,8 @@ public class DBObject {
      * @return This {@link DBObject} instance, useful for chaining.
      */
     public DBObject add(@NotNull("key cannot be null") final String key,
-                        @NotNull("value cannot be null") final Object value) {
+                        final Object value) {
         Objects.checkNotBlank(key, "key cannot be empty");
-        Objects.checkNotNull(value, "value cannot be null");
         this.data.put(key, value);
         return this;
     }
@@ -285,7 +284,9 @@ public class DBObject {
             return def;
         }
 
-        return (Boolean) result;
+        final String res = result.toString().toLowerCase();
+
+        return res.equals("y") || res.equals("yes") || res.equals("1") || res.equals("true") || res.equals("t") || res.equals("on");
     }
 
     /**

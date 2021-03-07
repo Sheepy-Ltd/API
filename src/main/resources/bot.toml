@@ -28,6 +28,7 @@ shard_total = -1                   #set to -1 to use discords recommended shard 
 shard_min = -1                     #the minimum shard ID
 shard_max = -1                     #the maximum shard ID
 use-jda-nas = false                #only enable this function if you're using lavaplayer for audio streaming https://github.com/sedmelluq/jda-nas
+jda-nas-buffer-size = 400          #how big the buffer size will be for jda-nas, this is recommended to keep it at default
 
 [client]
 language = "en_GB"                 #the file name not including the .properties file type

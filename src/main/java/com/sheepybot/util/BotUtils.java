@@ -3,6 +3,7 @@ package com.sheepybot.util;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import com.sheepybot.Bot;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
@@ -21,10 +22,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BotUtils {
@@ -89,121 +87,6 @@ public class BotUtils {
         return result;
     }
 
-    //courtesy of https://github.com/essentials/Essentials/blob/2.x/Essentials/src/com/earth2me/essentials/utils/DateUtil.java
-    //whilst I can do the method, I couldn't remember the regex
-
-    /**
-     * @param time   The time
-     * @param future Whether this is set in the future or in the past
-     * @return The time
-     * @throws Exception If the input {@code time} isn't parsable
-     */
-    public static long getDateFromInputTime(@NotNull("time cannot be null;") final String time,
-                                            final boolean future) throws Exception {
-
-        final Matcher matcher = TIME_PATTERN.matcher(time);
-
-        int years = 0;
-        int months = 0;
-        int weeks = 0;
-        int days = 0;
-        int hours = 0;
-        int minutes = 0;
-        int seconds = 0;
-
-        boolean found = false;
-
-        while (matcher.find()) {
-
-            if (matcher.group() == null || matcher.group().isEmpty()) {
-                continue;
-            }
-
-            for (int i = 0; i < matcher.groupCount(); i++) {
-                if (matcher.group(i) != null && !matcher.group(i).isEmpty()) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found) {
-
-                if (matcher.group(1) != null && !matcher.group(1).isEmpty()) {
-                    years = Integer.parseInt(matcher.group(1));
-                }
-
-                if (matcher.group(2) != null && !matcher.group(2).isEmpty()) {
-                    months = Integer.parseInt(matcher.group(2));
-                }
-
-                if (matcher.group(3) != null && !matcher.group(3).isEmpty()) {
-                    weeks = Integer.parseInt(matcher.group(3));
-                }
-
-                if (matcher.group(4) != null && !matcher.group(4).isEmpty()) {
-                    days = Integer.parseInt(matcher.group(4));
-                }
-
-                if (matcher.group(5) != null && !matcher.group(5).isEmpty()) {
-                    hours = Integer.parseInt(matcher.group(5));
-                }
-
-                if (matcher.group(6) != null && !matcher.group(6).isEmpty()) {
-                    minutes = Integer.parseInt(matcher.group(6));
-                }
-
-                if (matcher.group(7) != null && !matcher.group(7).isEmpty()) {
-                    seconds = Integer.parseInt(matcher.group(7));
-                }
-
-                break;
-            }
-        }
-
-        if (!found) {
-            throw new Exception("Invalid date format");
-        }
-
-        Calendar c = new GregorianCalendar();
-
-        if (years > 0) {
-            c.add(Calendar.YEAR, years * (future ? 1 : -1));
-        }
-
-        if (months > 0) {
-            c.add(Calendar.MONTH, months * (future ? 1 : -1));
-        }
-
-        if (weeks > 0) {
-            c.add(Calendar.WEEK_OF_YEAR, weeks * (future ? 1 : -1));
-        }
-
-        if (days > 0) {
-            c.add(Calendar.DAY_OF_MONTH, days * (future ? 1 : -1));
-        }
-
-        if (hours > 0) {
-            c.add(Calendar.HOUR_OF_DAY, hours * (future ? 1 : -1));
-        }
-
-        if (minutes > 0) {
-            c.add(Calendar.MINUTE, minutes * (future ? 1 : -1));
-        }
-
-        if (seconds > 0) {
-            c.add(Calendar.SECOND, seconds * (future ? 1 : -1));
-        }
-
-        Calendar calendar = new GregorianCalendar();
-        calendar.add(Calendar.YEAR, 10);
-
-        if (c.after(calendar)) {
-            return calendar.getTimeInMillis();
-        }
-
-        return c.getTimeInMillis();
-    }
-
     /**
      * Get the recommended shard count using the Bot token from Discords /gateway/bot endpoint
      *
@@ -247,6 +130,19 @@ public class BotUtils {
         return -1;
     }
 
+    public static OnlineStatus getOnlineStatusFromString(@NotNull("activity type cannot be null") final String onlineStatus) {
+        switch (onlineStatus.toLowerCase()) {
+            case "idle":
+                return OnlineStatus.IDLE;
+            case "dnd":
+                return OnlineStatus.DO_NOT_DISTURB;
+            case "invisible":
+            case "offline":
+                return OnlineStatus.OFFLINE;
+            default:
+                return OnlineStatus.ONLINE;
+        }
+    }
 
     /**
      * Retrieve an activity type from the input {@code activityType}, should no

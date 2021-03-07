@@ -14,10 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -56,8 +53,8 @@ public final class EventWaiter implements EventListener {
      * Waits a predetermined amount of time for the {@link Event} that returns true
      * when tested with the provided {@link Predicate}
      *
-     * <p>Should the time allotted lapse the event will not be calls and will be purged from
-     * the internal list calling the {@link Runnable} should one be present</p>
+     * <p>Should the time allotted lapse the event will not be called and will be purged from
+     * the internal list calling the {@code timeoutAction} should one be present</p>
      *
      * @param event         The {@link Class} of the {@link Event}
      * @param predicate     The {@link Predicate} to test when a compatible {@link Event} is called
@@ -81,11 +78,9 @@ public final class EventWaiter implements EventListener {
         final WaitingEvent waiter = new WaitingEvent<>(predicate, function);
         final Set<WaitingEvent> waiters = this.waiters.computeIfAbsent(event, __ -> new HashSet<>());
 
-        waiters.add(waiter);
-
         //noinspection ConstantConditions
         if (timeoutAfter > 0 && unit != null) {
-            this.service.schedule(() -> {
+            waiter.future = this.service.schedule(() -> {
                 if (waiters.remove(waiter) && timeoutAction != null) {
                     try {
                         timeoutAction.run();
@@ -94,6 +89,8 @@ public final class EventWaiter implements EventListener {
                 }
             }, timeoutAfter, unit);
         }
+
+        waiters.add(waiter);
 
         return waiter;
     }
@@ -156,6 +153,7 @@ public final class EventWaiter implements EventListener {
 
         private final Predicate<T> predicate;
         private final Function<T, Boolean> function;
+        private ScheduledFuture<?> future = null;
 
         WaitingEvent(final Predicate<T> predicate,
                      final Function<T, Boolean> function) {
@@ -172,7 +170,9 @@ public final class EventWaiter implements EventListener {
          */
         public boolean call(final T event) {
             try {
-                return this.predicate == null || this.predicate.test(event) ? this.function.apply(event) : false;
+                final boolean called = this.predicate == null || this.predicate.test(event) ? this.function.apply(event) : false;
+                if (called && this.future != null) this.future.cancel(true);
+                return called;
             } catch (final Throwable ex) {
                 LOGGER.info("WaitingEvent threw an exception", ex);
             }
