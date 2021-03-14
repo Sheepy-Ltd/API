@@ -184,7 +184,7 @@ public void onEnable() {
     
     final CommandRegistry commandRegistry = this.getCommandRegistry();
 
-    commandRegistry.registerCommand(Command.builder(this)
+    commandRegistry.register(Command.builder(this)
              .names("boop", "boops")
              .executor(new MyCommand())
              .build());
