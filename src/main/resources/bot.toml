@@ -35,6 +35,10 @@ language = "en_GB"                 #the file name not including the .properties 
 prefix = "!"                       #this is the default prefix used for commands, change it as you wish. Modules may override this setting at runtime by using the Module#setPrefixGenerator function
 command_timeout_after = 5_000      #how long (in milliseconds) commands may be able to run for, this is for the watchdog thread so if something goes wrong with a command it doesn't slowly consume all the worker threads
 
+[dbl]
+auto-post = false #whether to auto post bot stats to top.gg's api, https://top.gg
+token = ""
+
 #A list of User-ID's representing Administrators, you can retrieve your user ID by enabling
 #developer mode and then right clicking the user and hit "Copy ID"
 #after that then restart the bot and you will be able to use owner only commands.
