@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.sharding.ShardManager;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.discordbots.api.client.DiscordBotListAPI;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -16,64 +17,28 @@ import java.io.IOException;
 public class DiscordBotListAgent implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiscordBotListAgent.class);
-    private static final String URL = "https://discordbots.org/api/bots/%s/stats";
 
     private final ShardManager shardManager;
-    private final String token;
+    private final String botId;
+    private final DiscordBotListAPI api;
 
     public DiscordBotListAgent(@NotNull("bot cannot be null") final Bot bot,
-                               @NotNull("token cannot be null") final String token) {
+                               @NotNull("id cannot be null") final String botId,
+                               @NotNull("token cannot be null") final String dblToken) {
         this.shardManager = bot.getShardManager();
-        this.token = token;
+        this.botId = botId;
+        this.api = new DiscordBotListAPI.Builder()
+                .botId(botId)
+                .token(dblToken)
+                .build();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public void run() {
-
-        if (this.token != null && !this.token.trim().isEmpty()) {
-
-            LOGGER.info("Submitting bot metrics to Discord Bot List API...");
-
-            for (final JDA jda : this.shardManager.getShards()) {
-
-                final JDA.ShardInfo info = jda.getShardInfo();
-
-                final JSONObject data = new JSONObject();
-                data.put("shard_id", info.getShardId());
-                data.put("shard_count", info.getShardTotal());
-                data.put("server_count", jda.getGuilds().size());
-
-                final RequestBody body = RequestBody.create(Bot.MEDIA_JSON, data.toString());
-
-                final Request request = new Request.Builder()
-                        .url(URL)
-                        .addHeader("User-Agent", Bot.USER_AGENT)
-                        .addHeader("Authorization", this.token)
-                        .post(body)
-                        .build();
-
-                try {
-
-                    final Response response = Bot.HTTP_CLIENT.newCall(request).execute();
-
-                    final int code = response.code();
-                    if (code == 200) {
-                        LOGGER.info("Successfully submitted bot metrics to Discord Bot List!");
-                        LOGGER.info("Response(" + code + "): " + response.body().string());
-                    } else {
-                        LOGGER.info("Failed to submit metrics to Discord Bot List");
-                        LOGGER.info("Server responded with status code: " + code);
-                    }
-
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-        }
-
+        LOGGER.info("Submitting bot stats...");
+        this.api.setStats((int)this.shardManager.getGuildCache().size())
+                .exceptionally(ex -> { LOGGER.error("An erorr occurred and the stats could not be submitted", ex); return null; })
+        ;
     }
 
 }

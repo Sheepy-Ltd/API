@@ -4,6 +4,7 @@ import com.google.gson.JsonParser;
 import com.moandjiezana.toml.Toml;
 import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
+import com.sheepybot.agent.DiscordBotListAgent;
 import com.sheepybot.api.entities.command.Command;
 import com.sheepybot.api.entities.command.RootCommandRegistry;
 import com.sheepybot.api.entities.database.Database;
@@ -34,6 +35,7 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.apache.commons.io.FileUtils;
+import org.discordbots.api.client.DiscordBotListAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -365,6 +367,22 @@ public class Bot {
                 this.commandRegistry.registerCommand(Command.builder(null).ownerOnly(true).names("loadmodule", "lmod").usage("<module>").description("Load a module from its exact jar file name").executor(new LoadModuleCommand()).build(), null);
                 this.commandRegistry.registerCommand(Command.builder(null).ownerOnly(true).names("unloadmodule", "umod").usage("<module>").description("Unload a module from memory").executor(new UnloadModuleCommand()).build(), null);
                 this.commandRegistry.registerCommand(Command.builder(null).ownerOnly(true).names("evaluate", "eval").usage("<code>").description("Evaluate code live").executor(new EvaluateCommand()).build(), null);
+
+            }
+
+            final Toml dbl = this.config.getTable("dbl");
+            if (dbl != null && dbl.getBoolean("auto-post", false)) {
+
+                LOGGER.info("Setting up DBL auto poster...");
+
+                final String dblToken = dbl.getString("token");
+                if (dblToken == null || dblToken.isEmpty()) {
+                    LOGGER.error("Your DBL auto poster token is not set, please fetch one from the top.gg api.");
+                } else {
+                    this.shardManager.retrieveApplicationInfo().queue(info -> {
+                        SINGLE_EXECUTOR_SERVICE.scheduleAtFixedRate(new DiscordBotListAgent(this, info.getId(), dblToken), 10, 10, TimeUnit.MINUTES);
+                    }, e -> LOGGER.error("Failed to retrieve application info from discord", e));
+                }
 
             }
 

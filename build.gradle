@@ -49,7 +49,6 @@ jar {
 repositories {
     mavenCentral()
     jcenter()
-    
     maven {
         url 'https://jitpack.io'
     }
@@ -73,7 +72,7 @@ dependencies {
         exclude(group: 'commons-io', module: 'commons-io')
     }
     implementation group: 'org.codehaus.groovy', name: 'groovy-jsr223', version: '3.0.7'
-
+    implementation "org.discordbots:DBL-Java-Library:2.0.1"
 
     api group: 'org.jetbrains', name: 'annotations', version: '20.1.0'
     api group: 'com.google.guava', name: 'guava', version: '30.1-jre'
